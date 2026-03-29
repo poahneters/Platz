@@ -207,7 +207,11 @@ const APP_CSS = `
 *{box-sizing:border-box;margin:0;padding:0;}
 .platz-root{
   font-family:'Lora',Georgia,serif;
-  background:#d9d3bc;
+  background:#231008;
+  background-image:
+    radial-gradient(ellipse at 15% 50%,rgba(90,35,8,0.55) 0%,transparent 60%),
+    radial-gradient(ellipse at 85% 50%,rgba(55,18,3,0.45) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);
   color:#2c2416;
   min-height:100vh;
   display:flex;
@@ -219,14 +223,15 @@ const APP_CSS = `
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:1rem 1.25rem;
-  background:#d9d3bc;
+  padding:0.9rem 1.5rem;
+  background:#1a0a02;
+  border-bottom:1px solid #4a2208;
 }
 .platz-wordmark{
   font-family:'Lora',Georgia,serif;
   font-style:italic;
   font-size:1.35rem;
-  color:#2c2416;
+  color:#c9a86c;
   letter-spacing:0.02em;
 }
 .platz-burger{
@@ -240,8 +245,8 @@ const APP_CSS = `
   padding:0;
   cursor:pointer;
 }
-.platz-burger span{display:block;height:2px;background:#2c2416;width:100%;}
-.platz-body{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;}
+.platz-burger span{display:block;height:2px;background:#c9a86c;width:100%;}
+.platz-body{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;padding:1.25rem 1.5rem 1.5rem;}
 .platz-overlay{
   display:none;
   position:fixed;
@@ -256,8 +261,9 @@ const APP_CSS = `
   left:0;
   width:min(88vw,300px);
   height:100%;
-  background:#2c2416;
-  color:#ede8d0;
+  background:#1a0a02;
+  border-right:1px solid #4a2208;
+  color:#e8d9b8;
   z-index:210;
   transform:translateX(-100%);
   transition:transform 0.2s ease;
@@ -274,14 +280,14 @@ const APP_CSS = `
 .platz-drawer-close{
   font-family:'DM Sans',system-ui,sans-serif;
   font-size:0.85rem;
-  color:#ede8d0;
+  color:#c9a86c;
   background:none;
   border:none;
   cursor:pointer;
   text-decoration:underline;
   text-underline-offset:3px;
 }
-.platz-drawer-close:hover{color:#8b6914;}
+.platz-drawer-close:hover{color:#e8d9b8;}
 .platz-nav{display:flex;flex-direction:column;gap:0.5rem;}
 .platz-nav button{
   display:block;
@@ -293,12 +299,12 @@ const APP_CSS = `
   font-family:'Lora',Georgia,serif;
   font-style:italic;
   font-size:1.35rem;
-  color:#ede8d0;
+  color:#e8d9b8;
   cursor:pointer;
   line-height:1.3;
 }
-.platz-nav button:hover{color:#8b6914;}
-.platz-nav button.active{color:#8b6914;}
+.platz-nav button:hover{color:#c9a86c;}
+.platz-nav button.active{color:#c9a86c;}
 .platz-scroll-main{
   flex:1;
   min-height:0;
@@ -313,19 +319,22 @@ const APP_CSS = `
   -webkit-overflow-scrolling:touch;
 }
 .platz-sheet{
-  max-width:680px;
+  max-width:min(100%,1100px);
+  width:100%;
   margin:0 auto;
   min-height:100%;
-  background:#ede8d0;
-  padding:1.5rem 1.5rem 2.5rem;
+  background:#f0ead6;
+  padding:2rem 2.5rem 2.5rem 3.75rem;
+  border-left:7px solid #7a3b10;
+  position:relative;
 }
 .platz-sheet--ruled{
-  background-color:#ede8d0;
+  background-color:#f0ead6;
   background-image:repeating-linear-gradient(
     transparent 0,
     transparent 31px,
-    rgba(200,194,174,0.4) 31px,
-    rgba(200,194,174,0.4) 32px
+    rgba(180,165,130,0.35) 31px,
+    rgba(180,165,130,0.35) 32px
   );
 }
 .platz-section-label{
@@ -382,14 +391,17 @@ textarea.platz-inp{
   align-items:center;
   justify-content:center;
   padding:2rem;
-  background:#d9d3bc;
+  background:#231008;
+  background-image:radial-gradient(ellipse at 15% 50%,rgba(90,35,8,0.55) 0%,transparent 60%),radial-gradient(ellipse at 85% 50%,rgba(55,18,3,0.45) 0%,transparent 60%);
 }
 .onb-card{
   max-width:440px;
   width:100%;
   text-align:center;
   padding:2.5rem 2rem;
-  background:#ede8d0;
+  background:#f0ead6;
+  border-left:6px solid #7a3b10;
+  box-shadow:-4px 0 18px rgba(0,0,0,0.5),0 14px 50px rgba(0,0,0,0.45);
 }
 .onb-title{
   font-family:'Lora',Georgia,serif;
@@ -406,16 +418,18 @@ textarea.platz-inp{
   font-family:'Lora',Georgia,serif;
 }
 .onb-actions{display:flex;flex-direction:column;gap:0.65rem;}
-.onb-quiz{min-height:100vh;display:flex;flex-direction:column;background:#d9d3bc;}
+.onb-quiz{min-height:100vh;display:flex;flex-direction:column;background:#231008;background-image:radial-gradient(ellipse at 15% 50%,rgba(90,35,8,0.55) 0%,transparent 60%),radial-gradient(ellipse at 85% 50%,rgba(55,18,3,0.45) 0%,transparent 60%);}
 .onb-quiz-inner{
   flex:1;
   max-width:520px;
   margin:0 auto;
-  padding:2rem 1.5rem;
+  padding:2rem 1.5rem 2rem 3rem;
   width:100%;
   display:flex;
   flex-direction:column;
-  background:#ede8d0;
+  background:#f0ead6;
+  border-left:6px solid #7a3b10;
+  box-shadow:-4px 0 18px rgba(0,0,0,0.45);
 }
 .onb-progress{
   font-size:11px;
@@ -702,7 +716,67 @@ textarea.platz-inp{
   font-family:'Lora',Georgia,serif;
 }
 .modal-actions{display:flex;gap:1rem;justify-content:flex-end;font-family:'DM Sans',system-ui,sans-serif;}
+/* height fix — gives flex children a concrete container to fill */
+.platz-root{height:100%;}
+/* notebook 3d depth */
+.platz-sheet{box-shadow:-4px 0 18px rgba(0,0,0,0.45),3px 3px 0 #c8b896,6px 6px 0 #b8a47e,0 14px 50px rgba(0,0,0,0.4),inset 0 0 80px rgba(0,0,0,0.02);}
+/* journal notebook margin line + binding strip */
+.j-panel .platz-sheet--ruled{
+  background-image:
+    linear-gradient(90deg,rgba(44,36,22,0.04) 0,rgba(44,36,22,0.04) 44px,transparent 44px,transparent 56px,rgba(200,80,80,0.16) 56px,rgba(200,80,80,0.16) 57px,transparent 57px),
+    repeating-linear-gradient(transparent 0,transparent 31px,rgba(180,165,130,0.35) 31px,rgba(180,165,130,0.35) 32px);
+  padding-left:68px;
+}
+/* smooth hover transitions */
+.platz-nav button,.platz-btn,.platz-drawer-close,.j-save,.t-del,.b-toggle,.onb-opt{transition:color 0.15s ease;}
+/* overlay fade instead of snap */
+.platz-overlay{display:block;opacity:0;pointer-events:none;transition:opacity 0.25s ease;}
+.platz-overlay.open{display:block;opacity:1;pointer-events:auto;}
+/* modal fade instead of snap */
+.modal-bg{display:flex;opacity:0;pointer-events:none;transition:opacity 0.2s ease;}
+.modal-bg.open{display:flex;opacity:1;pointer-events:auto;}
+/* section fade-in on switch */
+@keyframes platz-fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.j-panel,.platz-page{animation:platz-fade 0.22s ease;}
+/* new message fade-in */
+@keyframes msg-in{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:translateY(0);}}
+.j-exchange{animation:msg-in 0.2s ease;}
+/* thinking dots */
+@keyframes dot-rise{0%,80%,100%{opacity:0.25;transform:translateY(0);}40%{opacity:1;transform:translateY(-4px);}}
+.j-thinking{display:inline-flex;gap:4px;align-items:center;height:1.1em;vertical-align:middle;}
+.j-thinking span{display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;animation:dot-rise 1.2s ease-in-out infinite;}
+.j-thinking span:nth-child(2){animation-delay:0.16s;}
+.j-thinking span:nth-child(3){animation-delay:0.32s;}
 `
+
+function ThinkingDots() {
+  return (
+    <span className="j-thinking" aria-label="thinking">
+      <span /><span /><span />
+    </span>
+  )
+}
+
+function TypewriterText({ text, animate }) {
+  const [displayed, setDisplayed] = useState(animate ? '' : text)
+
+  useEffect(() => {
+    if (!animate) {
+      setDisplayed(text)
+      return
+    }
+    setDisplayed('')
+    let i = 0
+    const timer = setInterval(() => {
+      i = Math.min(i + 2, text.length)
+      setDisplayed(text.slice(0, i))
+      if (i >= text.length) clearInterval(timer)
+    }, 12)
+    return () => clearInterval(timer)
+  }, [text, animate])
+
+  return <>{displayed}</>
+}
 
 export default function App() {
   const [phase, setPhase] = useState(() =>
@@ -743,6 +817,7 @@ export default function App() {
   const msgsRef = useRef(null)
   const inpRef = useRef(null)
   const modalInputRef = useRef(null)
+  const lastAiIdRef = useRef(null)
 
   const journalCalendarLine = useMemo(
     () =>
@@ -962,6 +1037,7 @@ Rules:
             ...afterUser,
             { role: 'assistant', content: reply },
           ]
+          lastAiIdRef.current = aid
           setMessages((prev) =>
             prev.map((m) =>
               m.id === aid ? { ...m, content: reply, isThinking: false } : m,
@@ -1312,7 +1388,10 @@ Rules:
                                     className={`j-ai${a.isThinking ? ' j-ai--hold' : ''}`}
                                     id={a.id}
                                   >
-                                    {a.content}
+                                    {a.isThinking
+                                      ? <ThinkingDots />
+                                      : <TypewriterText text={a.content} animate={a.id === lastAiIdRef.current} />
+                                    }
                                   </div>
                                   {!a.isThinking ? (
                                     <div className="j-save-wrap">
