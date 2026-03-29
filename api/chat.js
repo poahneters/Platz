@@ -8,8 +8,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'ANTHROPIC_KEY not configured' })
   }
   if (!apiKey.startsWith('sk-ant-')) {
-    return res.status(500).json({ error: `Key format wrong — starts with: "${apiKey.slice(0, 8)}..."` })
+    return res.status(500).json({ error: `Key format wrong — starts with: "${apiKey.slice(0, 8)}..." length: ${apiKey.length}` })
   }
+  return res.status(200).json({ debug: `Key ok — length: ${apiKey.length}, ends: "...${apiKey.slice(-6)}"` })
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
