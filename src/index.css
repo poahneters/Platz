@@ -1,0 +1,22 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  background: #d9d3bc;
+  color: #2c2416;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
