@@ -409,46 +409,64 @@ export default function Journal() {
                     {error}
                   </div>
                 )}
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
-                  <textarea
-                    value={reply}
-                    onChange={e => setReply(e.target.value)}
-                    onKeyDown={e => {
-                      // Enter = new line, no shortcut to send (only button)
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        // allow default (newline)
-                      }
+                <textarea
+                  value={reply}
+                  onChange={e => setReply(e.target.value)}
+                  placeholder="Continue the thought..."
+                  rows={2}
+                  style={{
+                    flex: 1,
+                    fontSize: '14px',
+                    lineHeight: 1.7,
+                    color: 'var(--text)',
+                    padding: '0 0 10px',
+                    maxHeight: '120px',
+                    overflowY: 'auto',
+                    width: '100%',
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={() => {
+                      if (!reply.trim()) return
+                      const msg = { id: (++nextId).toString(), role: 'user', content: reply.trim() }
+                      setEntries(prev => prev.map(e =>
+                        e.id === selected ? { ...e, thread: [...e.thread, msg] } : e
+                      ))
+                      setReply('')
                     }}
-                    placeholder="Continue the thought..."
-                    rows={2}
+                    disabled={!reply.trim()}
+                    className="btn-ghost"
                     style={{
-                      flex: 1,
-                      fontSize: '14px',
-                      lineHeight: 1.7,
-                      color: 'var(--text)',
-                      padding: '10px 0',
-                      maxHeight: '120px',
-                      overflowY: 'auto',
+                      padding: '8px 16px',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-mid)',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      opacity: !reply.trim() ? 0.35 : 1,
+                      transition: 'all 0.2s',
                     }}
-                  />
+                  >
+                    Save
+                  </button>
                   <button
                     onClick={() => sendMessage(true)}
                     disabled={!reply.trim()}
                     className="btn-gold"
                     style={{
-                      padding: '9px 18px',
+                      padding: '8px 18px',
                       background: reply.trim() ? 'var(--gold)' : 'var(--surface)',
                       color: reply.trim() ? '#0a0908' : 'var(--text-dim)',
                       border: reply.trim() ? 'none' : '1px solid var(--border)',
                       borderRadius: '8px',
                       fontSize: '13px',
                       fontWeight: 600,
-                      flexShrink: 0,
                       transition: 'all 0.2s ease',
-                      opacity: reply.trim() ? 1 : 0.5,
+                      opacity: reply.trim() ? 1 : 0.35,
                     }}
                   >
-                    Send
+                    Reflect  ✦
                   </button>
                 </div>
               </div>
