@@ -4,9 +4,10 @@ import Nav from './components/Nav'
 import Journal from './components/Journal'
 import Todo from './components/Todo'
 import Whiteboard from './components/Whiteboard'
+import About from './components/About'
 import PlatzIntro from './components/PlatzIntro'
 
-const VIEWS = { journal: Journal, todo: Todo, whiteboard: Whiteboard }
+const VIEWS = { journal: Journal, todo: Todo, whiteboard: Whiteboard, about: About }
 
 export default function App() {
   const [introComplete, setIntroComplete] = useState(false)
