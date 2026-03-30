@@ -102,7 +102,7 @@ function FloatingLeaves({ active }) {
         left: l.left,
         top: '62%',
         pointerEvents: 'none',
-        animation: `floatLeaf 2.4s ease-out ${l.delay}s forwards`,
+        animation: `floatLeaf 3s ease-out ${l.delay + 0.4}s forwards`,
         opacity: 0,
       }}
     >
@@ -134,9 +134,9 @@ export default function Intro({ onComplete }) {
 
   useEffect(() => {
     const t0 = setTimeout(() => setPhase('letters'),  80)
-    const t1 = setTimeout(() => setPhase('leafing'),  1400)
-    const t2 = setTimeout(() => setPhase('exit'),     3500)
-    const t3 = setTimeout(() => onComplete(),         4300)
+    const t1 = setTimeout(() => setPhase('leafing'),  1900)
+    const t2 = setTimeout(() => setPhase('exit'),     4600)
+    const t3 = setTimeout(() => onComplete(),         5500)
     return () => [t0, t1, t2, t3].forEach(clearTimeout)
   }, [onComplete])
 
@@ -159,7 +159,7 @@ export default function Intro({ onComplete }) {
         @keyframes floatLeaf {
           0%   { transform: translateY(0)      rotate(0deg);  opacity: 0;    }
           12%  {                                               opacity: 0.85; }
-          100% { transform: translateY(-160px) rotate(28deg); opacity: 0;    }
+          100% { transform: translateY(-180px) rotate(28deg); opacity: 0;    }
         }
       `}</style>
 
@@ -174,7 +174,7 @@ export default function Intro({ onComplete }) {
           justifyContent: 'center',
           zIndex: 100,
           opacity: isExit ? 0 : 1,
-          transition: 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'opacity 1s cubic-bezier(0.4, 0, 0.2, 1)',
           pointerEvents: isExit ? 'none' : 'all',
           userSelect: 'none',
           overflow: 'hidden',
@@ -188,7 +188,7 @@ export default function Intro({ onComplete }) {
             bottom: 0,
             pointerEvents: 'none',
             transform: leafing ? 'translateX(0)' : 'translateX(-112%)',
-            transition: 'transform 1.1s cubic-bezier(0.34, 1.1, 0.64, 1) 0.3s',
+            transition: 'transform 1.4s cubic-bezier(0.34, 1.1, 0.64, 1) 0.3s',
           }}
         >
           <CartoonTree side="left" />
@@ -202,7 +202,7 @@ export default function Intro({ onComplete }) {
             bottom: 0,
             pointerEvents: 'none',
             transform: leafing ? 'translateX(0)' : 'translateX(112%)',
-            transition: 'transform 1.1s cubic-bezier(0.34, 1.1, 0.64, 1) 0.3s',
+            transition: 'transform 1.4s cubic-bezier(0.34, 1.1, 0.64, 1) 0.3s',
           }}
         >
           <CartoonTree side="right" />
@@ -227,8 +227,8 @@ export default function Intro({ onComplete }) {
                   opacity: lettersVisible ? 1 : 0,
                   transform: lettersVisible ? 'translateY(0) scale(1)' : 'translateY(44px) scale(0.88)',
                   transition: [
-                    `opacity 0.65s ease ${i * 0.08}s`,
-                    `transform 0.65s cubic-bezier(0.16,1,0.3,1) ${i * 0.08}s`,
+                    `opacity 0.85s ease ${i * 0.1}s`,
+                    `transform 0.85s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s`,
                   ].join(', '),
                 }}
               >
@@ -263,7 +263,7 @@ export default function Intro({ onComplete }) {
                 strokeDasharray="920"
                 strokeDashoffset="920"
                 style={{
-                  animation: leafing ? 'vineGrow 0.9s ease-out forwards' : 'none',
+                  animation: leafing ? 'vineGrow 1.2s ease-out forwards' : 'none',
                 }}
               />
             </svg>
@@ -277,7 +277,7 @@ export default function Intro({ onComplete }) {
                   left: leaf.leftPct,
                   top: `${leaf.top}px`,
                   transformOrigin: 'bottom center',
-                  animation: `leafPop 0.45s cubic-bezier(0.34,1.56,0.64,1) ${leaf.delay}s both`,
+                  animation: `leafPop 0.6s cubic-bezier(0.34,1.56,0.64,1) ${leaf.delay + 0.3}s both`,
                 }}
               >
                 <CartoonLeaf color={leaf.color} rotate={leaf.rotate} size={leaf.size} />
@@ -296,7 +296,7 @@ export default function Intro({ onComplete }) {
               marginTop: '14px',
               opacity: leafing ? 0.82 : 0,
               transform: leafing ? 'translateY(0)' : 'translateY(10px)',
-              transition: 'opacity 0.9s ease 0.5s, transform 0.9s ease 0.5s',
+              transition: 'opacity 1s ease 0.7s, transform 1s ease 0.7s',
             }}
           >
             grow through it.
