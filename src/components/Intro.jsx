@@ -15,77 +15,97 @@ function CartoonLeaf({ color = '#52b788', rotate = 0, size = 1 }) {
         strokeWidth="2.8"
         strokeLinejoin="round"
       />
-      {/* center vein */}
       <line x1="16" y1="5" x2="16" y2="42" stroke="#1a4d2e" strokeWidth="1.5" strokeLinecap="round" />
-      {/* side veins */}
       <line x1="16" y1="18" x2="9"  y2="25" stroke="#1a4d2e" strokeWidth="1" strokeLinecap="round" opacity="0.45" />
       <line x1="16" y1="26" x2="23" y2="32" stroke="#1a4d2e" strokeWidth="1" strokeLinecap="round" opacity="0.45" />
-      {/* highlight */}
       <ellipse cx="11" cy="14" rx="4" ry="6" fill="white" opacity="0.25" />
     </svg>
   )
 }
 
-// Cartoon tree that slides in from an edge
-function CartoonTree({ side }) {
-  const isLeft = side === 'left'
+// Top-down jungle canopy corner — leaves viewed from above creeping inward.
+// Always drawn as top-left; CSS flip handles the other three corners.
+function JungleCanopySVG() {
   return (
-    <svg width="210" height="360" viewBox="0 0 210 360" fill="none">
-      {/* Trunk */}
-      <path
-        d={isLeft
-          ? 'M78,360 C78,360 84,262 90,208 C96,158 77,112 82,68'
-          : 'M132,360 C132,360 126,262 120,208 C114,158 133,112 128,68'}
-        stroke="#7a5230"
-        strokeWidth="22"
-        strokeLinecap="round"
-      />
-      {/* Main branch */}
-      <path
-        d={isLeft
-          ? 'M86,200 C62,176 30,162 6,132'
-          : 'M124,200 C148,176 180,162 204,132'}
-        stroke="#7a5230"
-        strokeWidth="12"
-        strokeLinecap="round"
-      />
-      {/* Upper branch */}
-      <path
-        d={isLeft
-          ? 'M88,144 C114,120 150,128 180,106'
-          : 'M122,144 C96,120 60,128 30,106'}
-        stroke="#7a5230"
-        strokeWidth="12"
-        strokeLinecap="round"
-      />
+    <svg
+      viewBox="0 0 440 380"
+      fill="none"
+      style={{ width: 'min(440px, 52vw)', height: 'min(380px, 52vh)', display: 'block' }}
+    >
+      {/* ── Vine tendrils reaching toward center ── */}
+      <path d="M 55,50  C 148,108 238,172 368,296" stroke="#2d6a4f" strokeWidth="3"   strokeLinecap="round" />
+      <path d="M 28,110 C  98,168 182,232 278,320" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M 125,28 C 198,84  282,128 402,182" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round" />
 
-      {/* Leaf clusters — big bubbly blobs */}
-      {isLeft ? <>
-        <ellipse cx="44"  cy="132" rx="50" ry="42" fill="#52b788" stroke="#1a4d2e" strokeWidth="3" />
-        <ellipse cx="18"  cy="116" rx="32" ry="27" fill="#4ade80" stroke="#1a4d2e" strokeWidth="3" />
-        <ellipse cx="90"  cy="92"  rx="52" ry="44" fill="#4ade80" stroke="#1a4d2e" strokeWidth="3" />
-        <ellipse cx="158" cy="98"  rx="46" ry="38" fill="#52b788" stroke="#1a4d2e" strokeWidth="3" />
-        <ellipse cx="186" cy="80"  rx="28" ry="24" fill="#4ade80" stroke="#1a4d2e" strokeWidth="3" />
-        {/* Highlights */}
-        <ellipse cx="36"  cy="122" rx="14" ry="9"  fill="white" opacity="0.22" />
-        <ellipse cx="84"  cy="80"  rx="16" ry="10" fill="white" opacity="0.22" />
-        <ellipse cx="152" cy="88"  rx="12" ry="8"  fill="white" opacity="0.22" />
-      </> : <>
-        <ellipse cx="166" cy="132" rx="50" ry="42" fill="#52b788" stroke="#1a4d2e" strokeWidth="3" />
-        <ellipse cx="192" cy="116" rx="32" ry="27" fill="#4ade80" stroke="#1a4d2e" strokeWidth="3" />
-        <ellipse cx="120" cy="92"  rx="52" ry="44" fill="#4ade80" stroke="#1a4d2e" strokeWidth="3" />
-        <ellipse cx="52"  cy="98"  rx="46" ry="38" fill="#52b788" stroke="#1a4d2e" strokeWidth="3" />
-        <ellipse cx="24"  cy="80"  rx="28" ry="24" fill="#4ade80" stroke="#1a4d2e" strokeWidth="3" />
-        {/* Highlights */}
-        <ellipse cx="174" cy="122" rx="14" ry="9"  fill="white" opacity="0.22" />
-        <ellipse cx="126" cy="80"  rx="16" ry="10" fill="white" opacity="0.22" />
-        <ellipse cx="58"  cy="88"  rx="12" ry="8"  fill="white" opacity="0.22" />
-      </>}
+      {/* ── Dense leaf cluster at corner (top-left) ── */}
+      {/* Large leaves */}
+      <ellipse cx="22"  cy="22"  rx="48" ry="34" transform="rotate(-15 22 22)"   fill="#4ade80" stroke="#1a4d2e" strokeWidth="2.8" />
+      <ellipse cx="95"  cy="14"  rx="42" ry="26" transform="rotate(8 95 14)"     fill="#52b788" stroke="#1a4d2e" strokeWidth="2.8" />
+      <ellipse cx="14"  cy="86"  rx="32" ry="50" transform="rotate(-4 14 86)"    fill="#4ade80" stroke="#1a4d2e" strokeWidth="2.8" />
+      <ellipse cx="152" cy="36"  rx="40" ry="26" transform="rotate(18 152 36)"   fill="#86efac" stroke="#1a4d2e" strokeWidth="2.8" />
+      <ellipse cx="56"  cy="130" rx="44" ry="30" transform="rotate(-8 56 130)"   fill="#52b788" stroke="#1a4d2e" strokeWidth="2.8" />
+      <ellipse cx="172" cy="92"  rx="34" ry="24" transform="rotate(12 172 92)"   fill="#4ade80" stroke="#1a4d2e" strokeWidth="2.8" />
+
+      {/* Medium leaves — mid-reach */}
+      <ellipse cx="114" cy="185" rx="36" ry="26" transform="rotate(-12 114 185)" fill="#86efac" stroke="#1a4d2e" strokeWidth="2.6" />
+      <ellipse cx="212" cy="58"  rx="28" ry="20" transform="rotate(5 212 58)"    fill="#52b788" stroke="#1a4d2e" strokeWidth="2.6" />
+      <ellipse cx="212" cy="158" rx="30" ry="22" transform="rotate(-18 212 158)" fill="#4ade80" stroke="#1a4d2e" strokeWidth="2.6" />
+      <ellipse cx="264" cy="112" rx="24" ry="18" transform="rotate(8 264 112)"   fill="#86efac" stroke="#1a4d2e" strokeWidth="2.6" />
+      <ellipse cx="178" cy="245" rx="28" ry="20" transform="rotate(15 178 245)"  fill="#52b788" stroke="#1a4d2e" strokeWidth="2.6" />
+      <ellipse cx="262" cy="212" rx="22" ry="16" transform="rotate(-5 262 212)"  fill="#4ade80" stroke="#1a4d2e" strokeWidth="2.6" />
+
+      {/* Small leaves at vine tips — furthest inward */}
+      <ellipse cx="318" cy="242" rx="16" ry="12" transform="rotate(-10 318 242)" fill="#52b788" stroke="#1a4d2e" strokeWidth="2.2" />
+      <ellipse cx="288" cy="308" rx="14" ry="11" transform="rotate(18 288 308)"  fill="#4ade80" stroke="#1a4d2e" strokeWidth="2.2" />
+      <ellipse cx="378" cy="184" rx="14" ry="10" transform="rotate(5 378 184)"   fill="#86efac" stroke="#1a4d2e" strokeWidth="2.2" />
+      <ellipse cx="362" cy="298" rx="12" ry="9"  transform="rotate(-15 362 298)" fill="#52b788" stroke="#1a4d2e" strokeWidth="2"   />
+      <ellipse cx="418" cy="328" rx="10" ry="8"  transform="rotate(10 418 328)"  fill="#4ade80" stroke="#1a4d2e" strokeWidth="2"   />
+
+      {/* ── Highlights (white gloss on large leaves) ── */}
+      <ellipse cx="13"  cy="14"  rx="16" ry="10" fill="white" opacity="0.22" />
+      <ellipse cx="86"  cy="8"   rx="13" ry="8"  fill="white" opacity="0.22" />
+      <ellipse cx="46"  cy="122" rx="14" ry="8"  fill="white" opacity="0.22" />
+      <ellipse cx="104" cy="178" rx="12" ry="7"  fill="white" opacity="0.20" />
     </svg>
   )
 }
 
-// Leaves that drift upward and fade out
+// Positions one corner cluster and mirrors it for the four corners
+function JungleCorner({ corner, active }) {
+  const isRight  = corner === 'tr' || corner === 'br'
+  const isBottom = corner === 'bl' || corner === 'br'
+
+  // Outer div: handles CSS position at corner
+  // Inner div: mirrors the SVG for right/bottom corners
+  const flipX = isRight  ? 'scaleX(-1)' : ''
+  const flipY = isBottom ? 'scaleY(-1)' : ''
+  const flip  = [flipX, flipY].filter(Boolean).join(' ') || 'none'
+
+  // Slide-in direction: push off-screen toward the corner on hide
+  const dx = isRight  ? '110%' : '-110%'
+  const dy = isBottom ? '110%' : '-110%'
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top:    isBottom ? undefined : 0,
+        bottom: isBottom ? 0 : undefined,
+        left:   isRight  ? undefined : 0,
+        right:  isRight  ? 0 : undefined,
+        pointerEvents: 'none',
+        transform: active ? 'translate(0, 0)' : `translate(${dx}, ${dy})`,
+        transition: `transform 2s cubic-bezier(0.22, 0.1, 0.36, 1) 0.25s`,
+      }}
+    >
+      <div style={{ transform: flip }}>
+        <JungleCanopySVG />
+      </div>
+    </div>
+  )
+}
+
+// Small leaves that drift upward and fade
 function FloatingLeaves({ active }) {
   const leaves = [
     { left: '22%', delay: 0.30, color: '#4ade80', rotate: -10 },
@@ -118,7 +138,6 @@ function FloatingLeaves({ active }) {
   ))
 }
 
-// Leaves distributed along the vine
 const VINE_LEAVES = [
   { leftPct: '4%',  top: -40, rotate: -28, delay: 0.05, size: 1.10, color: '#4ade80' },
   { leftPct: '17%', top:  -2, rotate:  32, delay: 0.18, size: 0.85, color: '#52b788' },
@@ -180,33 +199,11 @@ export default function Intro({ onComplete }) {
           overflow: 'hidden',
         }}
       >
-        {/* ── Left tree ── */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            pointerEvents: 'none',
-            transform: leafing ? 'translateX(0)' : 'translateX(-112%)',
-            transition: 'transform 1.4s cubic-bezier(0.34, 1.1, 0.64, 1) 0.3s',
-          }}
-        >
-          <CartoonTree side="left" />
-        </div>
-
-        {/* ── Right tree ── */}
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            bottom: 0,
-            pointerEvents: 'none',
-            transform: leafing ? 'translateX(0)' : 'translateX(112%)',
-            transition: 'transform 1.4s cubic-bezier(0.34, 1.1, 0.64, 1) 0.3s',
-          }}
-        >
-          <CartoonTree side="right" />
-        </div>
+        {/* ── Four jungle canopy corners creeping inward ── */}
+        <JungleCorner corner="tl" active={leafing} />
+        <JungleCorner corner="tr" active={leafing} />
+        <JungleCorner corner="bl" active={leafing} />
+        <JungleCorner corner="br" active={leafing} />
 
         {/* ── Center content ── */}
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
@@ -237,7 +234,7 @@ export default function Intro({ onComplete }) {
             ))}
           </div>
 
-          {/* Vine + leaves row */}
+          {/* Vine + leaves under the word */}
           <div
             style={{
               position: 'relative',
@@ -246,7 +243,6 @@ export default function Intro({ onComplete }) {
               marginTop: '-6px',
             }}
           >
-            {/* Growing vine SVG */}
             <svg
               width="100%"
               height="80"
@@ -268,7 +264,6 @@ export default function Intro({ onComplete }) {
               />
             </svg>
 
-            {/* Cartoon leaves along vine */}
             {leafing && VINE_LEAVES.map((leaf, i) => (
               <div
                 key={i}
