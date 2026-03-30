@@ -4,6 +4,7 @@ import Nav from './components/Nav'
 import Journal from './components/Journal'
 import Todo from './components/Todo'
 import Whiteboard from './components/Whiteboard'
+import PlatzIntro from './components/PlatzIntro'
 
 const VIEWS = { journal: Journal, todo: Todo, whiteboard: Whiteboard }
 
@@ -25,6 +26,8 @@ export default function App() {
   return (
     <>
       {!introComplete && <Intro onComplete={() => setIntroComplete(true)} />}
+
+      {introComplete && <PlatzIntro />}
 
       {introComplete && (
         <div
