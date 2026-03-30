@@ -4,7 +4,7 @@ const VIEWS = [
   { id: 'journal',    label: 'Journal' },
   { id: 'todo',       label: 'To Do' },
   { id: 'whiteboard', label: 'Whiteboard' },
-  { id: 'about',      label: 'About' },
+  { id: 'about',      label: 'About Platz' },
   { id: 'about-me',   label: 'About Me' },
 ]
 
