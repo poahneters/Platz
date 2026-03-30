@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 const STORAGE_KEY = 'platz_journal'
 let nextId = Date.now()
 
-const SYSTEM_PROMPT = `You are Platz — a direct, perceptive thinking partner. Not a therapist. Not a cheerleader. A sharp friend who calls things out.
+const BASE_SYSTEM_PROMPT = `You are Platz — a direct, perceptive thinking partner. Not a therapist. Not a cheerleader. A sharp friend who calls things out.
 
 When someone shares their thoughts:
 - Cut through the noise and name what's really going on
@@ -11,6 +11,35 @@ When someone shares their thoughts:
 - Point to 1–2 specific resources (books, articles, thinkers) with real URLs when relevant
 - End with one pointed question that pushes them further
 - Keep it under 250 words. No bullet lists. No headers. Talk like a person.`
+
+const STYLE_INSTRUCTIONS = {
+  direct:       'Be blunt and direct. Do not soften your feedback. Honesty over comfort.',
+  curious:      'Lead with questions more than answers. Help them think deeper, not just farther.',
+  motivational: 'Be encouraging. Help them see what is possible and what they are already doing right.',
+  analytical:   'Be logical and structured. Break things down into frameworks and clear reasoning.',
+}
+
+function buildSystemPrompt() {
+  try {
+    const about = JSON.parse(localStorage.getItem('platz_about_me')) || {}
+    const parts = [BASE_SYSTEM_PROMPT]
+    if (about.platzStyle && STYLE_INSTRUCTIONS[about.platzStyle]) {
+      parts.push(`\nCommunication style: ${STYLE_INSTRUCTIONS[about.platzStyle]}`)
+    }
+    if (about.mbtiType) {
+      parts.push(`\nUser's personality type: ${about.mbtiType}. Factor this into how you engage with them.`)
+    }
+    if (about.lifeStory?.trim()) {
+      parts.push(`\nUser's background: ${about.lifeStory.slice(0, 500)}`)
+    }
+    if (about.customInstructions?.trim()) {
+      parts.push(`\nAdditional context: ${about.customInstructions.slice(0, 300)}`)
+    }
+    return parts.join('\n')
+  } catch {
+    return BASE_SYSTEM_PROMPT
+  }
+}
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -143,7 +172,7 @@ export default function Journal() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: SYSTEM_PROMPT,
+          system: buildSystemPrompt(),
           messages,
           model: 'claude-sonnet-4-6',
           max_tokens: 600,

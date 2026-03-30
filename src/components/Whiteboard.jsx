@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
 
 const STORAGE_KEY = 'platz_boards'
-const PALETTE = ['#c9a86c', '#7a9bb5', '#9b7ab5', '#7ab59b', '#b57a7a', '#b5a07a']
+const MARKER_COLORS = ['#1a1a2e', '#1a2e1a', '#2e1a1a', '#1a1e2e', '#2e2a1a']
+const BOARD_COLORS  = ['#c9a86c', '#7a9bb5', '#9b7ab5', '#7ab59b', '#b57a7a']
 let nextId = Date.now()
 
-function makeBoard(title, color) {
-  return { id: (++nextId).toString(), title, color, items: [] }
+function makeBoard(title, color, markerColor) {
+  return { id: (++nextId).toString(), title, color, markerColor: markerColor || '#1a1a2e', items: [] }
 }
 
 function defaultBoards() {
-  return [makeBoard('Long-term Goals', '#c9a86c')]
+  return [makeBoard('Long-term Goals', '#c9a86c', '#1a1a2e')]
 }
 
 export default function Whiteboard() {
@@ -17,10 +18,7 @@ export default function Whiteboard() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultBoards() } catch { return defaultBoards() }
   })
   const [activeId, setActiveId] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
-      return saved?.[0]?.id || null
-    } catch { return null }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY))?.[0]?.id || null } catch { return null }
   })
   const [newItemText, setNewItemText] = useState('')
   const [newBoardTitle, setNewBoardTitle] = useState('')
@@ -31,14 +29,17 @@ export default function Whiteboard() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(boards))
   }, [boards])
 
-  // Set active to first board if none selected
   useEffect(() => {
     if (!activeId && boards.length > 0) setActiveId(boards[0].id)
   }, [boards, activeId])
 
   function addBoard() {
     if (!newBoardTitle.trim()) return
-    const board = makeBoard(newBoardTitle.trim(), PALETTE[boards.length % PALETTE.length])
+    const board = makeBoard(
+      newBoardTitle.trim(),
+      BOARD_COLORS[boards.length % BOARD_COLORS.length],
+      MARKER_COLORS[boards.length % MARKER_COLORS.length]
+    )
     setBoards(prev => [...prev, board])
     setActiveId(board.id)
     setNewBoardTitle('')
@@ -78,20 +79,14 @@ export default function Whiteboard() {
   }
 
   const active = boards.find(b => b.id === activeId)
+  const ink = active?.markerColor || '#1a1a2e'
 
   return (
     <div style={{ display: 'flex', height: '100%', gap: '1px', background: 'var(--border)' }}>
 
-      {/* ── Boards sidebar ── */}
-      <aside style={{ width: '220px', flexShrink: 0, background: 'var(--bg)', overflowY: 'auto', paddingTop: '20px' }}>
-        <div style={{
-          padding: '0 18px 14px',
-          fontSize: '10px',
-          fontWeight: 600,
-          letterSpacing: '0.14em',
-          color: 'var(--text-dim)',
-          textTransform: 'uppercase',
-        }}>
+      {/* ── Boards sidebar (dark) ── */}
+      <aside style={{ width: '200px', flexShrink: 0, background: 'var(--bg)', overflowY: 'auto', paddingTop: '20px' }}>
+        <div style={{ padding: '0 18px 14px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.14em', color: 'var(--text-dim)', textTransform: 'uppercase' }}>
           Boards
         </div>
 
@@ -101,32 +96,15 @@ export default function Whiteboard() {
             onClick={() => setActiveId(board.id)}
             className="sidebar-btn"
             style={{
-              width: '100%',
-              textAlign: 'left',
-              padding: '10px 18px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
+              width: '100%', textAlign: 'left', padding: '10px 18px',
+              display: 'flex', alignItems: 'center', gap: '10px',
               borderLeft: activeId === board.id ? `2px solid ${board.color}` : '2px solid transparent',
               background: activeId === board.id ? 'var(--gold-dim)' : 'transparent',
               transition: 'all 0.2s ease',
             }}
           >
-            <span style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              background: board.color,
-              flexShrink: 0,
-            }} />
-            <span style={{
-              flex: 1,
-              fontSize: '13px',
-              color: 'var(--text)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: board.color, flexShrink: 0 }} />
+            <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {board.title}
             </span>
             <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
@@ -135,111 +113,67 @@ export default function Whiteboard() {
           </button>
         ))}
 
-        {/* New board input */}
         {showNewBoard ? (
           <div style={{ padding: '8px 14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <input
               value={newBoardTitle}
               onChange={e => setNewBoardTitle(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter') addBoard()
-                if (e.key === 'Escape') setShowNewBoard(false)
-              }}
+              onKeyDown={e => { if (e.key === 'Enter') addBoard(); if (e.key === 'Escape') setShowNewBoard(false) }}
               placeholder="Board name..."
               autoFocus
-              style={{
-                fontSize: '13px',
-                padding: '7px 10px',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '7px',
-                color: 'var(--text)',
-                width: '100%',
-              }}
+              style={{ fontSize: '13px', padding: '7px 10px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '7px', color: 'var(--text)', width: '100%' }}
             />
             <div style={{ display: 'flex', gap: '5px' }}>
-              <button
-                onClick={addBoard}
-                style={{
-                  flex: 1,
-                  padding: '6px',
-                  background: 'var(--gold)',
-                  color: '#0a0908',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                }}
-              >
+              <button onClick={addBoard} style={{ flex: 1, padding: '6px', background: 'var(--gold)', color: '#0a0908', borderRadius: '6px', fontSize: '12px', fontWeight: 600 }}>
                 Create
               </button>
-              <button
-                onClick={() => { setShowNewBoard(false); setNewBoardTitle('') }}
-                style={{
-                  padding: '6px 9px',
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text-dim)',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                }}
-              >
+              <button onClick={() => { setShowNewBoard(false); setNewBoardTitle('') }} style={{ padding: '6px 9px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-dim)', borderRadius: '6px', fontSize: '13px' }}>
                 ×
               </button>
             </div>
           </div>
         ) : (
-          <button
-            onClick={() => setShowNewBoard(true)}
-            className="sidebar-btn"
-            style={{
-              width: '100%',
-              textAlign: 'left',
-              padding: '10px 18px',
-              fontSize: '13px',
-              color: 'var(--text-dim)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              borderLeft: '2px solid transparent',
-              transition: 'all 0.2s ease',
-            }}
-          >
+          <button onClick={() => setShowNewBoard(true)} className="sidebar-btn" style={{ width: '100%', textAlign: 'left', padding: '10px 18px', fontSize: '13px', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px', borderLeft: '2px solid transparent', transition: 'all 0.2s' }}>
             <span style={{ fontSize: '16px', lineHeight: 1 }}>+</span> New board
           </button>
         )}
       </aside>
 
-      {/* ── Board content ── */}
-      <main style={{ flex: 1, background: 'var(--bg)', overflowY: 'auto', padding: '44px 48px' }}>
+      {/* ── Whiteboard surface ── */}
+      <main style={{
+        flex: 1,
+        background: '#f4f3ee',
+        overflowY: 'auto',
+        position: 'relative',
+        // Subtle whiteboard texture via repeating gradient
+        backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(0,0,0,0.04) 31px, rgba(0,0,0,0.04) 32px)',
+        backgroundPositionY: '20px',
+      }}>
+
         {!active ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-dim)', fontSize: '14px' }}>
-            Select a board or create a new one
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontFamily: "'Permanent Marker', cursive", fontSize: '22px', color: 'rgba(0,0,0,0.2)' }}>
+            Pick a board →
           </div>
         ) : (
-          <div key={active.id} className="fade-up" style={{ maxWidth: '700px', margin: '0 auto' }}>
+          <div key={active.id} className="fade-up" style={{ padding: '40px 52px', maxWidth: '820px', margin: '0 auto' }}>
 
             {/* Board header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '36px' }}>
-              <span style={{ width: '11px', height: '11px', borderRadius: '50%', background: active.color, flexShrink: 0 }} />
-
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '36px' }}>
               {editingTitle === active.id ? (
                 <input
                   defaultValue={active.title}
                   autoFocus
                   onBlur={e => updateTitle(active.id, e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') updateTitle(active.id, e.target.value)
-                    if (e.key === 'Escape') setEditingTitle(null)
-                  }}
+                  onKeyDown={e => { if (e.key === 'Enter') updateTitle(active.id, e.target.value); if (e.key === 'Escape') setEditingTitle(null) }}
                   style={{
-                    fontFamily: "'Playfair Display', serif",
-                    fontSize: '30px',
-                    fontWeight: 700,
-                    color: 'var(--text)',
-                    borderBottom: `1px solid ${active.color}`,
-                    paddingBottom: '2px',
-                    width: '100%',
+                    fontFamily: "'Permanent Marker', cursive",
+                    fontSize: 'clamp(28px, 4vw, 44px)',
+                    color: ink,
                     background: 'transparent',
+                    borderBottom: `2px solid ${ink}`,
+                    paddingBottom: '4px',
+                    width: '100%',
+                    lineHeight: 1.2,
                   }}
                 />
               ) : (
@@ -247,11 +181,13 @@ export default function Whiteboard() {
                   onClick={() => setEditingTitle(active.id)}
                   title="Click to rename"
                   style={{
-                    fontFamily: "'Playfair Display', serif",
-                    fontSize: '30px',
-                    fontWeight: 700,
-                    color: 'var(--text)',
+                    fontFamily: "'Permanent Marker', cursive",
+                    fontSize: 'clamp(28px, 4vw, 44px)',
+                    color: ink,
                     cursor: 'text',
+                    lineHeight: 1.2,
+                    flex: 1,
+                    wordBreak: 'break-word',
                   }}
                 >
                   {active.title}
@@ -260,97 +196,99 @@ export default function Whiteboard() {
 
               <button
                 onClick={() => deleteBoard(active.id)}
-                className="btn-ghost"
                 style={{
-                  marginLeft: 'auto',
+                  marginTop: '6px',
                   fontSize: '11px',
-                  color: 'var(--text-dim)',
+                  color: 'rgba(0,0,0,0.3)',
                   padding: '4px 10px',
-                  border: '1px solid var(--border2)',
+                  border: '1px solid rgba(0,0,0,0.15)',
                   borderRadius: '5px',
-                  transition: 'all 0.2s',
+                  background: 'transparent',
                   flexShrink: 0,
+                  transition: 'all 0.2s',
+                  fontFamily: 'Inter, sans-serif',
                 }}
+                onMouseEnter={e => e.target.style.color = 'rgba(0,0,0,0.5)'}
+                onMouseLeave={e => e.target.style.color = 'rgba(0,0,0,0.3)'}
               >
-                Delete board
+                Erase board
               </button>
             </div>
 
-            {/* Progress bar */}
+            {/* Progress */}
             {active.items.length > 0 && (
-              <div style={{ marginBottom: '28px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Progress</span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-                    {active.items.filter(i => i.done).length} / {active.items.length}
-                  </span>
-                </div>
-                <div style={{ height: '3px', background: 'var(--surface2)', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ flex: 1, height: '3px', background: 'rgba(0,0,0,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
                   <div style={{
                     height: '100%',
-                    background: active.color,
+                    background: ink,
+                    opacity: 0.5,
                     width: `${(active.items.filter(i => i.done).length / active.items.length) * 100}%`,
                     borderRadius: '2px',
                     transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)',
                   }} />
                 </div>
+                <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '14px', color: `${ink}99`, whiteSpace: 'nowrap' }}>
+                  {active.items.filter(i => i.done).length} / {active.items.length}
+                </span>
               </div>
             )}
 
             {/* Items */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '32px' }}>
               {active.items.length === 0 && (
-                <p style={{ padding: '20px 0', fontSize: '14px', color: 'var(--text-dim)' }}>
-                  Add your first goal below.
+                <p style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '22px', color: `${ink}40`, padding: '12px 0' }}>
+                  write your first goal below...
                 </p>
               )}
 
               {active.items.map(item => (
                 <div
                   key={item.id}
-                  className="board-item fade-up"
+                  className="board-item"
                   style={{
                     display: 'flex',
                     alignItems: 'flex-start',
-                    gap: '12px',
-                    padding: '13px 14px',
-                    borderRadius: '8px',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border2)',
-                    opacity: item.done ? 0.4 : 1,
-                    transition: 'opacity 0.25s ease',
+                    gap: '14px',
+                    padding: '8px 4px',
+                    borderBottom: `1px solid rgba(0,0,0,0.06)`,
+                    opacity: item.done ? 0.45 : 1,
+                    transition: 'opacity 0.2s',
                   }}
                 >
+                  {/* Hand-drawn checkbox */}
                   <button
                     onClick={() => toggleItem(active.id, item.id)}
                     style={{
-                      width: '18px',
-                      height: '18px',
-                      borderRadius: '4px',
-                      border: `1.5px solid ${item.done ? active.color : 'var(--text-dim)'}`,
-                      background: item.done ? active.color : 'transparent',
+                      width: '22px',
+                      height: '22px',
+                      border: `2px solid ${ink}`,
+                      borderRadius: '3px',
+                      background: item.done ? ink : 'transparent',
                       flexShrink: 0,
-                      marginTop: '2px',
+                      marginTop: '4px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '10px',
-                      color: '#0a0908',
-                      fontWeight: 700,
-                      transition: 'all 0.2s ease',
+                      color: '#f4f3ee',
+                      fontFamily: "'Permanent Marker', cursive",
+                      fontSize: '13px',
+                      transition: 'background 0.2s',
+                      cursor: 'pointer',
                     }}
                   >
                     {item.done ? '✓' : ''}
                   </button>
 
                   <span style={{
+                    fontFamily: "'Permanent Marker', cursive",
+                    fontSize: 'clamp(16px, 2.2vw, 22px)',
+                    color: ink,
+                    lineHeight: 1.4,
                     flex: 1,
-                    fontSize: '14px',
-                    lineHeight: 1.6,
-                    color: 'var(--text)',
                     textDecoration: item.done ? 'line-through' : 'none',
-                    textDecorationColor: 'var(--text-dim)',
-                    transition: 'all 0.2s',
+                    textDecorationColor: `${ink}88`,
+                    wordBreak: 'break-word',
                   }}>
                     {item.text}
                   </span>
@@ -359,13 +297,16 @@ export default function Whiteboard() {
                     onClick={() => removeItem(active.id, item.id)}
                     className="board-item-delete"
                     style={{
+                      fontFamily: 'Inter, sans-serif',
                       fontSize: '18px',
-                      lineHeight: 1,
-                      color: 'var(--text-dim)',
+                      color: `${ink}55`,
                       opacity: 0,
                       transition: 'opacity 0.15s',
                       padding: '0 4px',
                       flexShrink: 0,
+                      marginTop: '2px',
+                      background: 'transparent',
+                      border: 'none',
                     }}
                   >
                     ×
@@ -374,41 +315,44 @@ export default function Whiteboard() {
               ))}
             </div>
 
-            {/* Add item */}
-            <div
-              className="input-row"
-              style={{
-                display: 'flex',
-                gap: '8px',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '10px',
-                padding: '4px 4px 4px 16px',
-                transition: 'border-color 0.2s',
-              }}
-            >
+            {/* Write input — styled like writing on the board */}
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', paddingTop: '8px', borderTop: `2px solid ${ink}22` }}>
+              <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '20px', color: `${ink}40` }}>+</span>
               <input
                 value={newItemText}
                 onChange={e => setNewItemText(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addItem(active.id)}
-                placeholder="Add a goal..."
-                style={{ flex: 1, fontSize: '14px', padding: '9px 0' }}
-              />
-              <button
-                onClick={() => addItem(active.id)}
-                disabled={!newItemText.trim()}
+                placeholder="write a goal..."
                 style={{
-                  padding: '9px 16px',
-                  background: newItemText.trim() ? active.color : 'var(--surface2)',
-                  color: newItemText.trim() ? '#0a0908' : 'var(--text-dim)',
-                  borderRadius: '7px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
+                  flex: 1,
+                  fontFamily: "'Permanent Marker', cursive",
+                  fontSize: 'clamp(16px, 2.2vw, 20px)',
+                  color: ink,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  padding: '8px 0',
+                  letterSpacing: '0.01em',
                 }}
-              >
-                Add
-              </button>
+              />
+              {newItemText.trim() && (
+                <button
+                  onClick={() => addItem(active.id)}
+                  style={{
+                    fontFamily: "'Permanent Marker', cursive",
+                    fontSize: '15px',
+                    color: '#f4f3ee',
+                    background: ink,
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '7px 14px',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s',
+                  }}
+                >
+                  Add
+                </button>
+              )}
             </div>
 
           </div>

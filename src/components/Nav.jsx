@@ -5,6 +5,7 @@ const VIEWS = [
   { id: 'todo',       label: 'To Do' },
   { id: 'whiteboard', label: 'Whiteboard' },
   { id: 'about',      label: 'About' },
+  { id: 'about-me',   label: 'About Me' },
 ]
 
 export default function Nav({ view, setView }) {
