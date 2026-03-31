@@ -198,7 +198,7 @@ export default function Intro({ onComplete }) {
                   d={vine.d}
                   stroke="#0f3320"
                   strokeWidth="5"
-                  strokeLinecap="round"
+                  strokeLinecap="butt"
                   strokeLinejoin="round"
                   fill="none"
                   opacity="0.18"
@@ -216,7 +216,7 @@ export default function Intro({ onComplete }) {
                   d={vine.d}
                   stroke="#2d6a4f"
                   strokeWidth="4.5"
-                  strokeLinecap="round"
+                  strokeLinecap="butt"
                   strokeLinejoin="round"
                   fill="none"
                   pathLength="1"
@@ -230,7 +230,7 @@ export default function Intro({ onComplete }) {
                   d={vine.d}
                   stroke="#86efac"
                   strokeWidth="1.5"
-                  strokeLinecap="round"
+                  strokeLinecap="butt"
                   strokeLinejoin="round"
                   fill="none"
                   opacity="0.45"
