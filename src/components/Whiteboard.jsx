@@ -212,12 +212,9 @@ export default function Whiteboard() {
           <div style={{
             flex: 1,
             minHeight: 0,
-            background: '#f8fffc',
+            background: '#ffffff',
             overflowY: 'auto',
             position: 'relative',
-            // Subtle horizontal ruled lines
-            backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(80,180,130,0.14) 31px, rgba(80,180,130,0.14) 32px)',
-            backgroundPositionY: '28px',
           }}>
 
             {/* Glare — diagonal highlight from top-left */}
