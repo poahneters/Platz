@@ -23,75 +23,6 @@ function defaultBoards() {
   return [makeBoard('Long-term Goals', '#2d8a55', 0)]
 }
 
-// One SVG marker lying flat in the tray
-function MarkerSVG({ x, body, cap, angle, active }) {
-  return (
-    <g transform={`translate(${x}, 26) rotate(${angle}, 42, 0)`}>
-      {/* Drop shadow */}
-      <rect x="-20" y="-5" width="98" height="12" rx="5"
-        fill="rgba(0,0,0,0.22)" transform="translate(1.5 3.5)" />
-      {/* Cap — rounded left end */}
-      <rect x="-20" y="-7" width="28" height="14" rx="7" fill={cap} />
-      {/* Cap highlight crescent */}
-      <ellipse cx="-12" cy="-3" rx="6" ry="3.5" fill="white" opacity="0.22" />
-      {/* Body */}
-      <rect x="4" y="-7" width="60" height="14" rx="3" fill={body} />
-      {/* White label band */}
-      <rect x="10" y="-4" width="46" height="8" rx="2" fill="white" opacity="0.14" />
-      {/* Clip */}
-      <rect x="8" y="-8" width="6" height="4" rx="1" fill={cap} opacity="0.85" />
-      {/* Tip housing (gray) */}
-      <rect x="64" y="-5" width="14" height="10" rx="2" fill="#c8cdd2" />
-      {/* Felt tip */}
-      <rect x="78" y="-2.5" width="6" height="5" rx="1.5" fill="#6a6a6a" />
-      {/* Body highlight stripe */}
-      <rect x="-18" y="-5" width="94" height="4" rx="2" fill="white"
-        opacity={active ? 0.32 : 0.16} />
-    </g>
-  )
-}
-
-// Full marker tray with ledge
-function MarkerTray({ activeIdx }) {
-  const angles = [-3, 1.5, -1, 2.5, -2]
-  return (
-    <div style={{
-      height: '58px',
-      background: 'linear-gradient(180deg, #b8bdc4 0%, #9ea5ab 55%, #868d93 100%)',
-      borderRadius: '0 0 3px 3px',
-      position: 'relative',
-      boxShadow: 'inset 0 3px 7px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.22)',
-      overflow: 'hidden',
-      flexShrink: 0,
-    }}>
-      {/* Top edge highlight */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-        background: 'linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.38), rgba(255,255,255,0.05))',
-      }} />
-      {/* Groove that markers rest in */}
-      <div style={{
-        position: 'absolute', bottom: '9px', left: '12px', right: '12px',
-        height: '5px',
-        background: 'rgba(0,0,0,0.18)',
-        borderRadius: '3px',
-        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.22)',
-      }} />
-      <svg width="100%" height="58" style={{ position: 'absolute', top: 0, left: 0 }}>
-        {MARKERS.map((m, i) => (
-          <MarkerSVG
-            key={i}
-            x={16 + i * 92}
-            body={m.body}
-            cap={m.cap}
-            angle={angles[i]}
-            active={i === activeIdx}
-          />
-        ))}
-      </svg>
-    </div>
-  )
-}
 
 export default function Whiteboard() {
   const [boards, setBoards] = useState(() => {
@@ -244,7 +175,7 @@ export default function Whiteboard() {
           borderRadius: '5px',
           // Brushed aluminum gradient
           background: 'linear-gradient(160deg, #d2d7dc 0%, #bcc2c8 25%, #b4babf 60%, #c8cdd2 100%)',
-          padding: '12px 12px 0',
+          padding: '12px',
           boxShadow: [
             '0 20px 60px rgba(0,0,0,0.28)',
             '0 6px 18px rgba(0,0,0,0.16)',
@@ -272,7 +203,7 @@ export default function Whiteboard() {
 
           {/* Inset shadow over board edge */}
           <div style={{
-            position: 'absolute', inset: '12px 12px 58px',
+            position: 'absolute', inset: '12px',
             boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.12)',
             pointerEvents: 'none', zIndex: 6, borderRadius: '1px',
           }} />
@@ -497,9 +428,6 @@ export default function Whiteboard() {
               )}
             </div>
           </div>
-
-          {/* ── Marker tray ── */}
-          <MarkerTray activeIdx={markerIdx} />
 
         </div>
       </main>
