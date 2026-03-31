@@ -121,13 +121,6 @@ function OvateLeaf({ x, y, rotate, scale = 1, color }) {
   )
 }
 
-// Small leaves that drift upward and fade
-const FLOAT_LEAVES = [
-  { left: '21%', delay: 0.5,  color: '#4ade80', rotate: -10 },
-  { left: '38%', delay: 0.85, color: '#86efac', rotate:  16 },
-  { left: '55%', delay: 0.62, color: '#52b788', rotate:  -8 },
-  { left: '71%', delay: 1.0,  color: '#4ade80', rotate:  22 },
-]
 
 const VINE_UNDERLINE_LEAVES = [
   { leftPct: '4%',  top: -38, rotate: -28, delay: 0.08, size: 1.10, color: '#4ade80' },
@@ -169,11 +162,6 @@ export default function Intro({ onComplete }) {
         @keyframes underlineGrow {
           from { stroke-dashoffset: 920; }
           to   { stroke-dashoffset: 0; }
-        }
-        @keyframes floatUp {
-          0%   { transform: translateY(0)      rotate(0deg);  opacity: 0;   }
-          10%  {                                               opacity: 0.8; }
-          100% { transform: translateY(-200px) rotate(30deg); opacity: 0;   }
         }
       `}</style>
 
@@ -392,26 +380,6 @@ export default function Intro({ onComplete }) {
           </p>
         </div>
 
-        {/* ── Floating leaves rising up ── */}
-        {leafing && FLOAT_LEAVES.map((l, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: l.left,
-              top: '64%',
-              pointerEvents: 'none',
-              animation: `floatUp 3.2s ease-out ${l.delay}s forwards`,
-              opacity: 0,
-            }}
-          >
-            <svg width="15" height="22" viewBox="0 0 30 46" fill="none"
-              style={{ transform: `rotate(${l.rotate}deg)` }}>
-              <path d="M15,43 C7,35 2,26 2,16 C2,6 7,1 15,1 C23,1 28,6 28,16 C28,26 23,35 15,43 Z"
-                fill={l.color} stroke="#1a4d2e" strokeWidth="2.5" />
-            </svg>
-          </div>
-        ))}
 
       </div>
     </>
