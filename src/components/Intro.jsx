@@ -184,7 +184,7 @@ export default function Intro({ onComplete }) {
       >
 
         {/* ── Full-screen SVG vine layer ── */}
-        <svg
+        {leafing && <svg
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
           viewBox="0 0 1000 700"
           preserveAspectRatio="xMidYMid slice"
@@ -263,7 +263,7 @@ export default function Intro({ onComplete }) {
               </g>
             )
           })}
-        </svg>
+        </svg>}
 
         {/* ── Center content ── */}
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
