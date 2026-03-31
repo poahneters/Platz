@@ -1,16 +1,96 @@
 import { useState, useEffect } from 'react'
 
 const STORAGE_KEY = 'platz_boards'
-const MARKER_COLORS = ['#1a1a2e', '#1a2e1a', '#2e1a1a', '#1a1e2e', '#2e2a1a']
-const BOARD_COLORS  = ['#c9a86c', '#7a9bb5', '#9b7ab5', '#7ab59b', '#b57a7a']
+
+// Marker body / cap color pairs — real whiteboard marker colors
+const MARKERS = [
+  { body: '#1a4d2e', cap: '#0f2d1a' }, // forest green
+  { body: '#1a3d6a', cap: '#0f2040' }, // navy blue
+  { body: '#8a1a1a', cap: '#4a0f0f' }, // deep red
+  { body: '#6a4020', cap: '#3a2010' }, // brown
+  { body: '#2d6a9f', cap: '#1a3d6a' }, // sky blue
+]
+
+const BOARD_COLORS = ['#2d8a55', '#4a7ab0', '#a04040', '#9a7030', '#3a8a7a']
+
 let nextId = Date.now()
 
-function makeBoard(title, color, markerColor) {
-  return { id: (++nextId).toString(), title, color, markerColor: markerColor || '#1a1a2e', items: [] }
+function makeBoard(title, color, markerIdx) {
+  return { id: (++nextId).toString(), title, color, markerIdx: markerIdx ?? 0, items: [] }
 }
 
 function defaultBoards() {
-  return [makeBoard('Long-term Goals', '#c9a86c', '#1a1a2e')]
+  return [makeBoard('Long-term Goals', '#2d8a55', 0)]
+}
+
+// One SVG marker lying flat in the tray
+function MarkerSVG({ x, body, cap, angle, active }) {
+  return (
+    <g transform={`translate(${x}, 26) rotate(${angle}, 42, 0)`}>
+      {/* Drop shadow */}
+      <rect x="-20" y="-5" width="98" height="12" rx="5"
+        fill="rgba(0,0,0,0.22)" transform="translate(1.5 3.5)" />
+      {/* Cap — rounded left end */}
+      <rect x="-20" y="-7" width="28" height="14" rx="7" fill={cap} />
+      {/* Cap highlight crescent */}
+      <ellipse cx="-12" cy="-3" rx="6" ry="3.5" fill="white" opacity="0.22" />
+      {/* Body */}
+      <rect x="4" y="-7" width="60" height="14" rx="3" fill={body} />
+      {/* White label band */}
+      <rect x="10" y="-4" width="46" height="8" rx="2" fill="white" opacity="0.14" />
+      {/* Clip */}
+      <rect x="8" y="-8" width="6" height="4" rx="1" fill={cap} opacity="0.85" />
+      {/* Tip housing (gray) */}
+      <rect x="64" y="-5" width="14" height="10" rx="2" fill="#c8cdd2" />
+      {/* Felt tip */}
+      <rect x="78" y="-2.5" width="6" height="5" rx="1.5" fill="#6a6a6a" />
+      {/* Body highlight stripe */}
+      <rect x="-18" y="-5" width="94" height="4" rx="2" fill="white"
+        opacity={active ? 0.32 : 0.16} />
+    </g>
+  )
+}
+
+// Full marker tray with ledge
+function MarkerTray({ activeIdx }) {
+  const angles = [-3, 1.5, -1, 2.5, -2]
+  return (
+    <div style={{
+      height: '58px',
+      background: 'linear-gradient(180deg, #b8bdc4 0%, #9ea5ab 55%, #868d93 100%)',
+      borderRadius: '0 0 3px 3px',
+      position: 'relative',
+      boxShadow: 'inset 0 3px 7px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.22)',
+      overflow: 'hidden',
+      flexShrink: 0,
+    }}>
+      {/* Top edge highlight */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+        background: 'linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.38), rgba(255,255,255,0.05))',
+      }} />
+      {/* Groove that markers rest in */}
+      <div style={{
+        position: 'absolute', bottom: '9px', left: '12px', right: '12px',
+        height: '5px',
+        background: 'rgba(0,0,0,0.18)',
+        borderRadius: '3px',
+        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.22)',
+      }} />
+      <svg width="100%" height="58" style={{ position: 'absolute', top: 0, left: 0 }}>
+        {MARKERS.map((m, i) => (
+          <MarkerSVG
+            key={i}
+            x={16 + i * 92}
+            body={m.body}
+            cap={m.cap}
+            angle={angles[i]}
+            active={i === activeIdx}
+          />
+        ))}
+      </svg>
+    </div>
+  )
 }
 
 export default function Whiteboard() {
@@ -35,10 +115,11 @@ export default function Whiteboard() {
 
   function addBoard() {
     if (!newBoardTitle.trim()) return
+    const idx = boards.length % MARKERS.length
     const board = makeBoard(
       newBoardTitle.trim(),
       BOARD_COLORS[boards.length % BOARD_COLORS.length],
-      MARKER_COLORS[boards.length % MARKER_COLORS.length]
+      idx
     )
     setBoards(prev => [...prev, board])
     setActiveId(board.id)
@@ -79,12 +160,13 @@ export default function Whiteboard() {
   }
 
   const active = boards.find(b => b.id === activeId)
-  const ink = active?.markerColor || '#1a1a2e'
+  const markerIdx = active?.markerIdx ?? 0
+  const ink = MARKERS[markerIdx]?.body || '#1a4d2e'
 
   return (
     <div style={{ display: 'flex', height: '100%', gap: '1px', background: 'var(--border)' }}>
 
-      {/* ── Boards sidebar (dark) ── */}
+      {/* ── Boards sidebar ── */}
       <aside style={{ width: '200px', flexShrink: 0, background: 'var(--bg)', overflowY: 'auto', paddingTop: '20px' }}>
         <div style={{ padding: '0 18px 14px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.14em', color: 'var(--text-dim)', textTransform: 'uppercase' }}>
           Boards
@@ -124,7 +206,7 @@ export default function Whiteboard() {
               style={{ fontSize: '13px', padding: '7px 10px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '7px', color: 'var(--text)', width: '100%' }}
             />
             <div style={{ display: 'flex', gap: '5px' }}>
-              <button onClick={addBoard} style={{ flex: 1, padding: '6px', background: 'var(--gold)', color: '#0a0908', borderRadius: '6px', fontSize: '12px', fontWeight: 600 }}>
+              <button onClick={addBoard} style={{ flex: 1, padding: '6px', background: 'var(--gold)', color: '#0f2d1a', borderRadius: '6px', fontSize: '12px', fontWeight: 600 }}>
                 Create
               </button>
               <button onClick={() => { setShowNewBoard(false); setNewBoardTitle('') }} style={{ padding: '6px 9px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-dim)', borderRadius: '6px', fontSize: '13px' }}>
@@ -139,224 +221,287 @@ export default function Whiteboard() {
         )}
       </aside>
 
-      {/* ── Whiteboard surface ── */}
+      {/* ── Wall + whiteboard ── */}
       <main style={{
         flex: 1,
-        background: '#f4f3ee',
-        overflowY: 'auto',
-        position: 'relative',
-        // Subtle whiteboard texture via repeating gradient
-        backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(0,0,0,0.04) 31px, rgba(0,0,0,0.04) 32px)',
-        backgroundPositionY: '20px',
+        background: 'var(--bg)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '28px 36px 28px',
+        overflow: 'hidden',
       }}>
 
-        {!active ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontFamily: "'Permanent Marker', cursive", fontSize: '22px', color: 'rgba(0,0,0,0.2)' }}>
-            Pick a board →
-          </div>
-        ) : (
-          <div key={active.id} className="fade-up" style={{ padding: '40px 52px', maxWidth: '820px', margin: '0 auto' }}>
+        {/* Aluminum frame */}
+        <div style={{
+          width: '100%',
+          maxWidth: '900px',
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: '5px',
+          // Brushed aluminum gradient
+          background: 'linear-gradient(160deg, #d2d7dc 0%, #bcc2c8 25%, #b4babf 60%, #c8cdd2 100%)',
+          padding: '12px 12px 0',
+          boxShadow: [
+            '0 20px 60px rgba(0,0,0,0.28)',
+            '0 6px 18px rgba(0,0,0,0.16)',
+            'inset 0 1px 0 rgba(255,255,255,0.55)',
+            'inset 0 -1px 3px rgba(0,0,0,0.18)',
+            'inset 1px 0 0 rgba(255,255,255,0.2)',
+            'inset -1px 0 0 rgba(0,0,0,0.08)',
+          ].join(', '),
+          position: 'relative',
+        }}>
 
-            {/* Board header */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '36px' }}>
-              {editingTitle === active.id ? (
-                <input
-                  defaultValue={active.title}
-                  autoFocus
-                  onBlur={e => updateTitle(active.id, e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') updateTitle(active.id, e.target.value); if (e.key === 'Escape') setEditingTitle(null) }}
-                  style={{
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 'clamp(28px, 4vw, 44px)',
-                    color: ink,
-                    background: 'transparent',
-                    borderBottom: `2px solid ${ink}`,
-                    paddingBottom: '4px',
-                    width: '100%',
-                    lineHeight: 1.2,
-                  }}
-                />
-              ) : (
-                <h2
-                  onClick={() => setEditingTitle(active.id)}
-                  title="Click to rename"
-                  style={{
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 'clamp(28px, 4vw, 44px)',
-                    color: ink,
-                    cursor: 'text',
-                    lineHeight: 1.2,
-                    flex: 1,
-                    wordBreak: 'break-word',
-                  }}
-                >
-                  {active.title}
-                </h2>
-              )}
+          {/* Corner screws */}
+          {[
+            { top: '5px', left: '5px' },
+            { top: '5px', right: '5px' },
+          ].map((pos, i) => (
+            <div key={i} style={{
+              position: 'absolute', ...pos,
+              width: '7px', height: '7px', borderRadius: '50%',
+              background: 'radial-gradient(circle at 38% 38%, #e4e8ec, #8a9098)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.35)',
+              zIndex: 4,
+            }} />
+          ))}
 
-              <button
-                onClick={() => deleteBoard(active.id)}
-                style={{
-                  marginTop: '6px',
-                  fontSize: '11px',
-                  color: 'rgba(0,0,0,0.3)',
-                  padding: '4px 10px',
-                  border: '1px solid rgba(0,0,0,0.15)',
-                  borderRadius: '5px',
-                  background: 'transparent',
-                  flexShrink: 0,
-                  transition: 'all 0.2s',
-                  fontFamily: 'Inter, sans-serif',
-                }}
-                onMouseEnter={e => e.target.style.color = 'rgba(0,0,0,0.5)'}
-                onMouseLeave={e => e.target.style.color = 'rgba(0,0,0,0.3)'}
-              >
-                Erase board
-              </button>
-            </div>
+          {/* Inset shadow over board edge */}
+          <div style={{
+            position: 'absolute', inset: '12px 12px 58px',
+            boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.12)',
+            pointerEvents: 'none', zIndex: 6, borderRadius: '1px',
+          }} />
 
-            {/* Progress */}
-            {active.items.length > 0 && (
-              <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ flex: 1, height: '3px', background: 'rgba(0,0,0,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%',
-                    background: ink,
-                    opacity: 0.5,
-                    width: `${(active.items.filter(i => i.done).length / active.items.length) * 100}%`,
-                    borderRadius: '2px',
-                    transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)',
-                  }} />
-                </div>
-                <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '14px', color: `${ink}99`, whiteSpace: 'nowrap' }}>
-                  {active.items.filter(i => i.done).length} / {active.items.length}
-                </span>
-              </div>
-            )}
+          {/* ── Board surface ── */}
+          <div style={{
+            flex: 1,
+            minHeight: 0,
+            background: '#f8fffc',
+            overflowY: 'auto',
+            position: 'relative',
+            // Subtle horizontal ruled lines
+            backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(80,180,130,0.14) 31px, rgba(80,180,130,0.14) 32px)',
+            backgroundPositionY: '28px',
+          }}>
 
-            {/* Items */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '32px' }}>
-              {active.items.length === 0 && (
-                <p style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '22px', color: `${ink}40`, padding: '12px 0' }}>
-                  write your first goal below...
-                </p>
-              )}
+            {/* Glare — diagonal highlight from top-left */}
+            <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10,
+              background: 'linear-gradient(128deg, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0.14) 22%, transparent 44%)',
+            }} />
+            {/* Secondary soft glare right side */}
+            <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10,
+              background: 'linear-gradient(305deg, rgba(255,255,255,0.12) 0%, transparent 35%)',
+            }} />
 
-              {active.items.map(item => (
-                <div
-                  key={item.id}
-                  className="board-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '14px',
-                    padding: '8px 4px',
-                    borderBottom: `1px solid rgba(0,0,0,0.06)`,
-                    opacity: item.done ? 0.45 : 1,
-                    transition: 'opacity 0.2s',
-                  }}
-                >
-                  {/* Hand-drawn checkbox */}
-                  <button
-                    onClick={() => toggleItem(active.id, item.id)}
-                    style={{
-                      width: '22px',
-                      height: '22px',
-                      border: `2px solid ${ink}`,
-                      borderRadius: '3px',
-                      background: item.done ? ink : 'transparent',
-                      flexShrink: 0,
-                      marginTop: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#f4f3ee',
-                      fontFamily: "'Permanent Marker', cursive",
-                      fontSize: '13px',
-                      transition: 'background 0.2s',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {item.done ? '✓' : ''}
-                  </button>
-
-                  <span style={{
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 'clamp(16px, 2.2vw, 22px)',
-                    color: ink,
-                    lineHeight: 1.4,
-                    flex: 1,
-                    textDecoration: item.done ? 'line-through' : 'none',
-                    textDecorationColor: `${ink}88`,
-                    wordBreak: 'break-word',
-                  }}>
-                    {item.text}
-                  </span>
-
-                  <button
-                    onClick={() => removeItem(active.id, item.id)}
-                    className="board-item-delete"
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '18px',
-                      color: `${ink}55`,
-                      opacity: 0,
-                      transition: 'opacity 0.15s',
-                      padding: '0 4px',
-                      flexShrink: 0,
-                      marginTop: '2px',
-                      background: 'transparent',
-                      border: 'none',
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Write input — styled like writing on the board */}
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', paddingTop: '8px', borderTop: `2px solid ${ink}22` }}>
-              <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '20px', color: `${ink}40` }}>+</span>
-              <input
-                value={newItemText}
-                onChange={e => setNewItemText(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addItem(active.id)}
-                placeholder="write a goal..."
-                style={{
-                  flex: 1,
+            {/* Content */}
+            <div style={{ position: 'relative', zIndex: 5 }}>
+              {!active ? (
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  height: '300px',
                   fontFamily: "'Permanent Marker', cursive",
-                  fontSize: 'clamp(16px, 2.2vw, 20px)',
-                  color: ink,
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  padding: '8px 0',
-                  letterSpacing: '0.01em',
-                }}
-              />
-              {newItemText.trim() && (
-                <button
-                  onClick={() => addItem(active.id)}
-                  style={{
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: '15px',
-                    color: '#f4f3ee',
-                    background: ink,
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '7px 14px',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s',
-                  }}
-                >
-                  Add
-                </button>
+                  fontSize: '22px', color: 'rgba(30,80,50,0.2)',
+                }}>
+                  Pick a board →
+                </div>
+              ) : (
+                <div key={active.id} className="fade-up" style={{ padding: '36px 48px 32px', maxWidth: '820px', margin: '0 auto' }}>
+
+                  {/* Board header */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '28px' }}>
+                    {editingTitle === active.id ? (
+                      <input
+                        defaultValue={active.title}
+                        autoFocus
+                        onBlur={e => updateTitle(active.id, e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') updateTitle(active.id, e.target.value); if (e.key === 'Escape') setEditingTitle(null) }}
+                        style={{
+                          fontFamily: "'Permanent Marker', cursive",
+                          fontSize: 'clamp(26px, 3.8vw, 42px)',
+                          color: ink,
+                          background: 'transparent',
+                          borderBottom: `2px solid ${ink}`,
+                          paddingBottom: '4px',
+                          width: '100%',
+                          lineHeight: 1.2,
+                        }}
+                      />
+                    ) : (
+                      <h2
+                        onClick={() => setEditingTitle(active.id)}
+                        title="Click to rename"
+                        style={{
+                          fontFamily: "'Permanent Marker', cursive",
+                          fontSize: 'clamp(26px, 3.8vw, 42px)',
+                          color: ink,
+                          cursor: 'text',
+                          lineHeight: 1.2,
+                          flex: 1,
+                          wordBreak: 'break-word',
+                        }}
+                      >
+                        {active.title}
+                      </h2>
+                    )}
+
+                    <button
+                      onClick={() => deleteBoard(active.id)}
+                      style={{
+                        marginTop: '6px', fontSize: '11px',
+                        color: 'rgba(30,80,50,0.35)',
+                        padding: '4px 10px',
+                        border: '1px solid rgba(30,80,50,0.18)',
+                        borderRadius: '5px',
+                        background: 'transparent',
+                        flexShrink: 0,
+                        transition: 'all 0.2s',
+                        fontFamily: 'Inter, sans-serif',
+                      }}
+                      onMouseEnter={e => e.target.style.color = 'rgba(30,80,50,0.6)'}
+                      onMouseLeave={e => e.target.style.color = 'rgba(30,80,50,0.35)'}
+                    >
+                      Erase board
+                    </button>
+                  </div>
+
+                  {/* Progress bar */}
+                  {active.items.length > 0 && (
+                    <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ flex: 1, height: '3px', background: `${ink}22`, borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%', background: ink, opacity: 0.5,
+                          width: `${(active.items.filter(i => i.done).length / active.items.length) * 100}%`,
+                          borderRadius: '2px',
+                          transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)',
+                        }} />
+                      </div>
+                      <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '14px', color: `${ink}88`, whiteSpace: 'nowrap' }}>
+                        {active.items.filter(i => i.done).length} / {active.items.length}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Items */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '28px' }}>
+                    {active.items.length === 0 && (
+                      <p style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '20px', color: `${ink}38`, padding: '12px 0' }}>
+                        write your first goal below...
+                      </p>
+                    )}
+
+                    {active.items.map(item => (
+                      <div
+                        key={item.id}
+                        className="board-item"
+                        style={{
+                          display: 'flex', alignItems: 'flex-start', gap: '14px',
+                          padding: '8px 4px',
+                          borderBottom: `1px solid ${ink}14`,
+                          opacity: item.done ? 0.42 : 1,
+                          transition: 'opacity 0.2s',
+                        }}
+                      >
+                        {/* Hand-drawn checkbox */}
+                        <button
+                          onClick={() => toggleItem(active.id, item.id)}
+                          style={{
+                            width: '22px', height: '22px',
+                            border: `2px solid ${ink}`,
+                            borderRadius: '3px',
+                            background: item.done ? ink : 'transparent',
+                            flexShrink: 0, marginTop: '4px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: '#f8fffc',
+                            fontFamily: "'Permanent Marker', cursive",
+                            fontSize: '13px',
+                            transition: 'background 0.2s',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {item.done ? '✓' : ''}
+                        </button>
+
+                        <span style={{
+                          fontFamily: "'Permanent Marker', cursive",
+                          fontSize: 'clamp(16px, 2.2vw, 21px)',
+                          color: ink, lineHeight: 1.4, flex: 1,
+                          textDecoration: item.done ? 'line-through' : 'none',
+                          textDecorationColor: `${ink}66`,
+                          wordBreak: 'break-word',
+                        }}>
+                          {item.text}
+                        </span>
+
+                        <button
+                          onClick={() => removeItem(active.id, item.id)}
+                          className="board-item-delete"
+                          style={{
+                            fontFamily: 'Inter, sans-serif', fontSize: '18px',
+                            color: `${ink}44`, opacity: 0,
+                            transition: 'opacity 0.15s', padding: '0 4px',
+                            flexShrink: 0, marginTop: '2px',
+                            background: 'transparent', border: 'none',
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Write input */}
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', paddingTop: '8px', borderTop: `2px solid ${ink}18` }}>
+                    <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '20px', color: `${ink}38` }}>+</span>
+                    <input
+                      value={newItemText}
+                      onChange={e => setNewItemText(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && addItem(active.id)}
+                      placeholder="write a goal..."
+                      style={{
+                        flex: 1,
+                        fontFamily: "'Permanent Marker', cursive",
+                        fontSize: 'clamp(15px, 2vw, 19px)',
+                        color: ink,
+                        background: 'transparent',
+                        border: 'none', outline: 'none',
+                        padding: '8px 0',
+                      }}
+                    />
+                    {newItemText.trim() && (
+                      <button
+                        onClick={() => addItem(active.id)}
+                        style={{
+                          fontFamily: 'Inter, sans-serif', fontWeight: 600,
+                          fontSize: '13px', letterSpacing: '0.04em',
+                          color: '#f8fffc',
+                          background: ink,
+                          border: 'none', borderRadius: '7px',
+                          padding: '8px 16px',
+                          cursor: 'pointer',
+                          transition: 'opacity 0.2s',
+                        }}
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+
+                </div>
               )}
             </div>
-
           </div>
-        )}
+
+          {/* ── Marker tray ── */}
+          <MarkerTray activeIdx={markerIdx} />
+
+        </div>
       </main>
     </div>
   )
