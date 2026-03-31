@@ -40,7 +40,7 @@ export default function About() {
             fontSize: '22px',
             color: 'var(--text)',
             lineHeight: 1.7,
-            borderLeft: '2px solid rgba(201,168,108,0.4)',
+            borderLeft: '2px solid rgba(45,138,85,0.45)',
             paddingLeft: '24px',
             margin: '8px 0',
           }}>

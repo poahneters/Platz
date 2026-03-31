@@ -27,7 +27,7 @@ export default function Nav({ view, setView }) {
         position: 'fixed',
         top: 0, left: 0, right: 0,
         height: '60px',
-        background: 'rgba(10, 9, 8, 0.88)',
+        background: 'rgba(244, 250, 240, 0.92)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
         borderBottom: '1px solid var(--border)',

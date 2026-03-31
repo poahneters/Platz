@@ -151,7 +151,7 @@ export default function Intro({ onComplete }) {
   }, [onComplete])
 
   const lettersVisible = phase !== 'hidden'
-  const leafing        = phase === 'leafing'
+  const leafing        = phase === 'leafing' || phase === 'exit'
   const isExit         = phase === 'exit'
 
   return (
@@ -388,7 +388,7 @@ export default function Intro({ onComplete }) {
               transition: 'opacity 1s ease 0.7s, transform 1s ease 0.7s',
             }}
           >
-            grow through it.
+            A Space to Grow
           </p>
         </div>
 

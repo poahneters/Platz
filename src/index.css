@@ -7,18 +7,18 @@
 }
 
 :root {
-  --bg: #0a0908;
-  --surface: #131110;
-  --surface2: #1d1a17;
-  --border: rgba(255, 248, 235, 0.08);
-  --border2: rgba(255, 248, 235, 0.04);
-  --gold: #c9a86c;
-  --gold-dim: rgba(201, 168, 108, 0.1);
-  --gold-dim2: rgba(201, 168, 108, 0.05);
-  --text: #ede5d5;
-  --text-mid: #8a8075;
-  --text-dim: #4a4540;
-  --green: #5a8c6a;
+  --bg:         #f4faf0;
+  --surface:    #e8f5e1;
+  --surface2:   #d8edcc;
+  --border:     rgba(26, 77, 46, 0.12);
+  --border2:    rgba(26, 77, 46, 0.06);
+  --gold:       #2d8a55;
+  --gold-dim:   rgba(45, 138, 85, 0.12);
+  --gold-dim2:  rgba(45, 138, 85, 0.06);
+  --text:       #1a2e1f;
+  --text-mid:   #4a7060;
+  --text-dim:   #8aaa92;
+  --green:      #52b788;
 }
 
 html, body, #root {
@@ -51,7 +51,7 @@ a { color: var(--gold); }
 a:hover { text-decoration: underline; }
 
 ::selection {
-  background: rgba(201, 168, 108, 0.2);
+  background: rgba(45, 138, 85, 0.18);
   color: var(--text);
 }
 
@@ -78,10 +78,10 @@ a:hover { text-decoration: underline; }
 .sidebar-btn:hover { background: var(--gold-dim2) !important; }
 .nav-link:hover { color: var(--text-mid) !important; }
 
-.btn-gold:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-gold:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
 .btn-ghost:hover { color: var(--text) !important; border-color: var(--border) !important; }
 
-.input-row:focus-within { border-color: rgba(201, 168, 108, 0.3) !important; }
+.input-row:focus-within { border-color: rgba(45, 138, 85, 0.35) !important; }
 
 textarea::placeholder,
 input::placeholder { color: var(--text-dim); }

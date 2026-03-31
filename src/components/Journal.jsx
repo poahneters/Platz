@@ -344,7 +344,7 @@ export default function Journal() {
                     ) : (
                       /* Platz message */
                       <div style={{
-                        borderLeft: '2px solid rgba(201,168,108,0.35)',
+                        borderLeft: '2px solid rgba(45,138,85,0.4)',
                         paddingLeft: '20px',
                         marginTop: '8px',
                       }}>
@@ -399,7 +399,7 @@ export default function Journal() {
               {/* Loading state */}
               {reflecting && (
                 <div style={{
-                  borderLeft: '2px solid rgba(201,168,108,0.2)',
+                  borderLeft: '2px solid rgba(45,138,85,0.25)',
                   paddingLeft: '20px',
                   marginBottom: '32px',
                 }}>
@@ -486,7 +486,7 @@ export default function Journal() {
                     style={{
                       padding: '8px 18px',
                       background: reply.trim() ? 'var(--gold)' : 'var(--surface)',
-                      color: reply.trim() ? '#0a0908' : 'var(--text-dim)',
+                      color: reply.trim() ? '#0f2d1a' : 'var(--text-dim)',
                       border: reply.trim() ? 'none' : '1px solid var(--border)',
                       borderRadius: '8px',
                       fontSize: '13px',
@@ -564,7 +564,7 @@ export default function Journal() {
                 style={{
                   padding: '10px 22px',
                   background: 'var(--gold)',
-                  color: '#0a0908',
+                  color: '#0f2d1a',
                   borderRadius: '8px',
                   fontSize: '13px',
                   fontWeight: 600,

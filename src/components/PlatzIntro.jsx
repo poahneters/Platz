@@ -27,7 +27,7 @@ export default function PlatzIntro() {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.75)',
+        background: 'rgba(20, 50, 30, 0.45)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         zIndex: 80,
@@ -42,8 +42,8 @@ export default function PlatzIntro() {
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: '#131110',
-          border: '1px solid rgba(201,168,108,0.2)',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
           borderRadius: '16px',
           padding: 'clamp(32px, 5vw, 56px)',
           maxWidth: '560px',
@@ -105,7 +105,7 @@ export default function PlatzIntro() {
             marginTop: '36px',
             padding: '11px 28px',
             background: 'var(--gold)',
-            color: '#0a0908',
+            color: '#0f2d1a',
             borderRadius: '8px',
             fontSize: '13px',
             fontWeight: 600,
