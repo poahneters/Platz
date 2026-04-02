@@ -48,6 +48,7 @@ export default function Nav({ view, setView }) {
   const navRef = useRef(null)
   const [indicator, setIndicator] = useState({ left: 0, width: 0 })
   const [rustling, setRustling] = useState(false)
+  const [rustlingTab, setRustlingTab] = useState(null)
 
   useEffect(() => {
     const nav = navRef.current
@@ -64,7 +65,8 @@ export default function Nav({ view, setView }) {
 
   function handleSetView(id) {
     setView(id)
-    triggerRustle()
+    setRustlingTab(id)
+    setTimeout(() => setRustlingTab(null), 600)
   }
 
   async function signOut() {
@@ -163,6 +165,8 @@ export default function Nav({ view, setView }) {
                 textTransform: 'uppercase',
                 color: view === id ? 'var(--text)' : 'var(--text-dim)',
                 transition: 'color 0.25s ease',
+                display: 'inline-block',
+                animation: rustlingTab === id ? 'rustle 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both' : 'none',
               }}
             >
               {label}
