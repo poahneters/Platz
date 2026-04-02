@@ -248,10 +248,20 @@ export default function Whiteboard({ user }) {
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   height: '300px',
-                  fontFamily: "'Permanent Marker', cursive",
-                  fontSize: '22px', color: 'rgba(30,80,50,0.2)',
                 }}>
-                  Pick a board →
+                  <button
+                    onClick={() => setShowNewBoard(true)}
+                    style={{
+                      fontFamily: "'Permanent Marker', cursive",
+                      fontSize: '22px', color: 'rgba(30,80,50,0.35)',
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      transition: 'color 0.2s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.color = 'rgba(30,80,50,0.6)'}
+                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(30,80,50,0.35)'}
+                  >
+                    + Create a board
+                  </button>
                 </div>
               ) : (
                 <div key={active.id} className="fade-up" style={{ padding: '36px 48px 32px', maxWidth: '820px', margin: '0 auto' }}>
