@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { supabase } from '../supabase'
 
 const VIEWS = [
   { id: 'journal',    label: 'Journal' },
@@ -9,6 +10,10 @@ const VIEWS = [
 ]
 
 export default function Nav({ view, setView }) {
+  async function signOut() {
+    await supabase.auth.signOut()
+  }
+
   const navRef = useRef(null)
   const [indicator, setIndicator] = useState({ left: 0, width: 0 })
 
@@ -88,6 +93,26 @@ export default function Nav({ view, setView }) {
           </button>
         ))}
       </nav>
+
+      {/* Sign out */}
+      <button
+        onClick={signOut}
+        style={{
+          fontSize: '11.5px',
+          fontWeight: 500,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: 'var(--text-dim)',
+          padding: '5px 12px',
+          border: '1px solid var(--border)',
+          borderRadius: '6px',
+          transition: 'color 0.2s, border-color 0.2s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
+        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+      >
+        Sign out
+      </button>
     </header>
   )
 }
