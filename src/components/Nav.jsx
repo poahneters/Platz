@@ -76,9 +76,9 @@ export default function Nav({ view, setView, highlight }) {
   return (
     <>
       <style>{`
-        @keyframes tabHighlight {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(45,138,85,0); background: rgba(45,138,85,0.08); }
-          50%       { box-shadow: 0 0 0 4px rgba(45,138,85,0.12); background: rgba(45,138,85,0.16); }
+        @keyframes tabDot {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
+          50%       { transform: translateY(-3px) scale(1.2); opacity: 1; }
         }
         @keyframes rustle {
           0%   { transform: rotate(0deg) scale(1); }
@@ -171,13 +171,20 @@ export default function Nav({ view, setView, highlight }) {
                 transition: 'color 0.25s ease',
                 display: 'inline-block',
                 animation: rustlingTab === id ? 'rustle 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both' : 'none',
-                ...(highlight === id && {
-                  borderRadius: '6px',
-                  animation: 'tabHighlight 1.2s ease-in-out infinite',
-                }),
               }}
             >
               {label}
+              {highlight === id && (
+                <span style={{
+                  display: 'block',
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  background: 'var(--gold)',
+                  margin: '3px auto 0',
+                  animation: 'tabDot 0.8s ease-in-out infinite',
+                }} />
+              )}
             </button>
           ))}
         </nav>
