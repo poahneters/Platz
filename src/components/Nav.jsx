@@ -9,29 +9,40 @@ const VIEWS = [
   { id: 'about-me',   label: 'About Me' },
 ]
 
-// Leaves that fly out on click — angle in degrees, distance, color
 const BURST_LEAVES = [
-  { angle: -80,  dist: 28, color: '#4ade80', size: 0.7,  delay: 0    },
-  { angle: -50,  dist: 32, color: '#52b788', size: 0.55, delay: 0.03 },
-  { angle: -110, dist: 26, color: '#86efac', size: 0.6,  delay: 0.05 },
-  { angle: -25,  dist: 30, color: '#4ade80', size: 0.5,  delay: 0.02 },
-  { angle: -140, dist: 24, color: '#52b788', size: 0.65, delay: 0.06 },
-  { angle: -90,  dist: 34, color: '#86efac', size: 0.58, delay: 0.01 },
+  { angle: -90,  dist: 30, color: '#4ade80', size: 0.65, delay: 0    },
+  { angle: -55,  dist: 28, color: '#52b788', size: 0.5,  delay: 0.03 },
+  { angle: -125, dist: 26, color: '#86efac', size: 0.55, delay: 0.05 },
+  { angle: -30,  dist: 25, color: '#4ade80', size: 0.45, delay: 0.02 },
+  { angle: -150, dist: 22, color: '#52b788', size: 0.6,  delay: 0.06 },
 ]
 
 function Leaf({ size = 1, color = '#4ade80' }) {
-  const w = Math.round(14 * size)
-  const h = Math.round(20 * size)
+  const w = Math.round(12 * size)
+  const h = Math.round(18 * size)
   return (
-    <svg width={w} height={h} viewBox="0 0 14 20" fill="none">
+    <svg width={w} height={h} viewBox="0 0 12 18" fill="none">
       <path
-        d="M7,19 C3,15 1,11 1,6 C1,2 3,1 7,1 C11,1 13,2 13,6 C13,11 11,15 7,19 Z"
-        fill={color} stroke="#1a4d2e" strokeWidth="1.4"
+        d="M6,17 C3,13 1,10 1,5 C1,2 3,1 6,1 C9,1 11,2 11,5 C11,10 9,13 6,17 Z"
+        fill={color} stroke="#1a4d2e" strokeWidth="1.2"
       />
-      <line x1="7" y1="3" x2="7" y2="17" stroke="#1a4d2e" strokeWidth="0.7" strokeLinecap="round" opacity="0.38" />
+      <line x1="6" y1="3" x2="6" y2="15" stroke="#1a4d2e" strokeWidth="0.6" strokeLinecap="round" opacity="0.35" />
     </svg>
   )
 }
+
+// Pre-compute leaf keyframe CSS
+const leafKeyframeCSS = BURST_LEAVES.map((leaf, i) => {
+  const rad = (leaf.angle * Math.PI) / 180
+  const tx = Math.round(Math.cos(rad) * leaf.dist)
+  const ty = Math.round(Math.sin(rad) * leaf.dist)
+  return `
+    @keyframes leafBurst${i} {
+      0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+      100% { transform: translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1); opacity: 0; }
+    }
+  `
+}).join('')
 
 export default function Nav({ view, setView }) {
   const navRef = useRef(null)
@@ -42,15 +53,18 @@ export default function Nav({ view, setView }) {
     const nav = navRef.current
     if (!nav) return
     const active = nav.querySelector('[data-active="true"]')
-    if (active) {
-      setIndicator({ left: active.offsetLeft, width: active.offsetWidth })
-    }
+    if (active) setIndicator({ left: active.offsetLeft, width: active.offsetWidth })
   }, [view])
 
-  function handleLogoClick() {
+  function triggerRustle() {
     if (rustling) return
     setRustling(true)
     setTimeout(() => setRustling(false), 700)
+  }
+
+  function handleSetView(id) {
+    setView(id)
+    triggerRustle()
   }
 
   async function signOut() {
@@ -68,18 +82,7 @@ export default function Nav({ view, setView }) {
           80%  { transform: rotate(2deg) scale(1.02); }
           100% { transform: rotate(0deg) scale(1); }
         }
-        ${BURST_LEAVES.map((leaf, i) => {
-          const rad = (leaf.angle * Math.PI) / 180
-          const tx = Math.round(Math.cos(rad) * leaf.dist)
-          const ty = Math.round(Math.sin(rad) * leaf.dist)
-          return `
-            @keyframes leafBurst${i} {
-              0%   { transform: translate(-50%, -50%) rotate(${leaf.angle + 90}deg) scale(0); opacity: 1; }
-              65%  { opacity: 1; }
-              100% { transform: translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${leaf.angle + 110}deg) scale(1); opacity: 0; }
-            }
-          `
-        }).join('')}
+        ${leafKeyframeCSS}
       `}</style>
 
       <header
@@ -98,9 +101,9 @@ export default function Nav({ view, setView }) {
           zIndex: 50,
         }}
       >
-        {/* Wordmark */}
-        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={handleLogoClick}>
-          <div
+        {/* Wordmark — inline-block so position: absolute children anchor to the text, not the full row */}
+        <div style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }} onClick={triggerRustle}>
+          <span
             style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: '22px',
@@ -113,9 +116,8 @@ export default function Nav({ view, setView }) {
             }}
           >
             Platz
-          </div>
+          </span>
 
-          {/* Burst leaves */}
           {rustling && BURST_LEAVES.map((leaf, i) => (
             <div
               key={i}
@@ -124,7 +126,7 @@ export default function Nav({ view, setView }) {
                 top: '50%',
                 left: '50%',
                 pointerEvents: 'none',
-                animation: `leafBurst${i} 0.6s cubic-bezier(0.2,0,0.4,1) ${leaf.delay}s both`,
+                animation: `leafBurst${i} 0.55s ease-out ${leaf.delay}s both`,
               }}
             >
               <Leaf size={leaf.size} color={leaf.color} />
@@ -134,7 +136,6 @@ export default function Nav({ view, setView }) {
 
         {/* Nav */}
         <nav ref={navRef} style={{ position: 'relative', display: 'flex', gap: '2px' }}>
-          {/* Sliding underline indicator */}
           <div
             style={{
               position: 'absolute',
@@ -152,7 +153,7 @@ export default function Nav({ view, setView }) {
             <button
               key={id}
               data-active={view === id ? 'true' : 'false'}
-              onClick={() => setView(id)}
+              onClick={() => handleSetView(id)}
               className="nav-link"
               style={{
                 padding: '6px 18px',
