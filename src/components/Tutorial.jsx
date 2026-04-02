@@ -27,28 +27,29 @@ const STEPS = [
   },
 ]
 
-export default function Tutorial({ onStep }) {
+export default function Tutorial({ onStep, forced = false, onClose }) {
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(false)
   const [step, setStep] = useState(0)
 
   useEffect(() => {
-    if (!localStorage.getItem(SEEN_KEY)) {
+    if (forced || !localStorage.getItem(SEEN_KEY)) {
       setMounted(true)
+      setStep(0)
       setTimeout(() => setVisible(true), 100)
       onStep?.(STEP_TAB_IDS[0])
     }
-  }, [])
+  }, [forced])
 
   useEffect(() => {
-    onStep?.(STEP_TAB_IDS[step])
+    if (mounted) onStep?.(STEP_TAB_IDS[step])
   }, [step])
 
   function close() {
     setVisible(false)
     localStorage.setItem(SEEN_KEY, '1')
     onStep?.(null)
-    setTimeout(() => setMounted(false), 500)
+    setTimeout(() => { setMounted(false); onClose?.() }, 500)
   }
 
   function next() {
