@@ -11,25 +11,24 @@ const VIEWS = [
 
 // Leaves that fly out on click — angle in degrees, distance, color
 const BURST_LEAVES = [
-  { angle: -70,  dist: 48, color: '#4ade80', size: 1.1,  delay: 0   },
-  { angle: -40,  dist: 56, color: '#52b788', size: 0.85, delay: 0.03 },
-  { angle: -110, dist: 44, color: '#86efac', size: 0.95, delay: 0.05 },
-  { angle: -20,  dist: 60, color: '#4ade80', size: 0.75, delay: 0.02 },
-  { angle: -140, dist: 38, color: '#52b788', size: 1.0,  delay: 0.06 },
-  { angle: -85,  dist: 52, color: '#86efac', size: 0.88, delay: 0.01 },
+  { angle: -80,  dist: 28, color: '#4ade80', size: 0.7,  delay: 0    },
+  { angle: -50,  dist: 32, color: '#52b788', size: 0.55, delay: 0.03 },
+  { angle: -110, dist: 26, color: '#86efac', size: 0.6,  delay: 0.05 },
+  { angle: -25,  dist: 30, color: '#4ade80', size: 0.5,  delay: 0.02 },
+  { angle: -140, dist: 24, color: '#52b788', size: 0.65, delay: 0.06 },
+  { angle: -90,  dist: 34, color: '#86efac', size: 0.58, delay: 0.01 },
 ]
 
 function Leaf({ size = 1, color = '#4ade80' }) {
-  const w = Math.round(22 * size)
-  const h = Math.round(34 * size)
+  const w = Math.round(14 * size)
+  const h = Math.round(20 * size)
   return (
-    <svg width={w} height={h} viewBox="0 0 22 34" fill="none">
+    <svg width={w} height={h} viewBox="0 0 14 20" fill="none">
       <path
-        d="M11,32 C5,26 1,19 1,11 C1,4 5,1 11,1 C17,1 21,4 21,11 C21,19 17,26 11,32 Z"
-        fill={color} stroke="#1a4d2e" strokeWidth="1.8"
+        d="M7,19 C3,15 1,11 1,6 C1,2 3,1 7,1 C11,1 13,2 13,6 C13,11 11,15 7,19 Z"
+        fill={color} stroke="#1a4d2e" strokeWidth="1.4"
       />
-      <path d="M7,0 C9,-2 14,0 15,3 C12,4 7,4 7,0 Z" fill="white" opacity="0.32" transform="translate(0 3)" />
-      <line x1="11" y1="4" x2="11" y2="29" stroke="#1a4d2e" strokeWidth="0.9" strokeLinecap="round" opacity="0.38" />
+      <line x1="7" y1="3" x2="7" y2="17" stroke="#1a4d2e" strokeWidth="0.7" strokeLinecap="round" opacity="0.38" />
     </svg>
   )
 }
@@ -69,11 +68,18 @@ export default function Nav({ view, setView }) {
           80%  { transform: rotate(2deg) scale(1.02); }
           100% { transform: rotate(0deg) scale(1); }
         }
-        @keyframes leafBurst {
-          0%   { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 1; }
-          60%  { opacity: 1; }
-          100% { opacity: 0; }
-        }
+        ${BURST_LEAVES.map((leaf, i) => {
+          const rad = (leaf.angle * Math.PI) / 180
+          const tx = Math.round(Math.cos(rad) * leaf.dist)
+          const ty = Math.round(Math.sin(rad) * leaf.dist)
+          return `
+            @keyframes leafBurst${i} {
+              0%   { transform: translate(-50%, -50%) rotate(${leaf.angle + 90}deg) scale(0); opacity: 1; }
+              65%  { opacity: 1; }
+              100% { transform: translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${leaf.angle + 110}deg) scale(1); opacity: 0; }
+            }
+          `
+        }).join('')}
       `}</style>
 
       <header
@@ -110,31 +116,20 @@ export default function Nav({ view, setView }) {
           </div>
 
           {/* Burst leaves */}
-          {rustling && BURST_LEAVES.map((leaf, i) => {
-            const rad = (leaf.angle * Math.PI) / 180
-            const tx = Math.round(Math.cos(rad) * leaf.dist)
-            const ty = Math.round(Math.sin(rad) * leaf.dist)
-            return (
-              <div
-                key={i}
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  pointerEvents: 'none',
-                  animation: `leafBurst 0.65s cubic-bezier(0.34,1.4,0.64,1) ${leaf.delay}s both`,
-                  // Final transform baked into keyframe via CSS variable workaround:
-                  // We animate to the target position by wrapping in another div
-                }}
-              >
-                <div style={{
-                  transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${leaf.angle + 90}deg)`,
-                }}>
-                  <Leaf size={leaf.size} color={leaf.color} />
-                </div>
-              </div>
-            )
-          })}
+          {rustling && BURST_LEAVES.map((leaf, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                pointerEvents: 'none',
+                animation: `leafBurst${i} 0.6s cubic-bezier(0.2,0,0.4,1) ${leaf.delay}s both`,
+              }}
+            >
+              <Leaf size={leaf.size} color={leaf.color} />
+            </div>
+          ))}
         </div>
 
         {/* Nav */}
