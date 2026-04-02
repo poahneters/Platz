@@ -1,37 +1,49 @@
 import { useState, useEffect, useRef } from 'react'
+import { supabase } from '../supabase'
 
-const STORAGE_KEY = 'platz_todos'
-let nextId = Date.now()
-
-export default function Todo() {
-  const [todos, setTodos] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [] } catch { return [] }
-  })
+export default function Todo({ user }) {
+  const [todos, setTodos] = useState([])
   const [input, setInput] = useState('')
   const [filter, setFilter] = useState('all')
   const inputRef = useRef(null)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
-  }, [todos])
+    supabase
+      .from('todos')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setTodos(data) })
+  }, [user.id])
 
-  function add() {
+  async function add() {
     if (!input.trim()) return
-    setTodos(prev => [{ id: (++nextId).toString(), text: input.trim(), done: false }, ...prev])
+    const text = input.trim()
     setInput('')
     inputRef.current?.focus()
+    const { data } = await supabase
+      .from('todos')
+      .insert({ user_id: user.id, text, done: false })
+      .select()
+      .single()
+    if (data) setTodos(prev => [data, ...prev])
   }
 
-  function toggle(id) {
+  async function toggle(id) {
+    const todo = todos.find(t => t.id === id)
     setTodos(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t))
+    await supabase.from('todos').update({ done: !todo.done }).eq('id', id)
   }
 
-  function remove(id) {
+  async function remove(id) {
     setTodos(prev => prev.filter(t => t.id !== id))
+    await supabase.from('todos').delete().eq('id', id)
   }
 
-  function clearDone() {
+  async function clearDone() {
+    const doneIds = todos.filter(t => t.done).map(t => t.id)
     setTodos(prev => prev.filter(t => !t.done))
+    await supabase.from('todos').delete().in('id', doneIds)
   }
 
   const filtered = todos.filter(t =>

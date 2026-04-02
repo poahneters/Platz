@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-
-const STORAGE_KEY = 'platz_about_me'
+import { supabase } from '../supabase'
 
 const QUESTIONS = [
   // E/I — higher score = more E
@@ -48,10 +47,10 @@ const TYPES = {
 }
 
 const STYLES = [
-  { id: 'direct',      label: 'Direct',       desc: 'Call me out. Be blunt. I want honesty over comfort.' },
-  { id: 'curious',     label: 'Curious',      desc: 'Ask me questions. Help me think deeper rather than giving answers.' },
-  { id: 'motivational',label: 'Motivational', desc: 'Encourage me. Help me see what\'s possible and push forward.' },
-  { id: 'analytical',  label: 'Analytical',   desc: 'Break it down logically. Give me frameworks and structure.' },
+  { id: 'direct',       label: 'Direct',       desc: 'Call me out. Be blunt. I want honesty over comfort.' },
+  { id: 'curious',      label: 'Curious',      desc: 'Ask me questions. Help me think deeper rather than giving answers.' },
+  { id: 'motivational', label: 'Motivational', desc: 'Encourage me. Help me see what\'s possible and push forward.' },
+  { id: 'analytical',   label: 'Analytical',   desc: 'Break it down logically. Give me frameworks and structure.' },
 ]
 
 function calcMBTI(answers) {
@@ -78,24 +77,47 @@ const TABS = [
   { id: 'style',       label: 'Platz Style' },
 ]
 
-export default function AboutMe() {
-  const [data, setData] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {} } catch { return {} }
-  })
+export default function AboutMe({ user }) {
+  const [data, setData] = useState({})
   const [tab, setTab] = useState('story')
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  }, [data])
+    supabase
+      .from('about_me')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data: row }) => {
+        if (row) {
+          const quizAnswers = row.quiz_answers || {}
+          setData({
+            lifeStory: row.life_story || '',
+            quizAnswers,
+            mbtiType: row.personality_type || '',
+            mbtiPercentages: Object.keys(quizAnswers).length ? calcMBTI(quizAnswers).percentages : {},
+            platzStyle: row.communication_style || '',
+            customInstructions: row.custom_instructions || '',
+          })
+        }
+      })
+  }, [user.id])
 
   function update(patch) {
     setData(prev => ({ ...prev, ...patch }))
     setSaved(false)
   }
 
-  function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  async function save() {
+    await supabase.from('about_me').upsert({
+      user_id: user.id,
+      life_story: data.lifeStory || '',
+      quiz_answers: data.quizAnswers || {},
+      personality_type: data.mbtiType || '',
+      communication_style: data.platzStyle || '',
+      custom_instructions: data.customInstructions || '',
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -169,7 +191,7 @@ export default function AboutMe() {
                 padding: '18px 20px',
                 transition: 'border-color 0.2s',
               }}
-              onFocus={e => e.target.style.borderColor = 'rgba(201,168,108,0.3)'}
+              onFocus={e => e.target.style.borderColor = 'rgba(45,138,85,0.3)'}
               onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
             <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
@@ -187,7 +209,7 @@ export default function AboutMe() {
               <div style={{
                 padding: '20px 24px',
                 background: 'var(--gold-dim)',
-                border: '1px solid rgba(201,168,108,0.2)',
+                border: '1px solid rgba(45,138,85,0.2)',
                 borderRadius: '10px',
                 marginBottom: '32px',
                 display: 'flex',
@@ -200,7 +222,6 @@ export default function AboutMe() {
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', marginBottom: '4px' }}>{result.name}</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-mid)', lineHeight: 1.6 }}>{result.desc}</div>
-                  {/* Dimension bars */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '14px' }}>
                     {Object.entries(data.mbtiPercentages || {}).map(([dim, pct]) => {
                       const [a, b] = DIM_LABELS[dim]
@@ -310,7 +331,7 @@ export default function AboutMe() {
                       padding: '16px 18px',
                       borderRadius: '10px',
                       background: active ? 'var(--gold-dim)' : 'var(--surface)',
-                      border: `1px solid ${active ? 'rgba(201,168,108,0.3)' : 'var(--border2)'}`,
+                      border: `1px solid ${active ? 'rgba(45,138,85,0.3)' : 'var(--border2)'}`,
                       transition: 'all 0.2s ease',
                       display: 'flex',
                       gap: '14px',
@@ -356,7 +377,7 @@ export default function AboutMe() {
                 marginBottom: '16px',
                 transition: 'border-color 0.2s',
               }}
-              onFocus={e => e.target.style.borderColor = 'rgba(201,168,108,0.3)'}
+              onFocus={e => e.target.style.borderColor = 'rgba(45,138,85,0.3)'}
               onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

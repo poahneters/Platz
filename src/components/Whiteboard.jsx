@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-
-const STORAGE_KEY = 'platz_boards'
+import { supabase } from '../supabase'
 
 // Marker body / cap color pairs — real whiteboard marker colors
 const MARKERS = [
@@ -13,81 +12,98 @@ const MARKERS = [
 
 const BOARD_COLORS = ['#2d8a55', '#4a7ab0', '#a04040', '#9a7030', '#3a8a7a']
 
-let nextId = Date.now()
-
-function makeBoard(title, color, markerIdx) {
-  return { id: (++nextId).toString(), title, color, markerIdx: markerIdx ?? 0, items: [] }
-}
-
-function defaultBoards() {
-  return [makeBoard('Long-term Goals', '#2d8a55', 0)]
-}
-
-
-export default function Whiteboard() {
-  const [boards, setBoards] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultBoards() } catch { return defaultBoards() }
-  })
-  const [activeId, setActiveId] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY))?.[0]?.id || null } catch { return null }
-  })
+export default function Whiteboard({ user }) {
+  const [boards, setBoards] = useState([])
+  const [activeId, setActiveId] = useState(null)
   const [newItemText, setNewItemText] = useState('')
   const [newBoardTitle, setNewBoardTitle] = useState('')
   const [showNewBoard, setShowNewBoard] = useState(false)
   const [editingTitle, setEditingTitle] = useState(null)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(boards))
-  }, [boards])
+    supabase
+      .from('boards')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const mapped = data.map((row, i) => ({
+            id: row.id,
+            title: row.name,
+            color: row.color,
+            markerIdx: i % MARKERS.length,
+            items: row.lines || [],
+          }))
+          setBoards(mapped)
+          setActiveId(mapped[0].id)
+        }
+      })
+  }, [user.id])
 
   useEffect(() => {
     if (!activeId && boards.length > 0) setActiveId(boards[0].id)
   }, [boards, activeId])
 
-  function addBoard() {
+  async function addBoard() {
     if (!newBoardTitle.trim()) return
-    const idx = boards.length % MARKERS.length
-    const board = makeBoard(
-      newBoardTitle.trim(),
-      BOARD_COLORS[boards.length % BOARD_COLORS.length],
-      idx
-    )
-    setBoards(prev => [...prev, board])
-    setActiveId(board.id)
+    const color = BOARD_COLORS[boards.length % BOARD_COLORS.length]
+    const { data: row } = await supabase
+      .from('boards')
+      .insert({ user_id: user.id, name: newBoardTitle.trim(), color, lines: [] })
+      .select()
+      .single()
+    if (row) {
+      const board = {
+        id: row.id,
+        title: row.name,
+        color: row.color,
+        markerIdx: boards.length % MARKERS.length,
+        items: [],
+      }
+      setBoards(prev => [...prev, board])
+      setActiveId(row.id)
+    }
     setNewBoardTitle('')
     setShowNewBoard(false)
   }
 
-  function deleteBoard(id) {
+  async function deleteBoard(id) {
     const remaining = boards.filter(b => b.id !== id)
     setBoards(remaining)
     setActiveId(remaining[0]?.id || null)
+    await supabase.from('boards').delete().eq('id', id)
   }
 
-  function updateTitle(id, title) {
-    setBoards(prev => prev.map(b => b.id === id ? { ...b, title: title || b.title } : b))
+  async function updateTitle(id, title) {
+    if (!title) { setEditingTitle(null); return }
+    setBoards(prev => prev.map(b => b.id === id ? { ...b, title } : b))
     setEditingTitle(null)
+    await supabase.from('boards').update({ name: title }).eq('id', id)
   }
 
-  function addItem(boardId) {
+  async function addItem(boardId) {
     if (!newItemText.trim()) return
-    const item = { id: (++nextId).toString(), text: newItemText.trim(), done: false }
-    setBoards(prev => prev.map(b => b.id === boardId ? { ...b, items: [...b.items, item] } : b))
+    const item = { id: crypto.randomUUID(), text: newItemText.trim(), done: false }
+    const board = boards.find(b => b.id === boardId)
+    const updatedItems = [...board.items, item]
+    setBoards(prev => prev.map(b => b.id === boardId ? { ...b, items: updatedItems } : b))
     setNewItemText('')
+    await supabase.from('boards').update({ lines: updatedItems }).eq('id', boardId)
   }
 
-  function toggleItem(boardId, itemId) {
-    setBoards(prev => prev.map(b => b.id === boardId
-      ? { ...b, items: b.items.map(i => i.id === itemId ? { ...i, done: !i.done } : i) }
-      : b
-    ))
+  async function toggleItem(boardId, itemId) {
+    const board = boards.find(b => b.id === boardId)
+    const updatedItems = board.items.map(i => i.id === itemId ? { ...i, done: !i.done } : i)
+    setBoards(prev => prev.map(b => b.id === boardId ? { ...b, items: updatedItems } : b))
+    await supabase.from('boards').update({ lines: updatedItems }).eq('id', boardId)
   }
 
-  function removeItem(boardId, itemId) {
-    setBoards(prev => prev.map(b => b.id === boardId
-      ? { ...b, items: b.items.filter(i => i.id !== itemId) }
-      : b
-    ))
+  async function removeItem(boardId, itemId) {
+    const board = boards.find(b => b.id === boardId)
+    const updatedItems = board.items.filter(i => i.id !== itemId)
+    setBoards(prev => prev.map(b => b.id === boardId ? { ...b, items: updatedItems } : b))
+    await supabase.from('boards').update({ lines: updatedItems }).eq('id', boardId)
   }
 
   const active = boards.find(b => b.id === activeId)
@@ -173,7 +189,6 @@ export default function Whiteboard() {
           display: 'flex',
           flexDirection: 'column',
           borderRadius: '5px',
-          // Brushed aluminum gradient
           background: 'linear-gradient(160deg, #d2d7dc 0%, #bcc2c8 25%, #b4babf 60%, #c8cdd2 100%)',
           padding: '12px',
           boxShadow: [
@@ -217,12 +232,11 @@ export default function Whiteboard() {
             position: 'relative',
           }}>
 
-            {/* Glare — diagonal highlight from top-left */}
+            {/* Glare */}
             <div style={{
               position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10,
               background: 'linear-gradient(128deg, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0.14) 22%, transparent 44%)',
             }} />
-            {/* Secondary soft glare right side */}
             <div style={{
               position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10,
               background: 'linear-gradient(305deg, rgba(255,255,255,0.12) 0%, transparent 35%)',
@@ -336,7 +350,6 @@ export default function Whiteboard() {
                           transition: 'opacity 0.2s',
                         }}
                       >
-                        {/* Hand-drawn checkbox */}
                         <button
                           onClick={() => toggleItem(active.id, item.id)}
                           style={{

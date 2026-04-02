@@ -77,7 +77,7 @@ export default function App() {
               flexDirection: 'column',
             }}
           >
-            <View key={view} />
+            <View key={view} user={user} />
           </div>
         </div>
       )}

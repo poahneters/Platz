@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-
-const STORAGE_KEY = 'platz_journal'
-let nextId = Date.now()
+import { supabase } from '../supabase'
 
 const BASE_SYSTEM_PROMPT = `You are Platz — a direct, perceptive thinking partner. Not a therapist. Not a cheerleader. A sharp friend who calls things out.
 
@@ -19,26 +17,21 @@ const STYLE_INSTRUCTIONS = {
   analytical:   'Be logical and structured. Break things down into frameworks and clear reasoning.',
 }
 
-function buildSystemPrompt() {
-  try {
-    const about = JSON.parse(localStorage.getItem('platz_about_me')) || {}
-    const parts = [BASE_SYSTEM_PROMPT]
-    if (about.platzStyle && STYLE_INSTRUCTIONS[about.platzStyle]) {
-      parts.push(`\nCommunication style: ${STYLE_INSTRUCTIONS[about.platzStyle]}`)
-    }
-    if (about.mbtiType) {
-      parts.push(`\nUser's personality type: ${about.mbtiType}. Factor this into how you engage with them.`)
-    }
-    if (about.lifeStory?.trim()) {
-      parts.push(`\nUser's background: ${about.lifeStory.slice(0, 500)}`)
-    }
-    if (about.customInstructions?.trim()) {
-      parts.push(`\nAdditional context: ${about.customInstructions.slice(0, 300)}`)
-    }
-    return parts.join('\n')
-  } catch {
-    return BASE_SYSTEM_PROMPT
+function buildSystemPrompt(about) {
+  const parts = [BASE_SYSTEM_PROMPT]
+  if (about.communication_style && STYLE_INSTRUCTIONS[about.communication_style]) {
+    parts.push(`\nCommunication style: ${STYLE_INSTRUCTIONS[about.communication_style]}`)
   }
+  if (about.personality_type) {
+    parts.push(`\nUser's personality type: ${about.personality_type}. Factor this into how you engage with them.`)
+  }
+  if (about.life_story?.trim()) {
+    parts.push(`\nUser's background: ${about.life_story.slice(0, 500)}`)
+  }
+  if (about.custom_instructions?.trim()) {
+    parts.push(`\nAdditional context: ${about.custom_instructions.slice(0, 300)}`)
+  }
+  return parts.join('\n')
 }
 
 function formatDate(iso) {
@@ -49,18 +42,6 @@ function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
-// Migrate old {content, reflection} entries to thread format
-function migrate(entry) {
-  if (entry.thread) return entry
-  return {
-    ...entry,
-    thread: [
-      { id: entry.id + '_u', role: 'user', content: entry.content },
-      ...(entry.reflection ? [{ id: entry.id + '_p', role: 'platz', content: entry.reflection }] : []),
-    ],
-  }
-}
-
 // First ~180 chars, ending at a word boundary
 function excerpt(text, max = 180) {
   if (text.length <= max) return text
@@ -68,24 +49,42 @@ function excerpt(text, max = 180) {
   return text.slice(0, cut > 0 ? cut : max) + '…'
 }
 
-export default function Journal() {
-  const [entries, setEntries] = useState(() => {
-    try {
-      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
-      return raw.map(migrate)
-    } catch { return [] }
-  })
+export default function Journal({ user }) {
+  const [entries, setEntries] = useState([])
+  const [aboutMe, setAboutMe] = useState({})
   const [text, setText] = useState('')
   const [reply, setReply] = useState('')
   const [selected, setSelected] = useState(null)
   const [reflecting, setReflecting] = useState(false)
   const [error, setError] = useState(null)
-  const [expanded, setExpanded] = useState({}) // platz msg ids that are expanded
+  const [expanded, setExpanded] = useState({})
   const bottomRef = useRef(null)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
-  }, [entries])
+    async function load() {
+      const [entriesRes, aboutRes] = await Promise.all([
+        supabase
+          .from('journal_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('about_me')
+          .select('*')
+          .eq('user_id', user.id)
+          .single(),
+      ])
+      if (entriesRes.data) {
+        setEntries(entriesRes.data.map(row => ({
+          id: row.id,
+          createdAt: row.created_at,
+          thread: row.messages || [],
+        })))
+      }
+      if (aboutRes.data) setAboutMe(aboutRes.data)
+    }
+    load()
+  }, [user.id])
 
   // Scroll to bottom when thread updates
   useEffect(() => {
@@ -94,7 +93,6 @@ export default function Journal() {
 
   // Build API messages array from a thread
   function buildMessages(thread, newUserContent) {
-    // Use last 3 entries for background context
     const context = entries
       .filter(e => e.id !== selected)
       .slice(0, 3)
@@ -104,7 +102,6 @@ export default function Journal() {
     const messages = []
 
     if (context && thread.length === 0) {
-      // First message of this entry — include past context
       messages.push({
         role: 'user',
         content: `Recent context:\n${context}\n\n---\n\n${newUserContent}`,
@@ -112,10 +109,8 @@ export default function Journal() {
     } else if (thread.length === 0) {
       messages.push({ role: 'user', content: newUserContent })
     } else {
-      // Reconstruct conversation history
       thread.forEach((msg, i) => {
         const role = msg.role === 'user' ? 'user' : 'assistant'
-        // First user message carries context
         const content = (i === 0 && context)
           ? `Recent context:\n${context}\n\n---\n\n${msg.content}`
           : msg.content
@@ -139,28 +134,30 @@ export default function Journal() {
       let updatedThread
 
       if (!isReply) {
-        // New entry — create it with just the user message first
-        targetEntry = {
-          id: (++nextId).toString(),
-          createdAt: new Date().toISOString(),
-          thread: [{ id: (++nextId).toString(), role: 'user', content }],
-        }
+        // New entry — insert to Supabase first to get real UUID
+        const thread = [{ id: crypto.randomUUID(), role: 'user', content }]
+        const { data: row, error: insertErr } = await supabase
+          .from('journal_entries')
+          .insert({ user_id: user.id, messages: thread, title: '' })
+          .select()
+          .single()
+        if (insertErr) throw new Error(insertErr.message)
+
+        targetEntry = { id: row.id, createdAt: row.created_at, thread }
         setEntries(prev => [targetEntry, ...prev])
-        setSelected(targetEntry.id)
+        setSelected(row.id)
         setText('')
-        updatedThread = targetEntry.thread
+        updatedThread = thread
       } else {
         // Reply — add user message to existing thread
-        const newUserMsg = { id: (++nextId).toString(), role: 'user', content }
+        const newUserMsg = { id: crypto.randomUUID(), role: 'user', content }
+        const currentEntry = entries.find(e => e.id === selected)
+        updatedThread = [...currentEntry.thread, newUserMsg]
         setEntries(prev => prev.map(e =>
-          e.id === selected
-            ? { ...e, thread: [...e.thread, newUserMsg] }
-            : e
+          e.id === selected ? { ...e, thread: updatedThread } : e
         ))
         setReply('')
-        const current = entries.find(e => e.id === selected)
-        updatedThread = [...current.thread, newUserMsg]
-        targetEntry = current
+        targetEntry = currentEntry
       }
 
       const messages = buildMessages(
@@ -172,7 +169,7 @@ export default function Journal() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: buildSystemPrompt(),
+          system: buildSystemPrompt(aboutMe),
           messages,
           model: 'claude-sonnet-4-6',
           max_tokens: 600,
@@ -182,14 +179,17 @@ export default function Journal() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Something went wrong')
 
-      const platzMsg = { id: (++nextId).toString(), role: 'platz', content: data.content[0].text }
+      const platzMsg = { id: crypto.randomUUID(), role: 'platz', content: data.content[0].text }
+      const finalThread = [...updatedThread, platzMsg]
 
       setEntries(prev => prev.map(e =>
-        e.id === (targetEntry?.id || selected)
-          ? { ...e, thread: [...e.thread, platzMsg] }
-          : e
+        e.id === targetEntry.id ? { ...e, thread: finalThread } : e
       ))
-      if (!isReply) setSelected(targetEntry.id)
+
+      await supabase
+        .from('journal_entries')
+        .update({ messages: finalThread, updated_at: new Date().toISOString() })
+        .eq('id', targetEntry.id)
 
     } catch (e) {
       setError(e.message)
@@ -198,9 +198,10 @@ export default function Journal() {
     setReflecting(false)
   }
 
-  function deleteEntry(id) {
+  async function deleteEntry(id) {
     setEntries(prev => prev.filter(e => e.id !== id))
     if (selected === id) setSelected(null)
+    await supabase.from('journal_entries').delete().eq('id', id)
   }
 
   function toggleExpanded(msgId) {
@@ -332,7 +333,6 @@ export default function Journal() {
                 return (
                   <div key={msg.id} style={{ marginBottom: '32px' }} className="fade-up">
                     {msg.role === 'user' ? (
-                      /* User message */
                       <p style={{
                         fontSize: '16px',
                         lineHeight: 1.85,
@@ -342,7 +342,6 @@ export default function Journal() {
                         {msg.content}
                       </p>
                     ) : (
-                      /* Platz message */
                       <div style={{
                         borderLeft: '2px solid rgba(45,138,85,0.4)',
                         paddingLeft: '20px',
@@ -388,7 +387,6 @@ export default function Journal() {
                       </div>
                     )}
 
-                    {/* Divider between exchanges */}
                     {msg.role === 'platz' && i < selectedEntry.thread.length - 1 && (
                       <div style={{ height: '1px', background: 'var(--border2)', margin: '24px 0 0' }} />
                     )}
@@ -456,13 +454,19 @@ export default function Journal() {
                 />
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (!reply.trim()) return
-                      const msg = { id: (++nextId).toString(), role: 'user', content: reply.trim() }
+                      const msg = { id: crypto.randomUUID(), role: 'user', content: reply.trim() }
+                      const currentEntry = entries.find(e => e.id === selected)
+                      const updatedThread = [...currentEntry.thread, msg]
                       setEntries(prev => prev.map(e =>
-                        e.id === selected ? { ...e, thread: [...e.thread, msg] } : e
+                        e.id === selected ? { ...e, thread: updatedThread } : e
                       ))
                       setReply('')
+                      await supabase
+                        .from('journal_entries')
+                        .update({ messages: updatedThread, updated_at: new Date().toISOString() })
+                        .eq('id', selected)
                     }}
                     disabled={!reply.trim()}
                     className="btn-ghost"
@@ -525,10 +529,8 @@ export default function Journal() {
               value={text}
               onChange={e => setText(e.target.value)}
               onKeyDown={e => {
-                // Enter always creates a newline — only the button triggers reflect
                 if (e.key === 'Enter') {
                   e.stopPropagation()
-                  // Allow default newline behavior
                 }
               }}
               placeholder="What's on your mind..."
@@ -577,16 +579,19 @@ export default function Journal() {
               </button>
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (!text.trim()) return
-                  const entry = {
-                    id: (++nextId).toString(),
-                    createdAt: new Date().toISOString(),
-                    thread: [{ id: (++nextId).toString(), role: 'user', content: text.trim() }],
+                  const thread = [{ id: crypto.randomUUID(), role: 'user', content: text.trim() }]
+                  const { data: row } = await supabase
+                    .from('journal_entries')
+                    .insert({ user_id: user.id, messages: thread, title: '' })
+                    .select()
+                    .single()
+                  if (row) {
+                    setEntries(prev => [{ id: row.id, createdAt: row.created_at, thread }, ...prev])
+                    setSelected(row.id)
+                    setText('')
                   }
-                  setEntries(prev => [entry, ...prev])
-                  setSelected(entry.id)
-                  setText('')
                 }}
                 disabled={!text.trim()}
                 className="btn-ghost"
