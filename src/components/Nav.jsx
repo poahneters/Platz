@@ -104,7 +104,7 @@ export default function Nav({ view, setView, highlight }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 36px',
-          zIndex: 50,
+          zIndex: highlight ? 76 : 50,
         }}
       >
         {/* Wordmark — inline-block so position: absolute children anchor to the text, not the full row */}
