@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 
 const SEEN_KEY = 'platz_tutorial_seen'
 
+const STEP_TAB_IDS = ['journal', 'todo', 'whiteboard', 'about-me']
+
 const STEPS = [
   {
     label: 'Journal',
@@ -25,7 +27,7 @@ const STEPS = [
   },
 ]
 
-export default function Tutorial() {
+export default function Tutorial({ onStep }) {
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(false)
   const [step, setStep] = useState(0)
@@ -34,12 +36,18 @@ export default function Tutorial() {
     if (!localStorage.getItem(SEEN_KEY)) {
       setMounted(true)
       setTimeout(() => setVisible(true), 100)
+      onStep?.(STEP_TAB_IDS[0])
     }
   }, [])
+
+  useEffect(() => {
+    onStep?.(STEP_TAB_IDS[step])
+  }, [step])
 
   function close() {
     setVisible(false)
     localStorage.setItem(SEEN_KEY, '1')
+    onStep?.(null)
     setTimeout(() => setMounted(false), 500)
   }
 

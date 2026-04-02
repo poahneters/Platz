@@ -44,7 +44,7 @@ const leafKeyframeCSS = BURST_LEAVES.map((leaf, i) => {
   `
 }).join('')
 
-export default function Nav({ view, setView }) {
+export default function Nav({ view, setView, highlight }) {
   const navRef = useRef(null)
   const [indicator, setIndicator] = useState({ left: 0, width: 0 })
   const [rustling, setRustling] = useState(false)
@@ -76,6 +76,10 @@ export default function Nav({ view, setView }) {
   return (
     <>
       <style>{`
+        @keyframes tabHighlight {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(45,138,85,0); background: rgba(45,138,85,0.08); }
+          50%       { box-shadow: 0 0 0 4px rgba(45,138,85,0.12); background: rgba(45,138,85,0.16); }
+        }
         @keyframes rustle {
           0%   { transform: rotate(0deg) scale(1); }
           20%  { transform: rotate(-4deg) scale(1.06); }
@@ -167,6 +171,10 @@ export default function Nav({ view, setView }) {
                 transition: 'color 0.25s ease',
                 display: 'inline-block',
                 animation: rustlingTab === id ? 'rustle 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both' : 'none',
+                ...(highlight === id && {
+                  borderRadius: '6px',
+                  animation: 'tabHighlight 1.2s ease-in-out infinite',
+                }),
               }}
             >
               {label}

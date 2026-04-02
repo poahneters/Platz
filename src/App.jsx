@@ -19,6 +19,7 @@ export default function App() {
   const [introComplete, setIntroComplete] = useState(false)
   const [visible, setVisible] = useState(false)
   const [view, setView] = useState('journal')
+  const [tutorialHighlight, setTutorialHighlight] = useState(null)
 
   // Check session on mount, then listen for auth changes
   useEffect(() => {
@@ -56,7 +57,7 @@ export default function App() {
       )}
 
       {introComplete && user && <PlatzIntro />}
-      {introComplete && user && <Tutorial />}
+      {introComplete && user && <Tutorial onStep={setTutorialHighlight} />}
 
       {introComplete && user && (
         <div
@@ -68,7 +69,7 @@ export default function App() {
             transition: 'opacity 0.6s ease',
           }}
         >
-          <Nav view={view} setView={setView} />
+          <Nav view={view} setView={setView} highlight={tutorialHighlight} />
 
           <div
             style={{
