@@ -9,13 +9,35 @@ const VIEWS = [
   { id: 'about-me',   label: 'About Me' },
 ]
 
-export default function Nav({ view, setView }) {
-  async function signOut() {
-    await supabase.auth.signOut()
-  }
+// Leaves that fly out on click — angle in degrees, distance, color
+const BURST_LEAVES = [
+  { angle: -70,  dist: 48, color: '#4ade80', size: 1.1,  delay: 0   },
+  { angle: -40,  dist: 56, color: '#52b788', size: 0.85, delay: 0.03 },
+  { angle: -110, dist: 44, color: '#86efac', size: 0.95, delay: 0.05 },
+  { angle: -20,  dist: 60, color: '#4ade80', size: 0.75, delay: 0.02 },
+  { angle: -140, dist: 38, color: '#52b788', size: 1.0,  delay: 0.06 },
+  { angle: -85,  dist: 52, color: '#86efac', size: 0.88, delay: 0.01 },
+]
 
+function Leaf({ size = 1, color = '#4ade80' }) {
+  const w = Math.round(22 * size)
+  const h = Math.round(34 * size)
+  return (
+    <svg width={w} height={h} viewBox="0 0 22 34" fill="none">
+      <path
+        d="M11,32 C5,26 1,19 1,11 C1,4 5,1 11,1 C17,1 21,4 21,11 C21,19 17,26 11,32 Z"
+        fill={color} stroke="#1a4d2e" strokeWidth="1.8"
+      />
+      <path d="M7,0 C9,-2 14,0 15,3 C12,4 7,4 7,0 Z" fill="white" opacity="0.32" transform="translate(0 3)" />
+      <line x1="11" y1="4" x2="11" y2="29" stroke="#1a4d2e" strokeWidth="0.9" strokeLinecap="round" opacity="0.38" />
+    </svg>
+  )
+}
+
+export default function Nav({ view, setView }) {
   const navRef = useRef(null)
   const [indicator, setIndicator] = useState({ left: 0, width: 0 })
+  const [rustling, setRustling] = useState(false)
 
   useEffect(() => {
     const nav = navRef.current
@@ -26,93 +48,152 @@ export default function Nav({ view, setView }) {
     }
   }, [view])
 
+  function handleLogoClick() {
+    if (rustling) return
+    setRustling(true)
+    setTimeout(() => setRustling(false), 700)
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut()
+  }
+
   return (
-    <header
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0,
-        height: '60px',
-        background: 'rgba(244, 250, 240, 0.92)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderBottom: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 36px',
-        zIndex: 50,
-      }}
-    >
-      {/* Wordmark */}
-      <div
+    <>
+      <style>{`
+        @keyframes rustle {
+          0%   { transform: rotate(0deg) scale(1); }
+          20%  { transform: rotate(-4deg) scale(1.06); }
+          40%  { transform: rotate(5deg) scale(1.04); }
+          60%  { transform: rotate(-3deg) scale(1.05); }
+          80%  { transform: rotate(2deg) scale(1.02); }
+          100% { transform: rotate(0deg) scale(1); }
+        }
+        @keyframes leafBurst {
+          0%   { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 1; }
+          60%  { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
+
+      <header
         style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: '22px',
-          fontWeight: 700,
-          color: 'var(--gold)',
-          letterSpacing: '0.04em',
-          userSelect: 'none',
+          position: 'fixed',
+          top: 0, left: 0, right: 0,
+          height: '60px',
+          background: 'rgba(244, 250, 240, 0.92)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderBottom: '1px solid var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 36px',
+          zIndex: 50,
         }}
       >
-        Platz
-      </div>
-
-      {/* Nav */}
-      <nav ref={navRef} style={{ position: 'relative', display: 'flex', gap: '2px' }}>
-        {/* Sliding underline indicator */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-6px',
-            height: '1.5px',
-            background: 'var(--gold)',
-            borderRadius: '2px',
-            left: `${indicator.left}px`,
-            width: `${indicator.width}px`,
-            transition: 'left 0.4s cubic-bezier(0.4,0,0.2,1), width 0.4s cubic-bezier(0.4,0,0.2,1)',
-          }}
-        />
-
-        {VIEWS.map(({ id, label }) => (
-          <button
-            key={id}
-            data-active={view === id ? 'true' : 'false'}
-            onClick={() => setView(id)}
-            className="nav-link"
+        {/* Wordmark */}
+        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={handleLogoClick}>
+          <div
             style={{
-              padding: '6px 18px',
-              fontSize: '11.5px',
-              fontWeight: 500,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: view === id ? 'var(--text)' : 'var(--text-dim)',
-              transition: 'color 0.25s ease',
+              fontFamily: "'Playfair Display', serif",
+              fontSize: '22px',
+              fontWeight: 700,
+              color: 'var(--gold)',
+              letterSpacing: '0.04em',
+              userSelect: 'none',
+              display: 'inline-block',
+              animation: rustling ? 'rustle 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both' : 'none',
             }}
           >
-            {label}
-          </button>
-        ))}
-      </nav>
+            Platz
+          </div>
 
-      {/* Sign out */}
-      <button
-        onClick={signOut}
-        style={{
-          fontSize: '11.5px',
-          fontWeight: 500,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          color: 'var(--text-dim)',
-          padding: '5px 12px',
-          border: '1px solid var(--border)',
-          borderRadius: '6px',
-          transition: 'color 0.2s, border-color 0.2s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
-        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)' }}
-      >
-        Sign out
-      </button>
-    </header>
+          {/* Burst leaves */}
+          {rustling && BURST_LEAVES.map((leaf, i) => {
+            const rad = (leaf.angle * Math.PI) / 180
+            const tx = Math.round(Math.cos(rad) * leaf.dist)
+            const ty = Math.round(Math.sin(rad) * leaf.dist)
+            return (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  pointerEvents: 'none',
+                  animation: `leafBurst 0.65s cubic-bezier(0.34,1.4,0.64,1) ${leaf.delay}s both`,
+                  // Final transform baked into keyframe via CSS variable workaround:
+                  // We animate to the target position by wrapping in another div
+                }}
+              >
+                <div style={{
+                  transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${leaf.angle + 90}deg)`,
+                }}>
+                  <Leaf size={leaf.size} color={leaf.color} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Nav */}
+        <nav ref={navRef} style={{ position: 'relative', display: 'flex', gap: '2px' }}>
+          {/* Sliding underline indicator */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-6px',
+              height: '1.5px',
+              background: 'var(--gold)',
+              borderRadius: '2px',
+              left: `${indicator.left}px`,
+              width: `${indicator.width}px`,
+              transition: 'left 0.4s cubic-bezier(0.4,0,0.2,1), width 0.4s cubic-bezier(0.4,0,0.2,1)',
+            }}
+          />
+
+          {VIEWS.map(({ id, label }) => (
+            <button
+              key={id}
+              data-active={view === id ? 'true' : 'false'}
+              onClick={() => setView(id)}
+              className="nav-link"
+              style={{
+                padding: '6px 18px',
+                fontSize: '11.5px',
+                fontWeight: 500,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: view === id ? 'var(--text)' : 'var(--text-dim)',
+                transition: 'color 0.25s ease',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Sign out */}
+        <button
+          onClick={signOut}
+          style={{
+            fontSize: '11.5px',
+            fontWeight: 500,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--text-dim)',
+            padding: '5px 12px',
+            border: '1px solid var(--border)',
+            borderRadius: '6px',
+            transition: 'color 0.2s, border-color 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+        >
+          Sign out
+        </button>
+      </header>
+    </>
   )
 }
