@@ -53,6 +53,15 @@ const STYLES = [
   { id: 'analytical',   label: 'Analytical',   desc: 'Break it down logically. Give me frameworks and structure.' },
 ]
 
+const LENGTHS = [
+  { id: 'spark',    label: 'Spark',    desc: 'One sentence. The sharpest possible point.' },
+  { id: 'brief',    label: 'Brief',    desc: '2–3 sentences. Cut to what matters.' },
+  { id: 'short',    label: 'Short',    desc: 'A tight paragraph. Enough to chew on.' },
+  { id: 'medium',   label: 'Medium',   desc: 'A few paragraphs. Balanced and clear.' },
+  { id: 'detailed', label: 'Detailed', desc: 'Full thoughts. Don\'t leave anything out.' },
+  { id: 'deep',     label: 'Deep',     desc: 'Go all in. I want the whole picture.' },
+]
+
 function calcMBTI(answers) {
   const dims = {
     EI: ['e1','e2','e3','e4'],
@@ -97,6 +106,7 @@ export default function AboutMe({ user }) {
             mbtiType: row.personality_type || '',
             mbtiPercentages: Object.keys(quizAnswers).length ? calcMBTI(quizAnswers).percentages : {},
             platzStyle: row.communication_style || '',
+            responseLength: row.response_length || 'short',
             customInstructions: row.custom_instructions || '',
           })
         }
@@ -115,6 +125,7 @@ export default function AboutMe({ user }) {
       quiz_answers: data.quizAnswers || {},
       personality_type: data.mbtiType || '',
       communication_style: data.platzStyle || '',
+      response_length: data.responseLength || 'short',
       custom_instructions: data.customInstructions || '',
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id' })
@@ -352,6 +363,33 @@ export default function AboutMe({ user }) {
                       <div style={{ fontSize: '14px', fontWeight: 600, color: active ? 'var(--text)' : 'var(--text-mid)', marginBottom: '3px' }}>{s.label}</div>
                       <div style={{ fontSize: '13px', color: 'var(--text-dim)', lineHeight: 1.5 }}>{s.desc}</div>
                     </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            <label style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-dim)', display: 'block', marginBottom: '16px' }}>
+              Response length
+            </label>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '36px' }}>
+              {LENGTHS.map(l => {
+                const active = (data.responseLength || 'short') === l.id
+                return (
+                  <button
+                    key={l.id}
+                    onClick={() => update({ responseLength: l.id })}
+                    style={{
+                      textAlign: 'left',
+                      padding: '12px 14px',
+                      borderRadius: '10px',
+                      background: active ? 'var(--gold-dim)' : 'var(--surface)',
+                      border: `1px solid ${active ? 'rgba(45,138,85,0.3)' : 'var(--border2)'}`,
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: active ? 'var(--text)' : 'var(--text-mid)', marginBottom: '3px' }}>{l.label}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.4 }}>{l.desc}</div>
                   </button>
                 )
               })}

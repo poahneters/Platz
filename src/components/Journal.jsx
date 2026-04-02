@@ -17,8 +17,19 @@ const STYLE_INSTRUCTIONS = {
   analytical:   'Be logical and structured. Break things down into frameworks and clear reasoning.',
 }
 
+const LENGTH_INSTRUCTIONS = {
+  spark:    { instruction: 'Respond in one sentence only. Make it count.', maxTokens: 60 },
+  brief:    { instruction: 'Respond in 2–3 sentences max.',                maxTokens: 100 },
+  short:    { instruction: 'Keep your response under 80 words.',           maxTokens: 180 },
+  medium:   { instruction: 'Keep your response under 160 words.',          maxTokens: 320 },
+  detailed: { instruction: 'Keep your response under 280 words.',          maxTokens: 520 },
+  deep:     { instruction: 'Keep your response under 420 words.',          maxTokens: 750 },
+}
+
 function buildSystemPrompt(about) {
   const parts = [BASE_SYSTEM_PROMPT]
+  const lengthKey = about.response_length || 'short'
+  parts.push(`\nLength: ${LENGTH_INSTRUCTIONS[lengthKey]?.instruction ?? LENGTH_INSTRUCTIONS.short.instruction}`)
   if (about.communication_style && STYLE_INSTRUCTIONS[about.communication_style]) {
     parts.push(`\nCommunication style: ${STYLE_INSTRUCTIONS[about.communication_style]}`)
   }
@@ -172,7 +183,7 @@ export default function Journal({ user }) {
           system: buildSystemPrompt(aboutMe),
           messages,
           model: 'claude-sonnet-4-6',
-          max_tokens: 600,
+          max_tokens: LENGTH_INSTRUCTIONS[aboutMe.response_length || 'short']?.maxTokens ?? 180,
         }),
       })
 
