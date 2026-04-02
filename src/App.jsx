@@ -20,6 +20,7 @@ export default function App() {
   const [visible, setVisible] = useState(false)
   const [view, setView] = useState('journal')
   const [tutorialHighlight, setTutorialHighlight] = useState(null)
+  const [tutorialForced, setTutorialForced] = useState(false)
 
   // Check session on mount, then listen for auth changes
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function App() {
       )}
 
       {introComplete && user && <PlatzIntro />}
-      {introComplete && user && <Tutorial onStep={setTutorialHighlight} />}
+      {introComplete && user && <Tutorial onStep={setTutorialHighlight} forced={tutorialForced} onClose={() => setTutorialForced(false)} />}
 
       {introComplete && user && (
         <div
@@ -80,7 +81,7 @@ export default function App() {
               flexDirection: 'column',
             }}
           >
-            <View key={view} user={user} />
+            <View key={view} user={user} onReplayTutorial={() => setTutorialForced(true)} />
           </div>
         </div>
       )}

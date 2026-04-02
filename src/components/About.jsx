@@ -1,8 +1,4 @@
-import { useState } from 'react'
-import Tutorial from './Tutorial'
-
-export default function About() {
-  const [showTutorial, setShowTutorial] = useState(false)
+export default function About({ onReplayTutorial }) {
   return (
     <div style={{ height: '100%', overflowY: 'auto' }}>
       <div className="fade-up" style={{ maxWidth: '680px', margin: '0 auto', padding: '56px 48px' }}>
@@ -103,7 +99,7 @@ export default function About() {
             New here, or just want a refresher?
           </p>
           <button
-            onClick={() => setShowTutorial(true)}
+            onClick={onReplayTutorial}
             className="btn-ghost"
             style={{
               padding: '10px 22px',
@@ -122,9 +118,6 @@ export default function About() {
 
       </div>
 
-      {showTutorial && (
-        <Tutorial forced onClose={() => setShowTutorial(false)} />
-      )}
     </div>
   )
 }
