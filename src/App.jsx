@@ -9,6 +9,7 @@ import About from './components/About'
 import AboutMe from './components/AboutMe'
 import PlatzIntro from './components/PlatzIntro'
 import AuthModal from './components/AuthModal'
+import Tutorial from './components/Tutorial'
 
 const VIEWS = { journal: Journal, todo: Todo, whiteboard: Whiteboard, about: About, 'about-me': AboutMe }
 
@@ -55,6 +56,7 @@ export default function App() {
       )}
 
       {introComplete && user && <PlatzIntro />}
+      {introComplete && user && <Tutorial />}
 
       {introComplete && user && (
         <div
