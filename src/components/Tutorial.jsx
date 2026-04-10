@@ -42,18 +42,18 @@ export default function Tutorial({ onStep, forced = false, onClose }) {
       setMounted(true)
       setStep(0)
       setTimeout(() => setVisible(true), 100)
-      onStep?.(STEP_TAB_IDS[0])
+      onStep?.(STEP_TAB_IDS[0], 0)
     }
   }, [forced])
 
   useEffect(() => {
-    if (mounted) onStep?.(STEP_TAB_IDS[step])
+    if (mounted) onStep?.(STEP_TAB_IDS[step], step)
   }, [step])
 
   function close() {
     setVisible(false)
     localStorage.setItem(SEEN_KEY, '1')
-    onStep?.(null)
+    onStep?.(null, null)
     setTimeout(() => { setMounted(false); onClose?.() }, 500)
   }
 
@@ -86,6 +86,7 @@ export default function Tutorial({ onStep, forced = false, onClose }) {
         padding: '24px',
         opacity: visible ? 1 : 0,
         transition: 'opacity 0.5s ease',
+        pointerEvents: visible ? 'auto' : 'none',
       }}
     >
       <div

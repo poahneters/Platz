@@ -44,11 +44,14 @@ const leafKeyframeCSS = BURST_LEAVES.map((leaf, i) => {
   `
 }).join('')
 
-export default function Nav({ view, setView, highlight }) {
+export default function Nav({ view, setView, highlight, tutorialStep }) {
   const navRef = useRef(null)
   const [indicator, setIndicator] = useState({ left: 0, width: 0 })
   const [rustling, setRustling] = useState(false)
   const [rustlingTab, setRustlingTab] = useState(null)
+
+  const tutorialActive = tutorialStep !== null
+  const navVisible = !tutorialActive || tutorialStep > 0
 
   useEffect(() => {
     const nav = navRef.current
@@ -105,6 +108,9 @@ export default function Nav({ view, setView, highlight }) {
           justifyContent: 'space-between',
           padding: '0 36px',
           zIndex: highlight ? 76 : 50,
+          opacity: navVisible ? 1 : 0,
+          pointerEvents: tutorialActive ? 'none' : 'auto',
+          transition: 'opacity 0.5s ease',
         }}
       >
         {/* Wordmark - inline-block so position: absolute children anchor to the text, not the full row */}
@@ -151,7 +157,8 @@ export default function Nav({ view, setView, highlight }) {
               borderRadius: '2px',
               left: `${indicator.left}px`,
               width: `${indicator.width}px`,
-              transition: 'left 0.4s cubic-bezier(0.4,0,0.2,1), width 0.4s cubic-bezier(0.4,0,0.2,1)',
+              transition: 'left 0.4s cubic-bezier(0.4,0,0.2,1), width 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease',
+              opacity: tutorialActive ? 0 : 1,
             }}
           />
 

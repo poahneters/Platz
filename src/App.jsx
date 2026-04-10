@@ -19,6 +19,7 @@ export default function App() {
   const [visible, setVisible] = useState(false)
   const [view, setView] = useState('journal')
   const [tutorialHighlight, setTutorialHighlight] = useState(null)
+  const [tutorialStep, setTutorialStep] = useState(null)
   const [tutorialForced, setTutorialForced] = useState(false)
   const [emailConfirmed, setEmailConfirmed] = useState(false)
 
@@ -83,7 +84,7 @@ export default function App() {
         </div>
       )}
 
-{introComplete && user && <Tutorial onStep={setTutorialHighlight} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me') }} />}
+{introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
 
       {introComplete && user && (
         <div
@@ -95,7 +96,7 @@ export default function App() {
             transition: 'opacity 0.6s ease',
           }}
         >
-          <Nav view={view} setView={setView} highlight={tutorialHighlight} />
+          <Nav view={view} setView={setView} highlight={tutorialHighlight} tutorialStep={tutorialStep} />
 
           <div
             style={{
