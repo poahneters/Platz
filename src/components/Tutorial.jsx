@@ -13,7 +13,7 @@ const STEPS = [
   {
     label: 'To Do',
     title: 'Keep it simple.',
-    body: `The to-do list is exactly what it sounds like. Add tasks, check them off, filter by what's left.\n\nNo projects, no priorities, no friction. Just the things you need to do.`,
+    body: `The to-do list is exactly what it sounds like. Add tasks, check them off, filter by what's left.`,
   },
   {
     label: 'Whiteboard',
