@@ -74,27 +74,13 @@ export default function PlatzIntro() {
         </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <p style={{
-            fontSize: '15px',
-            lineHeight: 1.85,
-            color: 'var(--text-mid)',
-          }}>
-            As an overthinker who is ambitious, loves journalling, and wants to get called out on his bull shit - I built Platz to keep your thinking on your feet. To push you toward your goals. To keep you innovative.
+          <p style={{ fontSize: '15px', lineHeight: 1.85, color: 'var(--text-mid)' }}>
+            I built Platz as the natural next step in my college career. I have struggled with mental health throughout my 20s, and journaling has been a beautiful journey. This is a tool I use for self-improvement and reflection - and one you are welcome to use too.
           </p>
-          <p style={{
-            fontSize: '15px',
-            lineHeight: 1.85,
-            color: 'var(--text-mid)',
-          }}>
-            <em style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)', fontSize: '16px' }}>Platz</em> means <em>Space</em> or <em>Place</em> in German. My family is German - and I want you to know that you have the space to think and grow here.
+          <p style={{ fontSize: '15px', lineHeight: 1.85, color: 'var(--text-mid)' }}>
+            <em style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)', fontSize: '16px' }}>Platz</em> means <em>Space</em> or <em>Place</em> in German. Coming from a German family, this word feels like home - and I want you to know that you have the space to think and grow here.
           </p>
-          <p style={{
-            fontFamily: "'Playfair Display', serif",
-            fontStyle: 'italic',
-            fontSize: '16px',
-            color: 'var(--text)',
-            lineHeight: 1.7,
-          }}>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '16px', color: 'var(--text)', lineHeight: 1.7 }}>
             Platz is a great friend.
           </p>
         </div>
