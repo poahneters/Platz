@@ -187,6 +187,7 @@ export default function Whiteboard({ user }) {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '28px 36px 28px',
+        paddingRight: 'calc(36px + 200px)',
         overflow: 'hidden',
       }}>
 
