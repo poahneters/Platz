@@ -58,7 +58,7 @@ export default function App() {
       )}
 
       {introComplete && user && <PlatzIntro />}
-      {introComplete && user && <Tutorial onStep={setTutorialHighlight} forced={tutorialForced} onClose={() => setTutorialForced(false)} />}
+      {introComplete && user && <Tutorial onStep={setTutorialHighlight} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me') }} />}
 
       {introComplete && user && (
         <div
