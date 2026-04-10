@@ -103,13 +103,18 @@ export default function AuthModal({ onAuth }) {
       return
     }
 
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
     if (authError) {
       setError(authError.message)
-    } else {
-      onAuth()
+      return
     }
+    if (!data.user?.email_confirmed_at) {
+      await supabase.auth.signOut()
+      setMode('verify')
+      return
+    }
+    onAuth()
   }
 
   // Verify email screen
