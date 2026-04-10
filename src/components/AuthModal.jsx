@@ -48,9 +48,19 @@ export default function AuthModal({ onAuth }) {
       return
     }
 
-    if (mode === 'signup' && password.length < 8) {
-      setError('Password must be at least 8 characters.')
-      return
+    if (mode === 'signup') {
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters.')
+        return
+      }
+      if (!/[A-Z]/.test(password)) {
+        setError('Password must include at least one capital letter.')
+        return
+      }
+      if (!/[^A-Za-z0-9]/.test(password)) {
+        setError('Password must include at least one special character.')
+        return
+      }
     }
 
     setLoading(true)
