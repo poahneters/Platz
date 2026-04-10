@@ -19,6 +19,8 @@ export default function Whiteboard({ user }) {
   const [newBoardTitle, setNewBoardTitle] = useState('')
   const [showNewBoard, setShowNewBoard] = useState(false)
   const [editingTitle, setEditingTitle] = useState(null)
+  const [inlineCreate, setInlineCreate] = useState(false)
+  const [inlineTitle, setInlineTitle] = useState('')
 
   useEffect(() => {
     supabase
@@ -45,12 +47,12 @@ export default function Whiteboard({ user }) {
     if (!activeId && boards.length > 0) setActiveId(boards[0].id)
   }, [boards, activeId])
 
-  async function addBoard() {
-    if (!newBoardTitle.trim()) return
+  async function createBoard(title) {
+    if (!title.trim()) return
     const color = BOARD_COLORS[boards.length % BOARD_COLORS.length]
     const { data: row } = await supabase
       .from('boards')
-      .insert({ user_id: user.id, name: newBoardTitle.trim(), color, lines: [] })
+      .insert({ user_id: user.id, name: title.trim(), color, lines: [] })
       .select()
       .single()
     if (row) {
@@ -64,8 +66,16 @@ export default function Whiteboard({ user }) {
       setBoards(prev => [...prev, board])
       setActiveId(row.id)
     }
+  }
+
+  async function addBoard() {
+    await createBoard(newBoardTitle)
     setNewBoardTitle('')
     setShowNewBoard(false)
+  }
+
+  async function addBoardFromInline(title) {
+    await createBoard(title)
   }
 
   async function deleteBoard(id) {
@@ -184,10 +194,10 @@ export default function Whiteboard({ user }) {
         <div style={{
           width: '100%',
           maxWidth: '900px',
-          flex: 1,
-          minHeight: 0,
+          height: 'min(calc(100vh - 180px), 680px)',
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
           borderRadius: '5px',
           background: 'linear-gradient(160deg, #d2d7dc 0%, #bcc2c8 25%, #b4babf 60%, #c8cdd2 100%)',
           padding: '12px',
@@ -225,8 +235,7 @@ export default function Whiteboard({ user }) {
 
           {/* ── Board surface ── */}
           <div style={{
-            flex: 1,
-            minHeight: 0,
+            height: '100%',
             background: '#ffffff',
             overflowY: 'auto',
             position: 'relative',
@@ -246,22 +255,52 @@ export default function Whiteboard({ user }) {
             <div style={{ position: 'relative', zIndex: 5 }}>
               {!active ? (
                 <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  height: '300px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  height: '300px', gap: '12px',
                 }}>
-                  <button
-                    onClick={() => setShowNewBoard(true)}
-                    style={{
-                      fontFamily: "'Permanent Marker', cursive",
-                      fontSize: '22px', color: 'rgba(30,80,50,0.35)',
-                      background: 'transparent', border: 'none', cursor: 'pointer',
-                      transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'rgba(30,80,50,0.6)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(30,80,50,0.35)'}
-                  >
-                    + Create a board
-                  </button>
+                  {inlineCreate ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '100%', maxWidth: '340px', padding: '0 24px' }}>
+                      <input
+                        value={inlineTitle}
+                        onChange={e => setInlineTitle(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') { addBoardFromInline(inlineTitle); setInlineCreate(false); setInlineTitle('') }
+                          if (e.key === 'Escape') { setInlineCreate(false); setInlineTitle('') }
+                        }}
+                        placeholder="Name your board..."
+                        autoFocus
+                        style={{
+                          fontFamily: "'Permanent Marker', cursive",
+                          fontSize: '22px',
+                          color: 'rgba(30,80,50,0.8)',
+                          background: 'transparent',
+                          border: 'none',
+                          borderBottom: '2px solid rgba(30,80,50,0.3)',
+                          outline: 'none',
+                          width: '100%',
+                          textAlign: 'center',
+                          padding: '6px 0',
+                        }}
+                      />
+                      <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '13px', color: 'rgba(30,80,50,0.3)' }}>
+                        press enter to create
+                      </span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setInlineCreate(true)}
+                      style={{
+                        fontFamily: "'Permanent Marker', cursive",
+                        fontSize: '22px', color: 'rgba(30,80,50,0.35)',
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        transition: 'color 0.2s',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.color = 'rgba(30,80,50,0.6)'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'rgba(30,80,50,0.35)'}
+                    >
+                      + Create a board
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div key={active.id} className="fade-up" style={{ padding: '36px 48px 32px', maxWidth: '820px', margin: '0 auto' }}>
