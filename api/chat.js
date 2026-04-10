@@ -1,19 +1,30 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { createClient } from '@supabase/supabase-js'
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.VITE_SUPABASE_ANON_KEY
+)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { messages, system, model = 'claude-sonnet-4-6', max_tokens = 1024 } = req.body
+  // Verify Supabase auth token
+  const token = req.headers.authorization?.replace('Bearer ', '')
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+  if (authError || !user) return res.status(401).json({ error: 'Unauthorized' })
+
+  const { messages, system, max_tokens = 1024 } = req.body
 
   try {
     const response = await client.messages.create({
-      model,
+      model: 'claude-sonnet-4-6',
       max_tokens,
       messages,
       ...(system && { system }),

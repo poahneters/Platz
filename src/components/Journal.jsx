@@ -177,13 +177,16 @@ export default function Journal({ user }) {
         content
       )
 
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
         body: JSON.stringify({
           system: buildSystemPrompt(aboutMe),
           messages,
-          model: 'claude-sonnet-4-6',
           max_tokens: LENGTH_INSTRUCTIONS[aboutMe.response_length || 'short']?.maxTokens ?? 180,
         }),
       })
