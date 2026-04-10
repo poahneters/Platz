@@ -20,8 +20,18 @@ const inputStyle = {
   border: 'none',
 }
 
+function getEmailLink(email) {
+  const domain = email.split('@')[1]?.toLowerCase()
+  if (!domain) return null
+  if (domain === 'gmail.com') return 'https://mail.google.com'
+  if (domain === 'yahoo.com' || domain === 'yahoo.co.uk') return 'https://mail.yahoo.com'
+  if (['outlook.com', 'hotmail.com', 'live.com', 'msn.com'].includes(domain)) return 'https://outlook.live.com'
+  if (domain === 'icloud.com' || domain === 'me.com') return 'https://www.icloud.com/mail'
+  return `mailto:${email}`
+}
+
 export default function AuthModal({ onAuth }) {
-  const [mode, setMode] = useState('signin') // 'signin' | 'signup' | 'forgot'
+  const [mode, setMode] = useState('signin') // 'signin' | 'signup' | 'forgot' | 'verify'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -78,17 +88,130 @@ export default function AuthModal({ onAuth }) {
       return
     }
 
-    const { error: authError } = mode === 'signup'
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password })
+    if (mode === 'signup') {
+      const { error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin },
+      })
+      setLoading(false)
+      if (authError) {
+        setError(authError.message)
+      } else {
+        setMode('verify')
+      }
+      return
+    }
 
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
-
     if (authError) {
       setError(authError.message)
     } else {
       onAuth()
     }
+  }
+
+  // Verify email screen
+  if (mode === 'verify') {
+    const emailLink = getEmailLink(email)
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(20, 50, 30, 0.45)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        zIndex: 90,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.5s ease',
+      }}>
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
+          padding: 'clamp(32px, 5vw, 52px)',
+          maxWidth: '440px',
+          width: '100%',
+          textAlign: 'center',
+          transform: visible ? 'translateY(0)' : 'translateY(24px)',
+          transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
+        }}>
+          {/* Email icon */}
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            background: 'var(--surface2)',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 28px',
+            fontSize: '24px',
+          }}>
+            ✉️
+          </div>
+
+          <h2 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 'clamp(22px, 3.5vw, 28px)',
+            fontWeight: 700,
+            color: 'var(--text)',
+            marginBottom: '12px',
+            lineHeight: 1.2,
+          }}>
+            Verify your email
+          </h2>
+
+          <p style={{
+            fontSize: '14px',
+            color: 'var(--text-mid)',
+            lineHeight: 1.7,
+            marginBottom: '32px',
+          }}>
+            We sent a confirmation link to <strong style={{ color: 'var(--text)' }}>{email}</strong>.<br />
+            Click the link to activate your account.
+          </p>
+
+          {emailLink && (
+            <a
+              href={emailLink}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: 'block',
+                padding: '13px',
+                background: 'var(--gold)',
+                color: '#fff',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontWeight: 600,
+                letterSpacing: '0.04em',
+                textDecoration: 'none',
+                marginBottom: '16px',
+                transition: 'filter 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.1)'}
+              onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}
+            >
+              Open email app
+            </a>
+          )}
+
+          <button
+            onClick={() => switchMode('signin')}
+            style={{ fontSize: '13px', color: 'var(--text-mid)', textDecoration: 'underline' }}
+          >
+            Back to sign in
+          </button>
+        </div>
+      </div>
+    )
   }
 
   const titles = {
@@ -100,7 +223,7 @@ export default function AuthModal({ onAuth }) {
   const subtitles = {
     signin: 'Sign in to pick up where you left off.',
     signup: 'Your journal, goals, and space — saved across every device.',
-    forgot: 'Enter your email and we\'ll send you a reset link.',
+    forgot: "Enter your email and we'll send you a reset link.",
   }
 
   return (
