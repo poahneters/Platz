@@ -21,6 +21,7 @@ export default function App() {
   const [view, setView] = useState('journal')
   const [tutorialHighlight, setTutorialHighlight] = useState(null)
   const [tutorialForced, setTutorialForced] = useState(false)
+  const [emailConfirmed, setEmailConfirmed] = useState(false)
 
   // Check session on mount, then listen for auth changes
   useEffect(() => {
@@ -29,8 +30,13 @@ export default function App() {
       setAuthChecked(true)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
+      if (event === 'SIGNED_IN' && window.location.hash.includes('type=signup')) {
+        setEmailConfirmed(true)
+        window.history.replaceState(null, '', window.location.pathname)
+        setTimeout(() => setEmailConfirmed(false), 4000)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -55,6 +61,27 @@ export default function App() {
       {/* Auth gate — shown after intro if not signed in */}
       {introComplete && !user && (
         <AuthModal onAuth={() => {}} />
+      )}
+
+      {emailConfirmed && (
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'var(--surface)',
+          border: '1px solid var(--gold)',
+          borderRadius: '10px',
+          padding: '12px 24px',
+          fontSize: '14px',
+          fontWeight: 600,
+          color: 'var(--gold)',
+          zIndex: 999,
+          boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+          animation: 'fadeSlideIn 0.4s ease',
+        }}>
+          Email confirmed!
+        </div>
       )}
 
       {introComplete && user && <PlatzIntro />}
