@@ -20,10 +20,10 @@ export default function About({ onReplayTutorial }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <p style={{ fontSize: '17px', lineHeight: 1.9, color: 'var(--text-mid)' }}>
-            As an overthinker who is ambitious, loves journalling, and wants to get called out on his bull shit — I built Platz to keep your thinking on your feet. To push you toward your goals. To keep you innovative.
+            As an overthinker who is ambitious, loves journalling, and wants to get called out on his bull shit - I built Platz to keep your thinking on your feet. To push you toward your goals. To keep you innovative.
           </p>
           <p style={{ fontSize: '17px', lineHeight: 1.9, color: 'var(--text-mid)' }}>
-            This isn't a repackaged AI. It's a place to think out loud and get honest feedback — the kind a sharp friend gives you, not the kind a search engine does.
+            This isn't a repackaged AI. It's a place to think out loud and get honest feedback - the kind a sharp friend gives you, not the kind a search engine does.
           </p>
 
           <div style={{ height: '1px', background: 'var(--border)', margin: '8px 0' }} />
@@ -31,7 +31,7 @@ export default function About({ onReplayTutorial }) {
           <p style={{ fontSize: '17px', lineHeight: 1.9, color: 'var(--text-mid)' }}>
             <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '19px', color: 'var(--gold)' }}>Platz</span> means{' '}
             <span style={{ color: 'var(--text)' }}>Space</span> or{' '}
-            <span style={{ color: 'var(--text)' }}>Place</span> in German. My family is German — and I want you to know that you have the space to think and grow here.
+            <span style={{ color: 'var(--text)' }}>Place</span> in German. My family is German - and I want you to know that you have the space to think and grow here.
           </p>
 
           <blockquote style={{
@@ -62,7 +62,7 @@ export default function About({ onReplayTutorial }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {[
-              ['Journal', 'Write freely. Reflect with Platz when you want a second voice — or just save and move on. Your journal, your pace.'],
+              ['Journal', 'Write freely. Reflect with Platz when you want a second voice - or just save and move on. Your journal, your pace.'],
               ['To Do', 'Keep your daily tasks in one clean place.'],
               ['Whiteboard', 'Long-term goals, organized by board. Your digital wipe board.'],
             ].map(([title, desc]) => (

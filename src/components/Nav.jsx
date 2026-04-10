@@ -107,7 +107,7 @@ export default function Nav({ view, setView, highlight }) {
           zIndex: highlight ? 76 : 50,
         }}
       >
-        {/* Wordmark — inline-block so position: absolute children anchor to the text, not the full row */}
+        {/* Wordmark - inline-block so position: absolute children anchor to the text, not the full row */}
         <div style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }} onClick={triggerRustle}>
           <span
             style={{

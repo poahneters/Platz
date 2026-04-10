@@ -227,7 +227,7 @@ export default function AuthModal({ onAuth }) {
 
   const subtitles = {
     signin: 'Sign in to pick up where you left off.',
-    signup: 'Your journal, goals, and space — saved across every device.',
+    signup: 'Your journal, goals, and space - saved across every device.',
     forgot: "Enter your email and we'll send you a reset link.",
   }
 

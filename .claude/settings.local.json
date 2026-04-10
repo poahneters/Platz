@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.weareheroes.one)",
+      "WebFetch(domain:www.cleverswim.de)",
+      "WebFetch(domain:www.snig.digital)",
+      "WebFetch(domain:www.cabanana.pt)"
+    ]
+  }
+}

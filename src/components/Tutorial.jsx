@@ -8,7 +8,7 @@ const STEPS = [
   {
     label: 'Journal',
     title: 'Think out loud.',
-    body: `The journal is your main space. Write whatever is on your mind — a problem, a goal, something you can't stop thinking about.\n\nHit Reflect ✦ and Platz will respond. It won't flatter you. It'll push back, ask the right question, and point you somewhere useful. Hit Save if you just want to keep the thought without a response.\n\nYou can keep the conversation going inside any entry.`,
+    body: `The journal is your main space. Write whatever is on your mind - a problem, a goal, something you can't stop thinking about.\n\nHit Reflect ✦ and Platz will respond. It won't flatter you. It'll push back, ask the right question, and point you somewhere useful. Hit Save if you just want to keep the thought without a response.\n\nYou can keep the conversation going inside any entry.`,
   },
   {
     label: 'To Do',
@@ -18,12 +18,12 @@ const STEPS = [
   {
     label: 'Whiteboard',
     title: 'Put your goals somewhere.',
-    body: `Create boards for different areas of your life — long-term goals, a project, anything you want to keep visible.\n\nWrite goals on the board, check them off as you go. The progress bar keeps track.`,
+    body: `Create boards for different areas of your life - long-term goals, a project, anything you want to keep visible.\n\nWrite goals on the board, check them off as you go. The progress bar keeps track.`,
   },
   {
     label: 'About Me',
     title: 'Make Platz yours.',
-    body: `The more Platz knows about you, the sharper it gets.\n\nSet your communication style — Direct, Curious, Motivational, or Analytical. Choose how long you want responses to be. Add anything else you want Platz to know about you.\n\nStart here before your first journal entry.`,
+    body: `The more Platz knows about you, the sharper it gets.\n\nSet your communication style - Direct, Curious, Motivational, or Analytical. Choose how long you want responses to be. Add anything else you want Platz to know about you.\n\nStart here before your first journal entry.`,
   },
 ]
 

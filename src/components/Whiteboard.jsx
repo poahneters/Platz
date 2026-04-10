@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
-// Marker body / cap color pairs — real whiteboard marker colors
+// Marker body / cap color pairs - real whiteboard marker colors
 const MARKERS = [
   { body: '#1a4d2e', cap: '#0f2d1a' }, // forest green
   { body: '#1a3d6a', cap: '#0f2040' }, // navy blue

@@ -79,14 +79,14 @@ export default function PlatzIntro() {
             lineHeight: 1.85,
             color: 'var(--text-mid)',
           }}>
-            As an overthinker who is ambitious, loves journalling, and wants to get called out on his bull shit — I built Platz to keep your thinking on your feet. To push you toward your goals. To keep you innovative.
+            As an overthinker who is ambitious, loves journalling, and wants to get called out on his bull shit - I built Platz to keep your thinking on your feet. To push you toward your goals. To keep you innovative.
           </p>
           <p style={{
             fontSize: '15px',
             lineHeight: 1.85,
             color: 'var(--text-mid)',
           }}>
-            <em style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)', fontSize: '16px' }}>Platz</em> means <em>Space</em> or <em>Place</em> in German. My family is German — and I want you to know that you have the space to think and grow here.
+            <em style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)', fontSize: '16px' }}>Platz</em> means <em>Space</em> or <em>Place</em> in German. My family is German - and I want you to know that you have the space to think and grow here.
           </p>
           <p style={{
             fontFamily: "'Playfair Display', serif",

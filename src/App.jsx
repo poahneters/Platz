@@ -58,7 +58,7 @@ export default function App() {
     <>
       {!introComplete && <Intro onComplete={() => setIntroComplete(true)} />}
 
-      {/* Auth gate — shown after intro if not signed in */}
+      {/* Auth gate - shown after intro if not signed in */}
       {introComplete && !user && (
         <AuthModal onAuth={() => {}} />
       )}

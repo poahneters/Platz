@@ -7,7 +7,7 @@ const LETTERS = 'PLATZ'.split('')
 const VINES = [
   {
     id: 'v1',
-    // From top edge ~14% — curves down-right, looping toward center-left
+    // From top edge ~14% - curves down-right, looping toward center-left
     d: 'M 138,0 C 105,55 165,95 155,158 C 145,222 88,245 102,308 C 116,368 172,372 178,435 C 184,490 142,520 148,570',
     duration: 2.6, delay: 0.0,
     leaves: [
@@ -19,7 +19,7 @@ const VINES = [
   },
   {
     id: 'v2',
-    // From right edge ~22% down — slithers left with wide S
+    // From right edge ~22% down - slithers left with wide S
     d: 'M 1000,155 C 935,138 905,195 848,186 C 788,176 768,238 706,228 C 650,220 628,272 568,268 C 515,264 492,312 438,318',
     duration: 2.8, delay: 0.22,
     leaves: [
@@ -30,7 +30,7 @@ const VINES = [
   },
   {
     id: 'v3',
-    // From bottom edge ~82% — curls upward-left
+    // From bottom edge ~82% - curls upward-left
     d: 'M 822,700 C 808,632 845,595 812,535 C 778,472 718,488 690,428 C 662,370 688,322 650,272 C 618,230 568,228 542,182',
     duration: 2.5, delay: 0.12,
     leaves: [
@@ -41,7 +41,7 @@ const VINES = [
   },
   {
     id: 'v4',
-    // From left edge ~55% — curls right with a loop
+    // From left edge ~55% - curls right with a loop
     d: 'M 0,388 C 72,365 88,428 148,415 C 210,402 228,342 290,352 C 345,360 362,415 418,405 C 468,396 488,348 542,345',
     duration: 2.4, delay: 0.45,
     leaves: [
@@ -52,7 +52,7 @@ const VINES = [
   },
   {
     id: 'v5',
-    // From top edge ~68% — curves down then bends left
+    // From top edge ~68% - curves down then bends left
     d: 'M 682,0 C 698,72 638,112 648,175 C 658,238 718,252 705,315 C 694,368 640,378 628,430 C 618,472 645,508 628,552',
     duration: 2.2, delay: 0.35,
     leaves: [
@@ -63,7 +63,7 @@ const VINES = [
   },
   {
     id: 'v6',
-    // From bottom edge ~22% — curls upward-right
+    // From bottom edge ~22% - curls upward-right
     d: 'M 215,700 C 232,628 192,590 212,528 C 232,465 292,452 300,390 C 308,335 265,298 282,242 C 298,192 348,178 358,128',
     duration: 2.3, delay: 0.18,
     leaves: [
@@ -74,7 +74,7 @@ const VINES = [
   },
   {
     id: 'v7',
-    // From right edge ~70% — shorter curl into lower-center
+    // From right edge ~70% - shorter curl into lower-center
     d: 'M 1000,488 C 942,472 918,528 858,518 C 798,508 782,455 722,452 C 672,448 650,492 598,488',
     duration: 2.0, delay: 0.55,
     leaves: [
@@ -84,7 +84,7 @@ const VINES = [
   },
 ]
 
-// Ovate leaf viewed from above — pointed at both ends, wider in middle, with 3D gloss
+// Ovate leaf viewed from above - pointed at both ends, wider in middle, with 3D gloss
 function OvateLeaf({ x, y, rotate, scale = 1, color }) {
   return (
     <g transform={`translate(${x} ${y}) rotate(${rotate}) scale(${scale})`}>
@@ -95,7 +95,7 @@ function OvateLeaf({ x, y, rotate, scale = 1, color }) {
         opacity="0.20"
         transform="translate(3 4)"
       />
-      {/* Leaf body — ovate: wider mid, tapers at top and base */}
+      {/* Leaf body - ovate: wider mid, tapers at top and base */}
       <path
         d="M0,-22 C10,-13 14,1 12,12 C10,20 5,25 0,26 C-5,25 -10,20 -12,12 C-14,1 -10,-13 0,-22 Z"
         fill={color}
@@ -103,7 +103,7 @@ function OvateLeaf({ x, y, rotate, scale = 1, color }) {
         strokeWidth="2.4"
         strokeLinejoin="round"
       />
-      {/* 3D highlight — curved crescent near tip, gives the bubbly roundness */}
+      {/* 3D highlight - curved crescent near tip, gives the bubbly roundness */}
       <path
         d="M-4,-17 C-1,-20 5,-17 7,-12 C4,-10 -2,-10 -4,-17 Z"
         fill="white"
@@ -193,7 +193,7 @@ export default function Intro({ onComplete }) {
             const animStart = vine.delay
             return (
               <g key={vine.id}>
-                {/* Vine shadow — slightly offset, gives depth */}
+                {/* Vine shadow - slightly offset, gives depth */}
                 <path
                   d={vine.d}
                   stroke="#0f3320"
@@ -225,7 +225,7 @@ export default function Intro({ onComplete }) {
                     animation: `vineSlither ${vine.duration}s cubic-bezier(0.3, 0.0, 0.4, 1) ${animStart}s both`,
                   } : { strokeDashoffset: 1 }}
                 />
-                {/* Highlight stripe — thinner, lighter, gives the rounded 3D vine look */}
+                {/* Highlight stripe - thinner, lighter, gives the rounded 3D vine look */}
                 <path
                   d={vine.d}
                   stroke="#86efac"
@@ -241,7 +241,7 @@ export default function Intro({ onComplete }) {
                   } : { strokeDashoffset: 1 }}
                 />
 
-                {/* Leaves — pop in as the vine tip passes each one */}
+                {/* Leaves - pop in as the vine tip passes each one */}
                 {leafing && vine.leaves.map((leaf, li) => {
                   const leafDelay = animStart + leaf.t * vine.duration
                   return (

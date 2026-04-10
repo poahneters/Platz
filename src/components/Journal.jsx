@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
 
-const BASE_SYSTEM_PROMPT = `You are Platz — a direct, perceptive thinking partner. Not a therapist. Not a cheerleader. A sharp friend who calls things out.
+const BASE_SYSTEM_PROMPT = `You are Platz - a direct, perceptive thinking partner. Not a therapist. Not a cheerleader. A sharp friend who calls things out.
 
 When someone shares their thoughts:
 - Cut through the noise and name what's really going on
@@ -9,7 +9,7 @@ When someone shares their thoughts:
 - End with one pointed question that pushes them further
 - Keep it under 250 words. No bullet lists. No headers. Talk like a person.
 
-If someone asks something that has nothing to do with their thoughts, goals, feelings, or personal growth — like a math problem, coding question, research task, or anything better suited for a general AI — don't answer it. Instead, briefly acknowledge what they asked, tell them that's not what you're here for, and redirect them back to what's actually on their mind.`
+If someone asks something that has nothing to do with their thoughts, goals, feelings, or personal growth - like a math problem, coding question, research task, or anything better suited for a general AI - don't answer it. Instead, briefly acknowledge what they asked, tell them that's not what you're here for, and redirect them back to what's actually on their mind.`
 
 const STYLE_INSTRUCTIONS = {
   direct:       'Be blunt and direct. Do not soften your feedback. Honesty over comfort.',
@@ -146,7 +146,7 @@ export default function Journal({ user }) {
       let updatedThread
 
       if (!isReply) {
-        // New entry — insert to Supabase first to get real UUID
+        // New entry - insert to Supabase first to get real UUID
         const thread = [{ id: crypto.randomUUID(), role: 'user', content }]
         const { data: row, error: insertErr } = await supabase
           .from('journal_entries')
@@ -161,7 +161,7 @@ export default function Journal({ user }) {
         setText('')
         updatedThread = thread
       } else {
-        // Reply — add user message to existing thread
+        // Reply - add user message to existing thread
         const newUserMsg = { id: crypto.randomUUID(), role: 'user', content }
         const currentEntry = entries.find(e => e.id === selected)
         updatedThread = [...currentEntry.thread, newUserMsg]

@@ -2,22 +2,22 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
 const QUESTIONS = [
-  // E/I — higher score = more E
+  // E/I - higher score = more E
   { id: 'e1', dim: 'EI', text: 'I feel recharged after spending time with groups of people' },
   { id: 'e2', dim: 'EI', text: 'I prefer talking things through with someone rather than thinking alone' },
   { id: 'e3', dim: 'EI', text: 'I enjoy meeting new people and building new connections easily' },
   { id: 'e4', dim: 'EI', text: "I'm comfortable speaking up in groups or taking charge of conversations" },
-  // S/N — higher score = more S
+  // S/N - higher score = more S
   { id: 's1', dim: 'SN', text: 'I focus on what is real and present rather than what could be' },
   { id: 's2', dim: 'SN', text: 'I trust hands-on experience more than theories or gut feelings' },
   { id: 's3', dim: 'SN', text: 'I prefer proven, practical solutions over innovative but untested ideas' },
   { id: 's4', dim: 'SN', text: 'I notice concrete details in my environment more than abstract patterns' },
-  // T/F — higher score = more T
+  // T/F - higher score = more T
   { id: 't1', dim: 'TF', text: 'When making decisions, logic matters more to me than how people will feel' },
   { id: 't2', dim: 'TF', text: 'I stay objective and analytical even in emotionally charged situations' },
   { id: 't3', dim: 'TF', text: "I'd rather give someone a hard truth than protect their feelings" },
   { id: 't4', dim: 'TF', text: 'I analyze situations thoroughly before acting on intuition' },
-  // J/P — higher score = more J
+  // J/P - higher score = more J
   { id: 'j1', dim: 'JP', text: 'I prefer having a clear plan rather than keeping my options open' },
   { id: 'j2', dim: 'JP', text: 'I feel most at ease when things are decided and settled' },
   { id: 'j3', dim: 'JP', text: 'I make to-do lists and find real satisfaction in checking things off' },
