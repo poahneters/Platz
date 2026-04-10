@@ -7,7 +7,6 @@ import Todo from './components/Todo'
 import Whiteboard from './components/Whiteboard'
 import About from './components/About'
 import AboutMe from './components/AboutMe'
-import PlatzIntro from './components/PlatzIntro'
 import AuthModal from './components/AuthModal'
 import Tutorial from './components/Tutorial'
 
@@ -84,8 +83,7 @@ export default function App() {
         </div>
       )}
 
-      {introComplete && user && <PlatzIntro />}
-      {introComplete && user && <Tutorial onStep={setTutorialHighlight} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me') }} />}
+{introComplete && user && <Tutorial onStep={setTutorialHighlight} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me') }} />}
 
       {introComplete && user && (
         <div

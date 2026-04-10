@@ -2,9 +2,14 @@ import { useEffect, useState } from 'react'
 
 const SEEN_KEY = 'platz_tutorial_seen'
 
-const STEP_TAB_IDS = ['journal', 'todo', 'whiteboard', 'about-me']
+const STEP_TAB_IDS = [null, 'journal', 'todo', 'whiteboard', 'about-me']
 
 const STEPS = [
+  {
+    label: 'Welcome',
+    title: 'What is Platz?',
+    body: `I built Platz as the natural next step in my college career. I have struggled with mental health throughout my 20s, and journaling has been a beautiful journey. This is a tool I use for self-improvement and reflection - and one you are welcome to use too.\n\nPlatz means Space or Place in German. Coming from a German family, this word feels like home - and I want you to know that you have the space to think and grow here.`,
+  },
   {
     label: 'Journal',
     title: 'Think out loud.',
