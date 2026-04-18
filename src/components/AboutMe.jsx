@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
 
 const QUESTIONS = [
@@ -98,7 +98,12 @@ const MEMORY_SECTIONS = [
 export default function AboutMe({ user }) {
   const [data, setData] = useState({})
   const [tab, setTab] = useState('story')
-  const [saved, setSaved] = useState(false)
+  const [saveStatus, setSaveStatus] = useState('idle') // 'idle' | 'saving' | 'saved'
+  const autosaveTimer = useRef(null)
+  const initializedRef = useRef(false)
+  const dataRef = useRef({})
+
+  useEffect(() => { dataRef.current = data }, [data])
 
   useEffect(() => {
     supabase
@@ -120,10 +125,10 @@ export default function AboutMe({ user }) {
             memory: row.memory || {},
           })
         }
+        requestAnimationFrame(() => { initializedRef.current = true })
       })
   }, [user.id])
 
-  // Re-fetch memory whenever the user opens that tab so it's always fresh
   useEffect(() => {
     if (tab !== 'memory') return
     supabase
@@ -136,24 +141,30 @@ export default function AboutMe({ user }) {
       })
   }, [tab, user.id])
 
+  useEffect(() => {
+    if (!initializedRef.current) return
+    setSaveStatus('saving')
+    clearTimeout(autosaveTimer.current)
+    autosaveTimer.current = setTimeout(async () => {
+      const d = dataRef.current
+      await supabase.from('about_me').upsert({
+        user_id: user.id,
+        life_story: d.lifeStory || '',
+        quiz_answers: d.quizAnswers || {},
+        personality_type: d.mbtiType || '',
+        communication_style: d.platzStyle || '',
+        response_length: d.responseLength || 'short',
+        custom_instructions: d.customInstructions || '',
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' })
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    }, 800)
+    return () => clearTimeout(autosaveTimer.current)
+  }, [data.lifeStory, data.quizAnswers, data.mbtiType, data.platzStyle, data.responseLength, data.customInstructions])
+
   function update(patch) {
     setData(prev => ({ ...prev, ...patch }))
-    setSaved(false)
-  }
-
-  async function save() {
-    await supabase.from('about_me').upsert({
-      user_id: user.id,
-      life_story: data.lifeStory || '',
-      quiz_answers: data.quizAnswers || {},
-      personality_type: data.mbtiType || '',
-      communication_style: data.platzStyle || '',
-      response_length: data.responseLength || 'short',
-      custom_instructions: data.customInstructions || '',
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
   }
 
   function runQuiz() {
@@ -178,8 +189,9 @@ export default function AboutMe({ user }) {
           </p>
         </div>
 
-        {/* Internal tabs */}
-        <div style={{ display: 'flex', gap: '2px', marginBottom: '36px', background: 'var(--surface)', borderRadius: '9px', padding: '3px', width: '100%' }}>
+        {/* Internal tabs + autosave indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '36px' }}>
+        <div style={{ display: 'flex', gap: '2px', flex: 1, background: 'var(--surface)', borderRadius: '9px', padding: '3px' }}>
           {TABS.map(t => (
             <button
               key={t.id}
@@ -199,6 +211,12 @@ export default function AboutMe({ user }) {
               {t.label}
             </button>
           ))}
+        </div>
+        {saveStatus !== 'idle' && (
+          <span style={{ fontSize: '11px', color: saveStatus === 'saved' ? 'var(--gold)' : 'var(--text-dim)', whiteSpace: 'nowrap', transition: 'color 0.3s' }}>
+            {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+          </span>
+        )}
         </div>
 
         {/* ── Life Story ── */}
@@ -229,9 +247,6 @@ export default function AboutMe({ user }) {
               onFocus={e => e.target.style.borderColor = 'rgba(45,138,85,0.3)'}
               onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
-            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-              <SaveButton saved={saved} onClick={save} />
-            </div>
           </div>
         )}
 
@@ -442,9 +457,6 @@ export default function AboutMe({ user }) {
               onFocus={e => e.target.style.borderColor = 'rgba(45,138,85,0.3)'}
               onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <SaveButton saved={saved} onClick={save} />
-            </div>
           </div>
         )}
 
@@ -502,25 +514,5 @@ export default function AboutMe({ user }) {
 
       </div>
     </div>
-  )
-}
-
-function SaveButton({ saved, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="btn-gold"
-      style={{
-        padding: '9px 22px',
-        background: saved ? 'var(--green)' : 'var(--gold)',
-        color: '#0a0908',
-        borderRadius: '8px',
-        fontSize: '13px',
-        fontWeight: 600,
-        transition: 'all 0.25s ease',
-      }}
-    >
-      {saved ? 'Saved ✓' : 'Save'}
-    </button>
   )
 }
