@@ -54,7 +54,11 @@ ${platzResponse}`
       messages: [{ role: 'user', content: userMessage }],
     })
 
-    const updated = JSON.parse(response.content[0].text)
+    let text = response.content[0].text.trim()
+    if (text.startsWith('```')) {
+      text = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+    }
+    const updated = JSON.parse(text)
     res.status(200).json({ memory: updated })
   } catch (e) {
     res.status(500).json({ error: e.message })
