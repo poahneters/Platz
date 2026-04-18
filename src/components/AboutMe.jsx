@@ -28,22 +28,22 @@ const DIM_LABELS = { EI: ['E', 'I'], SN: ['S', 'N'], TF: ['T', 'F'], JP: ['J', '
 const DIM_NAMES  = { EI: ['Extraversion', 'Introversion'], SN: ['Sensing', 'Intuition'], TF: ['Thinking', 'Feeling'], JP: ['Judging', 'Perceiving'] }
 
 const TYPES = {
-  INTJ: { name: 'The Architect',      desc: 'Strategic, independent, and driven. You see the world as a system to be optimized and have the vision to back it up.' },
-  INTP: { name: 'The Logician',       desc: 'Analytical, inventive, and endlessly curious. You love ideas for their own sake and question everything.' },
-  ENTJ: { name: 'The Commander',      desc: 'Decisive, ambitious, and direct. You lead by seeing what needs to happen and making it so.' },
-  ENTP: { name: 'The Debater',        desc: "Quick-witted, curious, and unafraid to challenge. You thrive on intellectual sparring and don't back down easily." },
-  INFJ: { name: 'The Advocate',       desc: 'Principled, insightful, and purposeful. You want everything you do to mean something.' },
-  INFP: { name: 'The Mediator',       desc: 'Idealistic, empathetic, and fiercely authentic. You lead with values even when it costs you.' },
-  ENFJ: { name: 'The Protagonist',    desc: 'Charismatic, inspiring, and deeply invested in people. You naturally pull others forward.' },
-  ENFP: { name: 'The Campaigner',     desc: 'Enthusiastic, creative, and full of energy. You connect ideas and people in ways nobody else sees.' },
-  ISTJ: { name: 'The Logistician',    desc: 'Reliable, methodical, and thorough. You deliver on your word and expect the same.' },
-  ISFJ: { name: 'The Defender',       desc: 'Warm, conscientious, and deeply loyal. You protect what and who matters to you.' },
-  ESTJ: { name: 'The Executive',      desc: 'Organized, principled, and action-oriented. You cut through noise and get things done.' },
-  ESFJ: { name: 'The Consul',         desc: 'Caring, sociable, and committed to harmony. You make sure people feel seen.' },
-  ISTP: { name: 'The Virtuoso',       desc: 'Practical, observant, and coolly self-sufficient. You figure things out by doing them.' },
-  ISFP: { name: 'The Adventurer',     desc: 'Spontaneous, sensitive, and quietly creative. You experience life before you analyze it.' },
-  ESTP: { name: 'The Entrepreneur',   desc: 'Bold, direct, and action-first. You move fast, break things, and course-correct later.' },
-  ESFP: { name: 'The Entertainer',    desc: 'Energetic, warm, and spontaneous. You make everything better just by showing up.' },
+  INTJ: { name: 'The Waymaker',    desc: 'Strategic, independent, and driven. You see the world as a system to be optimized and have the vision to back it up.' },
+  INTP: { name: 'The Seeker',      desc: 'Analytical, inventive, and endlessly curious. You love ideas for their own sake and question everything.' },
+  ENTJ: { name: 'The Trailblazer', desc: 'Decisive, ambitious, and direct. You lead by seeing what needs to happen and making it so.' },
+  ENTP: { name: 'The Spark',       desc: "Quick-witted, curious, and unafraid to challenge. You thrive on intellectual sparring and don't back down easily." },
+  INFJ: { name: 'The Lantern',     desc: 'Principled, insightful, and purposeful. You want everything you do to mean something.' },
+  INFP: { name: 'The Dreamer',     desc: 'Idealistic, empathetic, and fiercely authentic. You lead with values even when it costs you.' },
+  ENFJ: { name: 'The Gardener',    desc: 'Charismatic, inspiring, and deeply invested in people. You naturally pull others forward.' },
+  ENFP: { name: 'The Wildflower',  desc: 'Enthusiastic, creative, and full of energy. You connect ideas and people in ways nobody else sees.' },
+  ISTJ: { name: 'The Foundation',  desc: 'Reliable, methodical, and thorough. You deliver on your word and expect the same.' },
+  ISFJ: { name: 'The Shelter',     desc: 'Warm, conscientious, and deeply loyal. You protect what and who matters to you.' },
+  ESTJ: { name: 'The Anchor',      desc: 'Organized, principled, and action-oriented. You cut through noise and get things done.' },
+  ESFJ: { name: 'The Hearth',      desc: 'Caring, sociable, and committed to harmony. You make sure people feel seen.' },
+  ISTP: { name: 'The Stone',       desc: 'Practical, observant, and coolly self-sufficient. You figure things out by doing them.' },
+  ISFP: { name: 'The Wanderer',    desc: 'Spontaneous, sensitive, and quietly creative. You experience life before you analyze it.' },
+  ESTP: { name: 'The Surge',       desc: 'Bold, direct, and action-first. You move fast, break things, and course-correct later.' },
+  ESFP: { name: 'The Sunlight',    desc: 'Energetic, warm, and spontaneous. You make everything better just by showing up.' },
 }
 
 const STYLES = [
