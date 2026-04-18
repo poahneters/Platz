@@ -452,7 +452,7 @@ export default function AboutMe({ user }) {
         {tab === 'memory' && (
           <div className="fade-up">
             <p style={{ fontSize: '13px', color: 'var(--text-dim)', lineHeight: 1.7, marginBottom: '32px' }}>
-              Platz builds this automatically as you journal. It uses this to know you better over time — you don't need to manage it.
+              Platz builds this automatically as you journal. It uses this to know you better over time. You don't need to manage it.
             </p>
 
             {!MEMORY_SECTIONS.some(s => data.memory?.[s.key]?.trim()) ? (

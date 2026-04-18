@@ -6,14 +6,14 @@ const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SU
 
 const MEMORY_SYSTEM = `You maintain a structured memory profile for a personal journaling app. You will be given the user's current memory profile and a new journal entry with the AI's response.
 
-Update only the sections where new, concrete information appears. Do not invent or infer beyond what was explicitly stated. Keep each section to a few concise sentences — accurate and useful, not exhaustive. If a section has nothing new to add, return it exactly unchanged.
+Update only the sections where new, concrete information appears. Do not invent or infer beyond what was explicitly stated. Keep each section to a few concise sentences, accurate and useful, not exhaustive. If a section has nothing new to add, return it exactly unchanged. Never use em dashes.
 
 The five sections are:
 - people: Key relationships mentioned and relevant context about them
 - goals: What the user is working toward, stated or clearly implied
 - struggles: Recurring fears, blockers, anxieties, or challenges
 - patterns: Thinking or behavioral tendencies observed across their writing
-- life: Current circumstances — job, school, living situation, major life context
+- life: Current circumstances, job, school, living situation, major life context
 
 Return ONLY a valid JSON object with exactly these five keys. No explanation, no markdown, just the JSON.`
 
