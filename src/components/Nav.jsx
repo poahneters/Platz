@@ -96,6 +96,7 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
             font-family: inherit;
           }
           .nav-mobile-btn[data-active="true"] { color: var(--gold); }
+          .nav-mobile-over-tutorial { z-index: 200 !important; }
           .nav-mobile-dot {
             width: 4px; height: 4px;
             border-radius: 50%;
@@ -215,7 +216,7 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
       </header>
 
       {/* Mobile bottom nav */}
-      <div className="nav-mobile-bottom" style={{ opacity: navVisible ? 1 : 0, transition: 'opacity 0.5s ease', pointerEvents: tutorialActive ? 'none' : 'auto', zIndex: tutorialActive && highlight ? 76 : undefined }}>
+      <div className={`nav-mobile-bottom${tutorialActive && highlight ? ' nav-mobile-over-tutorial' : ''}`} style={{ opacity: navVisible ? 1 : 0, transition: 'opacity 0.5s ease', pointerEvents: tutorialActive ? 'none' : 'auto' }}>
         {VIEWS.map(({ id, short }) => (
           <button
             key={id}
