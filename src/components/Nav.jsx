@@ -9,40 +9,6 @@ const VIEWS = [
   { id: 'about-me',   label: 'About Me' },
 ]
 
-const BURST_LEAVES = [
-  { angle: -90,  dist: 30, color: '#4ade80', size: 0.65, delay: 0    },
-  { angle: -55,  dist: 28, color: '#52b788', size: 0.5,  delay: 0.03 },
-  { angle: -125, dist: 26, color: '#86efac', size: 0.55, delay: 0.05 },
-  { angle: -30,  dist: 25, color: '#4ade80', size: 0.45, delay: 0.02 },
-  { angle: -150, dist: 22, color: '#52b788', size: 0.6,  delay: 0.06 },
-]
-
-function Leaf({ size = 1, color = '#4ade80' }) {
-  const w = Math.round(12 * size)
-  const h = Math.round(18 * size)
-  return (
-    <svg width={w} height={h} viewBox="0 0 12 18" fill="none">
-      <path
-        d="M6,17 C3,13 1,10 1,5 C1,2 3,1 6,1 C9,1 11,2 11,5 C11,10 9,13 6,17 Z"
-        fill={color} stroke="#1a4d2e" strokeWidth="1.2"
-      />
-      <line x1="6" y1="3" x2="6" y2="15" stroke="#1a4d2e" strokeWidth="0.6" strokeLinecap="round" opacity="0.35" />
-    </svg>
-  )
-}
-
-// Pre-compute leaf keyframe CSS
-const leafKeyframeCSS = BURST_LEAVES.map((leaf, i) => {
-  const rad = (leaf.angle * Math.PI) / 180
-  const tx = Math.round(Math.cos(rad) * leaf.dist)
-  const ty = Math.round(Math.sin(rad) * leaf.dist)
-  return `
-    @keyframes leafBurst${i} {
-      0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-      100% { transform: translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1); opacity: 0; }
-    }
-  `
-}).join('')
 
 export default function Nav({ view, setView, highlight, tutorialStep }) {
   const navRef = useRef(null)
@@ -91,7 +57,6 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
           80%  { transform: rotate(2deg) scale(1.02); }
           100% { transform: rotate(0deg) scale(1); }
         }
-        ${leafKeyframeCSS}
       `}</style>
 
       <header
@@ -130,20 +95,6 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
             Platz
           </span>
 
-          {rustling && BURST_LEAVES.map((leaf, i) => (
-            <div
-              key={i}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                pointerEvents: 'none',
-                animation: `leafBurst${i} 0.55s ease-out ${leaf.delay}s both`,
-              }}
-            >
-              <Leaf size={leaf.size} color={leaf.color} />
-            </div>
-          ))}
         </div>
 
         {/* Nav */}
