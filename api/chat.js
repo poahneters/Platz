@@ -20,11 +20,14 @@ export default async function handler(req, res) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(token)
   if (authError || !user) return res.status(401).json({ error: 'Unauthorized' })
 
-  const { messages, system, max_tokens = 1024 } = req.body
+  const { messages, system, max_tokens = 1024, response_length } = req.body
+
+  const SONNET_LENGTHS = new Set(['medium', 'detailed', 'deep'])
+  const model = SONNET_LENGTHS.has(response_length) ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001'
 
   try {
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-6',
+      model,
       max_tokens,
       messages,
       ...(system && { system }),

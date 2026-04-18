@@ -188,6 +188,7 @@ export default function Journal({ user }) {
           system: buildSystemPrompt(aboutMe),
           messages,
           max_tokens: LENGTH_INSTRUCTIONS[aboutMe.response_length || 'short']?.maxTokens ?? 180,
+          response_length: aboutMe.response_length || 'short',
         }),
       })
 
