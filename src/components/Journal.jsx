@@ -35,7 +35,7 @@ function buildSystemPrompt(about) {
     parts.push(`\nCommunication style: ${STYLE_INSTRUCTIONS[about.communication_style]}`)
   }
   if (about.personality_type) {
-    parts.push(`\nUser's personality type: ${about.personality_type}. Factor this into how you engage with them.`)
+    parts.push(`\nUser's personality type: ${about.personality_type}. Use this as silent background context to inform how you engage — never mention or reference their type directly.`)
   }
   if (about.life_story?.trim()) {
     parts.push(`\nUser's background: ${about.life_story.slice(0, 500)}`)
