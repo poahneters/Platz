@@ -1,36 +1,33 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
 
-function formatDue(isoStr) {
-  if (!isoStr) return null
-  const d = new Date(isoStr)
+function formatDue(dueDate, dueTime) {
+  if (!dueDate) return null
+
   const now = new Date()
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const tomorrowStart = new Date(todayStart.getTime() + 86400000)
-  const dStart = new Date(d.getFullYear(), d.getMonth(), d.getDate())
-  const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-  const overdue = d < now
+  const todayStr = now.toISOString().slice(0, 10)
+  const tomorrowStr = new Date(now.getTime() + 86400000).toISOString().slice(0, 10)
 
-  let label
-  if (dStart.getTime() === todayStart.getTime()) label = `Today at ${timeStr}`
-  else if (dStart.getTime() === tomorrowStart.getTime()) label = `Tomorrow at ${timeStr}`
-  else label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ` at ${timeStr}`
+  let dateLabel
+  if (dueDate === todayStr) dateLabel = 'Today'
+  else if (dueDate === tomorrowStr) dateLabel = 'Tomorrow'
+  else {
+    const [y, m, d] = dueDate.split('-').map(Number)
+    dateLabel = new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
 
-  return { label, overdue }
-}
+  let overdue = false
+  if (dueTime) {
+    const [h, min] = dueTime.split(':').map(Number)
+    const [y, m, d] = dueDate.split('-').map(Number)
+    overdue = new Date(y, m - 1, d, h, min) < now
+    const t = new Date(0, 0, 0, h, min)
+    const timeLabel = t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    return { label: `${dateLabel} at ${timeLabel}`, overdue }
+  }
 
-// Convert local datetime-local value to ISO string
-function localToISO(local) {
-  if (!local) return null
-  return new Date(local).toISOString()
-}
-
-// Convert ISO to datetime-local input value
-function isoToLocal(iso) {
-  if (!iso) return ''
-  const d = new Date(iso)
-  const pad = n => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  overdue = dueDate < todayStr
+  return { label: dateLabel, overdue }
 }
 
 export default function Todo({ user }) {
@@ -38,6 +35,7 @@ export default function Todo({ user }) {
   const [input, setInput] = useState('')
   const [filter, setFilter] = useState('all')
   const [dueDate, setDueDate] = useState('')
+  const [dueTime, setDueTime] = useState('')
   const [showDuePicker, setShowDuePicker] = useState(false)
   const [editingDue, setEditingDue] = useState(null)
   const inputRef = useRef(null)
@@ -54,14 +52,16 @@ export default function Todo({ user }) {
   async function add() {
     if (!input.trim()) return
     const text = input.trim()
-    const due_at = dueDate ? localToISO(dueDate) : null
+    const due_date = dueDate || null
+    const due_time = (dueDate && dueTime) ? dueTime : null
     setInput('')
     setDueDate('')
+    setDueTime('')
     setShowDuePicker(false)
     inputRef.current?.focus()
     const { data } = await supabase
       .from('todos')
-      .insert({ user_id: user.id, text, done: false, due_at })
+      .insert({ user_id: user.id, text, done: false, due_date, due_time })
       .select()
       .single()
     if (data) setTodos(prev => [data, ...prev])
@@ -84,11 +84,12 @@ export default function Todo({ user }) {
     await supabase.from('todos').delete().in('id', doneIds)
   }
 
-  async function updateDue(id, localVal) {
-    const due_at = localVal ? localToISO(localVal) : null
-    setTodos(prev => prev.map(t => t.id === id ? { ...t, due_at } : t))
+  async function saveDue(id, newDate, newTime) {
+    const due_date = newDate || null
+    const due_time = (newDate && newTime) ? newTime : null
+    setTodos(prev => prev.map(t => t.id === id ? { ...t, due_date, due_time } : t))
     setEditingDue(null)
-    await supabase.from('todos').update({ due_at }).eq('id', id)
+    await supabase.from('todos').update({ due_date, due_time }).eq('id', id)
   }
 
   const filtered = todos.filter(t =>
@@ -182,14 +183,14 @@ export default function Todo({ user }) {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
+            flexWrap: 'wrap',
           }}>
             <span style={{ fontSize: '12px', color: 'var(--text-dim)', flexShrink: 0 }}>Due</span>
             <input
-              type="datetime-local"
+              type="date"
               value={dueDate}
               onChange={e => setDueDate(e.target.value)}
               style={{
-                flex: 1,
                 fontSize: '13px',
                 color: 'var(--text)',
                 background: 'var(--surface2)',
@@ -198,10 +199,26 @@ export default function Todo({ user }) {
                 padding: '6px 10px',
               }}
             />
+            <input
+              type="time"
+              value={dueTime}
+              onChange={e => setDueTime(e.target.value)}
+              disabled={!dueDate}
+              placeholder="Time (optional)"
+              style={{
+                fontSize: '13px',
+                color: 'var(--text)',
+                background: 'var(--surface2)',
+                border: '1px solid var(--border)',
+                borderRadius: '7px',
+                padding: '6px 10px',
+                opacity: dueDate ? 1 : 0.4,
+              }}
+            />
             {dueDate && (
               <button
-                onClick={() => setDueDate('')}
-                style={{ fontSize: '13px', color: 'var(--text-dim)' }}
+                onClick={() => { setDueDate(''); setDueTime('') }}
+                style={{ fontSize: '12px', color: 'var(--text-dim)' }}
               >
                 Clear
               </button>
@@ -252,7 +269,8 @@ export default function Todo({ user }) {
         )}
 
         {filtered.map(todo => {
-          const due = formatDue(todo.due_at)
+          const due = formatDue(todo.due_date, todo.due_time)
+          const isEditing = editingDue === todo.id
           return (
             <div
               key={todo.id}
@@ -304,47 +322,28 @@ export default function Todo({ user }) {
                   {todo.text}
                 </span>
 
-                {/* Due date display / edit */}
-                {editingDue === todo.id ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-                    <input
-                      type="datetime-local"
-                      defaultValue={isoToLocal(todo.due_at)}
-                      autoFocus
-                      onBlur={e => updateDue(todo.id, e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') updateDue(todo.id, e.target.value); if (e.key === 'Escape') setEditingDue(null) }}
-                      style={{
-                        fontSize: '12px',
-                        color: 'var(--text)',
-                        background: 'var(--surface2)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '6px',
-                        padding: '4px 8px',
-                      }}
-                    />
-                    <button
-                      onClick={() => updateDue(todo.id, '')}
-                      style={{ fontSize: '11px', color: 'var(--text-dim)' }}
-                    >
-                      Remove
-                    </button>
-                  </div>
+                {/* Due date */}
+                {isEditing ? (
+                  <InlineDuePicker
+                    initialDate={todo.due_date || ''}
+                    initialTime={todo.due_time || ''}
+                    onSave={(d, t) => saveDue(todo.id, d, t)}
+                    onCancel={() => setEditingDue(null)}
+                  />
                 ) : due ? (
                   <button
                     onClick={() => !todo.done && setEditingDue(todo.id)}
                     style={{
                       marginTop: '4px',
                       fontSize: '11px',
-                      color: due.overdue ? '#c47a7a' : 'var(--gold)',
+                      color: due.overdue && !todo.done ? '#c47a7a' : 'var(--gold)',
                       opacity: 0.85,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
-                      transition: 'opacity 0.2s',
                     }}
                   >
-                    {due.overdue && !todo.done ? '⚠ ' : ''}
-                    {due.label}
+                    {due.overdue && !todo.done ? '⚠ ' : ''}{due.label}
                   </button>
                 ) : !todo.done ? (
                   <button
@@ -407,6 +406,55 @@ export default function Todo({ user }) {
         .todo-row:hover .todo-add-due { opacity: 0.6 !important; }
         .todo-row:hover .todo-add-due:hover { opacity: 1 !important; }
       `}</style>
+    </div>
+  )
+}
+
+function InlineDuePicker({ initialDate, initialTime, onSave, onCancel }) {
+  const [date, setDate] = useState(initialDate)
+  const [time, setTime] = useState(initialTime)
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+      <input
+        type="date"
+        value={date}
+        onChange={e => setDate(e.target.value)}
+        autoFocus
+        style={{
+          fontSize: '12px',
+          color: 'var(--text)',
+          background: 'var(--surface2)',
+          border: '1px solid var(--border)',
+          borderRadius: '6px',
+          padding: '4px 8px',
+        }}
+      />
+      <input
+        type="time"
+        value={time}
+        onChange={e => setTime(e.target.value)}
+        disabled={!date}
+        style={{
+          fontSize: '12px',
+          color: 'var(--text)',
+          background: 'var(--surface2)',
+          border: '1px solid var(--border)',
+          borderRadius: '6px',
+          padding: '4px 8px',
+          opacity: date ? 1 : 0.4,
+        }}
+      />
+      <button
+        onClick={() => onSave(date, time)}
+        disabled={!date}
+        style={{ fontSize: '12px', color: 'var(--gold)', opacity: date ? 1 : 0.4 }}
+      >
+        Save
+      </button>
+      {initialDate && (
+        <button onClick={() => onSave('', '')} style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Remove</button>
+      )}
+      <button onClick={onCancel} style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Cancel</button>
     </div>
   )
 }
