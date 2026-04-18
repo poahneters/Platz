@@ -49,8 +49,6 @@ export default function App() {
     }
   }, [introComplete])
 
-  const View = VIEWS[view]
-
   // Don't render anything until we know auth state
   if (!authChecked) return null
 
@@ -107,7 +105,20 @@ export default function App() {
               flexDirection: 'column',
             }}
           >
-            <View key={view} user={user} onReplayTutorial={() => setTutorialForced(true)} />
+            {Object.entries(VIEWS).map(([id, Comp]) => (
+              <div
+                key={id}
+                style={{
+                  display: view === id ? 'flex' : 'none',
+                  flex: 1,
+                  flexDirection: 'column',
+                  height: '100%',
+                  overflow: 'hidden',
+                }}
+              >
+                <Comp user={user} onReplayTutorial={() => setTutorialForced(true)} />
+              </div>
+            ))}
           </div>
         </div>
       )}
