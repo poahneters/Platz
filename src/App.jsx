@@ -84,7 +84,7 @@ export default function App() {
 
 {introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
 
-      {introComplete && user && (
+      {user && (
         <div
           style={{
             height: '100vh',
