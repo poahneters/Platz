@@ -83,7 +83,7 @@ export default function Tutorial({ onStep, forced = false, onClose }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px',
+        padding: 'clamp(12px, 4vw, 24px)',
         opacity: visible ? 1 : 0,
         transition: 'opacity 0.5s ease',
         pointerEvents: visible ? 'auto' : 'none',
@@ -94,7 +94,7 @@ export default function Tutorial({ onStep, forced = false, onClose }) {
           background: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: '16px',
-          padding: 'clamp(32px, 5vw, 52px)',
+          padding: 'clamp(20px, 5vw, 52px)',
           maxWidth: '520px',
           width: '100%',
           transform: visible ? 'translateY(0)' : 'translateY(24px)',
@@ -143,9 +143,9 @@ export default function Tutorial({ onStep, forced = false, onClose }) {
         </h2>
 
         {/* Body */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '36px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: 'clamp(20px, 5vw, 36px)' }}>
           {current.body.split('\n\n').map((para, i) => (
-            <p key={i} style={{ fontSize: '15px', lineHeight: 1.8, color: 'var(--text-mid)' }}>
+            <p key={i} style={{ fontSize: 'clamp(13px, 3.8vw, 15px)', lineHeight: 1.75, color: 'var(--text-mid)' }}>
               {para}
             </p>
           ))}
