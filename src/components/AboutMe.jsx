@@ -84,6 +84,15 @@ const TABS = [
   { id: 'story',       label: 'Life Story' },
   { id: 'personality', label: 'Personality' },
   { id: 'style',       label: 'Platz Style' },
+  { id: 'memory',      label: 'What Platz Knows' },
+]
+
+const MEMORY_SECTIONS = [
+  { key: 'people',    label: 'People' },
+  { key: 'goals',     label: 'Goals' },
+  { key: 'struggles', label: 'Struggles' },
+  { key: 'patterns',  label: 'Patterns' },
+  { key: 'life',      label: 'Life' },
 ]
 
 export default function AboutMe({ user }) {
@@ -108,10 +117,24 @@ export default function AboutMe({ user }) {
             platzStyle: row.communication_style || '',
             responseLength: row.response_length || 'short',
             customInstructions: row.custom_instructions || '',
+            memory: row.memory || {},
           })
         }
       })
   }, [user.id])
+
+  // Re-fetch memory whenever the user opens that tab so it's always fresh
+  useEffect(() => {
+    if (tab !== 'memory') return
+    supabase
+      .from('about_me')
+      .select('memory')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data: row }) => {
+        if (row?.memory) setData(prev => ({ ...prev, memory: row.memory }))
+      })
+  }, [tab, user.id])
 
   function update(patch) {
     setData(prev => ({ ...prev, ...patch }))
@@ -421,6 +444,58 @@ export default function AboutMe({ user }) {
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <SaveButton saved={saved} onClick={save} />
             </div>
+          </div>
+        )}
+
+        {/* ── What Platz Knows ── */}
+        {tab === 'memory' && (
+          <div className="fade-up">
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', lineHeight: 1.7, marginBottom: '32px' }}>
+              Platz builds this automatically as you journal. It uses this to know you better over time — you don't need to manage it.
+            </p>
+
+            {!MEMORY_SECTIONS.some(s => data.memory?.[s.key]?.trim()) ? (
+              <div style={{
+                padding: '48px 32px',
+                textAlign: 'center',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+              }}>
+                <p style={{ fontSize: '14px', color: 'var(--text-dim)', lineHeight: 1.7 }}>
+                  Nothing here yet. Start your first reflection and Platz will begin building your profile.
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {MEMORY_SECTIONS.filter(s => data.memory?.[s.key]?.trim()).map(section => (
+                  <div
+                    key={section.key}
+                    style={{
+                      padding: '20px 22px',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '12px',
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: 'var(--gold)',
+                      marginBottom: '10px',
+                      opacity: 0.8,
+                    }}>
+                      {section.label}
+                    </div>
+                    <p style={{ fontSize: '14px', color: 'var(--text-mid)', lineHeight: 1.75 }}>
+                      {data.memory[section.key]}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

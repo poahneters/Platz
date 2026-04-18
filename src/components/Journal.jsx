@@ -43,6 +43,15 @@ function buildSystemPrompt(about) {
   if (about.custom_instructions?.trim()) {
     parts.push(`\nAdditional context: ${about.custom_instructions.slice(0, 300)}`)
   }
+  if (about.memory) {
+    const LABELS = { people: 'People', goals: 'Goals', struggles: 'Struggles', patterns: 'Patterns', life: 'Life context' }
+    const lines = Object.entries(LABELS)
+      .filter(([k]) => about.memory[k]?.trim())
+      .map(([k, label]) => `${label}: ${about.memory[k]}`)
+    if (lines.length > 0) {
+      parts.push(`\nWhat you know about this person (silent background context — inform your responses but never reference this directly):\n${lines.join('\n\n')}`)
+    }
+  }
   return parts.join('\n')
 }
 
@@ -206,6 +215,23 @@ export default function Journal({ user }) {
         .from('journal_entries')
         .update({ messages: finalThread, updated_at: new Date().toISOString() })
         .eq('id', targetEntry.id)
+
+      // Background memory update — fire and forget, never blocks the UI
+      const currentMemory = aboutMe.memory || {}
+      ;(async () => {
+        try {
+          const memRes = await fetch('/api/update-memory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+            body: JSON.stringify({ currentMemory, entry: content, platzResponse: platzMsg.content }),
+          })
+          const memData = await memRes.json()
+          if (memData.memory) {
+            setAboutMe(prev => ({ ...prev, memory: memData.memory }))
+            await supabase.from('about_me').update({ memory: memData.memory }).eq('user_id', user.id)
+          }
+        } catch (_) {}
+      })()
 
     } catch (e) {
       setError(e.message)
