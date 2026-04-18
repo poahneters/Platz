@@ -215,7 +215,7 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
       </header>
 
       {/* Mobile bottom nav */}
-      <div className="nav-mobile-bottom" style={{ opacity: navVisible ? 1 : 0, transition: 'opacity 0.5s ease', pointerEvents: tutorialActive ? 'none' : 'auto' }}>
+      <div className="nav-mobile-bottom" style={{ opacity: navVisible ? 1 : 0, transition: 'opacity 0.5s ease', pointerEvents: tutorialActive ? 'none' : 'auto', zIndex: tutorialActive && highlight ? 76 : undefined }}>
         {VIEWS.map(({ id, short }) => (
           <button
             key={id}
