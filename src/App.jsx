@@ -25,17 +25,24 @@ export default function App() {
 
   // Check session on mount, then listen for auth changes
   useEffect(() => {
+    const isEmailConfirmation = window.location.hash.includes('type=signup') || window.location.search.includes('type=signup')
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setAuthChecked(true)
+      if (session && isEmailConfirmation) {
+        setEmailConfirmed(true)
+        window.history.replaceState(null, '', window.location.pathname)
+        setTimeout(() => setEmailConfirmed(false), 7000)
+      }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
-      if (event === 'SIGNED_IN' && window.location.hash.includes('type=signup')) {
+      if (event === 'SIGNED_IN' && isEmailConfirmation) {
         setEmailConfirmed(true)
         window.history.replaceState(null, '', window.location.pathname)
-        setTimeout(() => setEmailConfirmed(false), 4000)
+        setTimeout(() => setEmailConfirmed(false), 7000)
       }
     })
 
@@ -64,21 +71,26 @@ export default function App() {
       {emailConfirmed && (
         <div style={{
           position: 'fixed',
-          top: '24px',
+          top: '28px',
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'var(--surface)',
           border: '1px solid var(--gold)',
-          borderRadius: '10px',
-          padding: '12px 24px',
+          borderRadius: '12px',
+          padding: '14px 28px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
           fontSize: '14px',
           fontWeight: 600,
           color: 'var(--gold)',
-          zIndex: 999,
-          boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+          zIndex: 9999,
+          boxShadow: '0 4px 32px rgba(0,0,0,0.3)',
+          whiteSpace: 'nowrap',
           animation: 'fadeSlideIn 0.4s ease',
         }}>
-          Email confirmed!
+          <span style={{ fontSize: '18px' }}>✓</span>
+          Email confirmed! You can now sign in.
         </div>
       )}
 
