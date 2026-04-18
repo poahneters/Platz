@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../supabase'
 
 const VIEWS = [
-  { id: 'journal',    label: 'Journal' },
-  { id: 'todo',       label: 'To Do' },
-  { id: 'whiteboard', label: 'Whiteboard' },
-  { id: 'about',      label: 'About Platz' },
-  { id: 'about-me',   label: 'About Me' },
+  { id: 'journal',    label: 'Journal',     short: 'Journal' },
+  { id: 'todo',       label: 'To Do',       short: 'To Do' },
+  { id: 'whiteboard', label: 'Whiteboard',  short: 'Board' },
+  { id: 'about',      label: 'About Platz', short: 'About' },
+  { id: 'about-me',   label: 'About Me',    short: 'Me' },
 ]
 
 
@@ -216,7 +216,7 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
 
       {/* Mobile bottom nav */}
       <div className="nav-mobile-bottom" style={{ opacity: navVisible ? 1 : 0, transition: 'opacity 0.5s ease', pointerEvents: tutorialActive ? 'none' : 'auto' }}>
-        {VIEWS.map(({ id, label }) => (
+        {VIEWS.map(({ id, short }) => (
           <button
             key={id}
             data-active={view === id ? 'true' : 'false'}
@@ -224,7 +224,7 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
             className="nav-mobile-btn"
             style={{ animation: rustlingTab === id ? 'rustle 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both' : 'none' }}
           >
-            {label}
+            {short}
             {highlight === id && <span className="nav-mobile-dot" />}
           </button>
         ))}

@@ -116,15 +116,28 @@ export default function Whiteboard({ user }) {
     await supabase.from('boards').update({ lines: updatedItems }).eq('id', boardId)
   }
 
+  const [mobileView, setMobileView] = useState('list')
+
   const active = boards.find(b => b.id === activeId)
   const markerIdx = active?.markerIdx ?? 0
   const ink = MARKERS[markerIdx]?.body || '#1a4d2e'
 
   return (
+    <>
+    <style>{`
+      @media (max-width: 639px) {
+        .wb-sidebar { width: 100% !important; flex-shrink: unset !important; }
+        .wb-sidebar.mobile-hidden { display: none !important; }
+        .wb-main.mobile-hidden { display: none !important; }
+        .wb-back { display: flex !important; }
+        .wb-main { padding: 16px !important; padding-right: 16px !important; }
+      }
+      .wb-back { display: none; align-items: center; padding: 8px 16px 0; }
+    `}</style>
     <div style={{ display: 'flex', height: '100%', gap: '1px', background: 'var(--border)' }}>
 
       {/* ── Boards sidebar ── */}
-      <aside style={{ width: '200px', flexShrink: 0, background: 'var(--bg)', overflowY: 'auto', paddingTop: '20px' }}>
+      <aside className={`wb-sidebar${mobileView === 'board' ? ' mobile-hidden' : ''}`} style={{ width: '200px', flexShrink: 0, background: 'var(--bg)', overflowY: 'auto', paddingTop: '20px' }}>
         <div style={{ padding: '0 18px 14px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.14em', color: 'var(--text-dim)', textTransform: 'uppercase' }}>
           Boards
         </div>
@@ -132,7 +145,7 @@ export default function Whiteboard({ user }) {
         {boards.map(board => (
           <button
             key={board.id}
-            onClick={() => setActiveId(board.id)}
+            onClick={() => { setActiveId(board.id); setMobileView('board') }}
             className="sidebar-btn"
             style={{
               width: '100%', textAlign: 'left', padding: '10px 18px',
@@ -179,7 +192,7 @@ export default function Whiteboard({ user }) {
       </aside>
 
       {/* ── Wall + whiteboard ── */}
-      <main style={{
+      <main className={`wb-main${mobileView === 'list' ? ' mobile-hidden' : ''}`} style={{
         flex: 1,
         background: 'var(--bg)',
         display: 'flex',
@@ -190,6 +203,11 @@ export default function Whiteboard({ user }) {
         paddingRight: 'calc(36px + 200px)',
         overflow: 'hidden',
       }}>
+        <div className="wb-back">
+          <button onClick={() => setMobileView('list')} style={{ fontSize: '13px', color: 'var(--gold)' }}>
+            ← Boards
+          </button>
+        </div>
 
         {/* Aluminum frame */}
         <div style={{
@@ -492,5 +510,6 @@ export default function Whiteboard({ user }) {
         </div>
       </main>
     </div>
+    </>
   )
 }

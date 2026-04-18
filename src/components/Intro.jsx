@@ -163,6 +163,11 @@ export default function Intro({ onComplete }) {
           from { stroke-dashoffset: 920; }
           to   { stroke-dashoffset: 0; }
         }
+        @media (max-width: 639px) {
+          .intro-vine-bg { display: none !important; }
+          .intro-letter { font-size: clamp(64px, 17vw, 172px) !important; }
+          .intro-letters-row { gap: 0 !important; letter-spacing: 0.04em; }
+        }
       `}</style>
 
       <div
@@ -185,6 +190,7 @@ export default function Intro({ onComplete }) {
 
         {/* ── Full-screen SVG vine layer ── */}
         {leafing && <svg
+          className="intro-vine-bg"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
           viewBox="0 0 1000 700"
           preserveAspectRatio="xMidYMid slice"
@@ -269,10 +275,11 @@ export default function Intro({ onComplete }) {
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
 
           {/* PLATZ letters */}
-          <div style={{ display: 'flex', gap: 'clamp(2px, 1vw, 10px)', alignItems: 'center' }}>
+          <div className="intro-letters-row" style={{ display: 'flex', gap: 'clamp(2px, 1vw, 10px)', alignItems: 'center' }}>
             {LETTERS.map((letter, i) => (
               <span
                 key={i}
+                className="intro-letter"
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 900,

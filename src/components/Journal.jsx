@@ -79,6 +79,7 @@ export default function Journal({ user }) {
   const [reflecting, setReflecting] = useState(false)
   const [error, setError] = useState(null)
   const [expanded, setExpanded] = useState({})
+  const [mobileView, setMobileView] = useState('list')
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -253,10 +254,23 @@ export default function Journal({ user }) {
   const selectedEntry = entries.find(e => e.id === selected)
 
   return (
+    <>
+    <style>{`
+      @media (max-width: 639px) {
+        .journal-sidebar { width: 100% !important; flex-shrink: unset !important; }
+        .journal-sidebar.mobile-hidden { display: none !important; }
+        .journal-main.mobile-hidden { display: none !important; }
+        .journal-back { display: flex !important; }
+        .journal-thread-pad { padding: 24px 20px 20px !important; }
+        .journal-reply-pad { padding: 12px 20px 16px !important; }
+        .journal-new-pad { padding: 24px 20px !important; }
+      }
+      .journal-back { display: none; align-items: center; gap: 8px; padding: 12px 20px 0; }
+    `}</style>
     <div style={{ display: 'flex', height: '100%', gap: '1px', background: 'var(--border)' }}>
 
       {/* ── Sidebar ── */}
-      <aside style={{
+      <aside className={`journal-sidebar${mobileView === 'editor' ? ' mobile-hidden' : ''}`} style={{
         width: '230px',
         flexShrink: 0,
         background: 'var(--bg)',
@@ -275,7 +289,7 @@ export default function Journal({ user }) {
         </div>
 
         <button
-          onClick={() => setSelected(null)}
+          onClick={() => { setSelected(null); setMobileView('editor') }}
           className="sidebar-btn"
           style={{
             width: '100%',
@@ -300,7 +314,7 @@ export default function Journal({ user }) {
         {entries.map(e => (
           <button
             key={e.id}
-            onClick={() => setSelected(e.id)}
+            onClick={() => { setSelected(e.id); setMobileView('editor') }}
             className="sidebar-btn"
             style={{
               width: '100%',
@@ -335,12 +349,17 @@ export default function Journal({ user }) {
       </aside>
 
       {/* ── Main ── */}
-      <main style={{ flex: 1, background: 'var(--bg)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <main className={`journal-main${mobileView === 'list' ? ' mobile-hidden' : ''}`} style={{ flex: 1, background: 'var(--bg)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div className="journal-back">
+          <button onClick={() => setMobileView('list')} style={{ fontSize: '13px', color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            ← Entries
+          </button>
+        </div>
 
         {selectedEntry ? (
           /* ── Thread view ── */
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '36px 48px 24px', maxWidth: '740px', width: '100%', margin: '0 auto', flex: 1 }}>
+            <div className="journal-thread-pad" style={{ padding: '36px 48px 24px', maxWidth: '740px', width: '100%', margin: '0 auto', flex: 1 }}>
 
               {/* Entry header */}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '32px' }}>
@@ -465,7 +484,7 @@ export default function Journal({ user }) {
 
             {/* Reply input */}
             {!reflecting && (
-              <div style={{
+              <div className="journal-reply-pad" style={{
                 borderTop: '1px solid var(--border)',
                 padding: '16px 48px 24px',
                 maxWidth: '740px',
@@ -552,7 +571,7 @@ export default function Journal({ user }) {
           /* ── New entry ── */
           <div
             key="new"
-            className="fade-up"
+            className="fade-up journal-new-pad"
             style={{
               padding: '40px 48px',
               maxWidth: '740px',
@@ -655,5 +674,6 @@ export default function Journal({ user }) {
         )}
       </main>
     </div>
+    </>
   )
 }
