@@ -166,7 +166,7 @@ export default function AboutMe({ user }) {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto' }}>
-      <div className="fade-up" style={{ maxWidth: '700px', margin: '0 auto', padding: '48px 48px 72px' }}>
+      <div className="fade-up" style={{ maxWidth: '700px', margin: '0 auto', padding: 'clamp(24px, 6vw, 48px) clamp(16px, 6vw, 48px) 72px' }}>
 
         <div style={{ marginBottom: '36px' }}>
           <div style={{ width: '36px', height: '2px', background: 'var(--gold)', borderRadius: '1px', marginBottom: '28px', opacity: 0.8 }} />
@@ -179,13 +179,14 @@ export default function AboutMe({ user }) {
         </div>
 
         {/* Internal tabs */}
-        <div style={{ display: 'flex', gap: '2px', marginBottom: '36px', background: 'var(--surface)', borderRadius: '9px', padding: '3px', width: 'fit-content' }}>
+        <div style={{ display: 'flex', gap: '2px', marginBottom: '36px', background: 'var(--surface)', borderRadius: '9px', padding: '3px', width: '100%' }}>
           {TABS.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               style={{
-                padding: '7px 20px',
+                flex: 1,
+                padding: '7px 8px',
                 fontSize: '12px',
                 fontWeight: 500,
                 letterSpacing: '0.04em',
