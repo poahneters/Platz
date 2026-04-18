@@ -227,11 +227,14 @@ export default function Journal({ user }) {
             body: JSON.stringify({ currentMemory, entry: content, platzResponse: platzMsg.content }),
           })
           const memData = await memRes.json()
+          console.log('[memory]', memData)
+          if (!memRes.ok) { console.error('[memory] API error:', memData); return }
           if (memData.memory) {
             setAboutMe(prev => ({ ...prev, memory: memData.memory }))
-            await supabase.from('about_me').upsert({ user_id: user.id, memory: memData.memory }, { onConflict: 'user_id' })
+            const { error: dbErr } = await supabase.from('about_me').upsert({ user_id: user.id, memory: memData.memory }, { onConflict: 'user_id' })
+            if (dbErr) console.error('[memory] DB error:', dbErr)
           }
-        } catch (_) {}
+        } catch (e) { console.error('[memory] fetch error:', e) }
       })()
 
     } catch (e) {
