@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
+import { useUndo } from '../hooks/useUndo'
+import UndoToast from './UndoToast'
 
 // Marker body / cap color pairs - real whiteboard marker colors
 const MARKERS = [
@@ -79,10 +81,21 @@ export default function Whiteboard({ user }) {
   }
 
   async function deleteBoard(id) {
+    const board = boards.find(b => b.id === id)
     const remaining = boards.filter(b => b.id !== id)
     setBoards(remaining)
     setActiveId(remaining[0]?.id || null)
     await supabase.from('boards').delete().eq('id', id)
+    showUndo('Board erased', async () => {
+      const { data: row } = await supabase
+        .from('boards')
+        .insert({ id: board.id, user_id: user.id, name: board.title, color: board.color, lines: board.items })
+        .select().single()
+      if (row) {
+        setBoards(prev => [...prev, board])
+        setActiveId(board.id)
+      }
+    })
   }
 
   async function updateTitle(id, title) {
@@ -111,12 +124,18 @@ export default function Whiteboard({ user }) {
 
   async function removeItem(boardId, itemId) {
     const board = boards.find(b => b.id === boardId)
+    const originalItems = board.items
     const updatedItems = board.items.filter(i => i.id !== itemId)
     setBoards(prev => prev.map(b => b.id === boardId ? { ...b, items: updatedItems } : b))
     await supabase.from('boards').update({ lines: updatedItems }).eq('id', boardId)
+    showUndo('Item erased', async () => {
+      setBoards(prev => prev.map(b => b.id === boardId ? { ...b, items: originalItems } : b))
+      await supabase.from('boards').update({ lines: originalItems }).eq('id', boardId)
+    })
   }
 
   const [mobileView, setMobileView] = useState('list')
+  const { undoToast, showUndo } = useUndo()
 
   const active = boards.find(b => b.id === activeId)
   const markerIdx = active?.markerIdx ?? 0
@@ -124,6 +143,7 @@ export default function Whiteboard({ user }) {
 
   return (
     <>
+    <UndoToast toast={undoToast} />
     <style>{`
       @media (max-width: 639px) {
         .wb-sidebar { width: 100% !important; flex-shrink: unset !important; }

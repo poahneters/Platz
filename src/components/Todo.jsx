@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
+import { useUndo } from '../hooks/useUndo'
+import UndoToast from './UndoToast'
 
 function formatDue(dueDate, dueTime) {
   if (!dueDate) return null
@@ -70,7 +72,9 @@ export default function Todo({ user }) {
   const [addingList, setAddingList] = useState(false)
   const [renamingList, setRenamingList] = useState(null)
   const [renameValue, setRenameValue] = useState('')
+  const [confirmDeleteList, setConfirmDeleteList] = useState(null)
   const [mobileView, setMobileView] = useState('lists')
+  const { undoToast, showUndo } = useUndo()
   const inputRef = useRef(null)
   const newListRef = useRef(null)
   const renameRef = useRef(null)
@@ -149,11 +153,13 @@ export default function Todo({ user }) {
 
   async function deleteList(id) {
     if (lists.length === 1) return
+    setConfirmDeleteList(null)
     await supabase.from('todos').delete().eq('list_id', id)
     await supabase.from('todo_lists').delete().eq('id', id)
     const remaining = lists.filter(l => l.id !== id)
     setLists(remaining)
     if (selectedList === id) setSelectedList(remaining[0]?.id ?? null)
+    if (todos.length > 0) setTodos(prev => prev.filter(t => t.list_id !== id))
   }
 
   async function add() {
@@ -181,8 +187,16 @@ export default function Todo({ user }) {
   }
 
   async function remove(id) {
+    const todo = todos.find(t => t.id === id)
     setTodos(prev => prev.filter(t => t.id !== id))
     await supabase.from('todos').delete().eq('id', id)
+    showUndo('Task deleted', async () => {
+      const { data } = await supabase
+        .from('todos')
+        .insert({ user_id: todo.user_id, list_id: todo.list_id, text: todo.text, done: todo.done, due_date: todo.due_date, due_time: todo.due_time })
+        .select().single()
+      if (data) setTodos(prev => [data, ...prev])
+    })
   }
 
   async function clearDone() {
@@ -211,6 +225,7 @@ export default function Todo({ user }) {
 
   return (
     <>
+      <UndoToast toast={undoToast} />
       <style>{`
         @media (max-width: 639px) {
           .todo-sidebar { width: 100% !important; flex-shrink: unset !important; }
@@ -292,13 +307,20 @@ export default function Todo({ user }) {
                 </button>
               )}
               {lists.length > 1 && (
-                <button
-                  className="todo-list-delete"
-                  onClick={() => deleteList(list.id)}
-                  style={{ fontSize: '16px', color: 'var(--text-dim)', opacity: 0, padding: '0 10px 0 0', transition: 'opacity 0.15s', flexShrink: 0 }}
-                >
-                  ×
-                </button>
+                confirmDeleteList === list.id ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 8px 0 0', flexShrink: 0 }}>
+                    <button onClick={() => deleteList(list.id)} style={{ fontSize: '11px', color: '#c47a7a', fontWeight: 600 }}>Delete</button>
+                    <button onClick={() => setConfirmDeleteList(null)} style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Cancel</button>
+                  </div>
+                ) : (
+                  <button
+                    className="todo-list-delete"
+                    onClick={() => setConfirmDeleteList(list.id)}
+                    style={{ fontSize: '16px', color: 'var(--text-dim)', opacity: 0, padding: '0 10px 0 0', transition: 'opacity 0.15s', flexShrink: 0 }}
+                  >
+                    ×
+                  </button>
+                )
               )}
             </div>
           ))}
