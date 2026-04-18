@@ -57,6 +57,53 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
           80%  { transform: rotate(2deg) scale(1.02); }
           100% { transform: rotate(0deg) scale(1); }
         }
+        .nav-desktop { display: flex; }
+        .nav-mobile-bottom { display: none; }
+        @media (max-width: 639px) {
+          .nav-desktop { display: none; }
+          .nav-mobile-bottom {
+            display: flex;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 58px;
+            background: rgba(244, 250, 240, 0.96);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 4px;
+            padding-bottom: env(safe-area-inset-bottom);
+            z-index: 50;
+          }
+          .nav-mobile-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 8px 2px;
+            font-size: 9.5px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            transition: color 0.2s ease;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+          }
+          .nav-mobile-btn[data-active="true"] { color: var(--gold); }
+          .nav-mobile-dot {
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: var(--gold);
+            margin: 1px auto 0;
+            animation: tabDot 0.8s ease-in-out infinite;
+          }
+        }
       `}</style>
 
       <header
@@ -71,14 +118,14 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 36px',
+          padding: '0 clamp(16px, 3vw, 36px)',
           zIndex: highlight ? 76 : 50,
           opacity: navVisible ? 1 : 0,
           pointerEvents: tutorialActive ? 'none' : 'auto',
           transition: 'opacity 0.5s ease',
         }}
       >
-        {/* Wordmark - inline-block so position: absolute children anchor to the text, not the full row */}
+        {/* Wordmark */}
         <div style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }} onClick={triggerRustle}>
           <span
             style={{
@@ -94,11 +141,10 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
           >
             Platz
           </span>
-
         </div>
 
-        {/* Nav */}
-        <nav ref={navRef} style={{ position: 'relative', display: 'flex', gap: '2px' }}>
+        {/* Desktop nav */}
+        <nav ref={navRef} className="nav-desktop" style={{ position: 'relative', gap: '2px' }}>
           <div
             style={{
               position: 'absolute',
@@ -167,6 +213,22 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
           Sign out
         </button>
       </header>
+
+      {/* Mobile bottom nav */}
+      <div className="nav-mobile-bottom" style={{ opacity: navVisible ? 1 : 0, transition: 'opacity 0.5s ease', pointerEvents: tutorialActive ? 'none' : 'auto' }}>
+        {VIEWS.map(({ id, label }) => (
+          <button
+            key={id}
+            data-active={view === id ? 'true' : 'false'}
+            onClick={() => handleSetView(id)}
+            className="nav-mobile-btn"
+            style={{ animation: rustlingTab === id ? 'rustle 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both' : 'none' }}
+          >
+            {label}
+            {highlight === id && <span className="nav-mobile-dot" />}
+          </button>
+        ))}
+      </div>
     </>
   )
 }

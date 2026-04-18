@@ -97,3 +97,9 @@ input::placeholder { color: var(--text-dim); }
   from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
+
+@media (max-width: 639px) {
+  .mobile-nav-offset {
+    padding-bottom: calc(58px + env(safe-area-inset-bottom));
+  }
+}

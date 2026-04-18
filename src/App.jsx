@@ -97,6 +97,7 @@ export default function App() {
           <Nav view={view} setView={setView} highlight={tutorialHighlight} tutorialStep={tutorialStep} />
 
           <div
+            className="mobile-nav-offset"
             style={{
               flex: 1,
               marginTop: '60px',

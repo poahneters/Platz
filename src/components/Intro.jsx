@@ -298,7 +298,7 @@ export default function Intro({ onComplete }) {
           <div
             style={{
               position: 'relative',
-              width: 'clamp(270px, 46vw, 660px)',
+              width: 'clamp(240px, 88vw, 660px)',
               height: '72px',
               marginTop: '-4px',
             }}
@@ -367,7 +367,7 @@ export default function Intro({ onComplete }) {
             style={{
               fontFamily: "'Inter', sans-serif",
               fontWeight: 400,
-              fontSize: 'clamp(12px, 1.35vw, 16px)',
+              fontSize: 'clamp(13px, 3.5vw, 16px)',
               color: '#2d6a4f',
               letterSpacing: '0.22em',
               marginTop: '12px',
