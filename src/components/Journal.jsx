@@ -229,7 +229,7 @@ export default function Journal({ user }) {
           const memData = await memRes.json()
           if (memData.memory) {
             setAboutMe(prev => ({ ...prev, memory: memData.memory }))
-            await supabase.from('about_me').update({ memory: memData.memory }).eq('user_id', user.id)
+            await supabase.from('about_me').upsert({ user_id: user.id, memory: memData.memory }, { onConflict: 'user_id' })
           }
         } catch (_) {}
       })()
