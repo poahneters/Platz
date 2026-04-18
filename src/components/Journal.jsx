@@ -80,6 +80,7 @@ export default function Journal({ user }) {
   const [error, setError] = useState(null)
   const [expanded, setExpanded] = useState({})
   const [mobileView, setMobileView] = useState('list')
+  const [search, setSearch] = useState('')
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -256,6 +257,10 @@ export default function Journal({ user }) {
 
   const selectedEntry = entries.find(e => e.id === selected)
 
+  const filteredEntries = search.trim()
+    ? entries.filter(e => e.thread.some(m => m.content?.toLowerCase().includes(search.toLowerCase())))
+    : entries
+
   return (
     <>
     <style>{`
@@ -291,6 +296,40 @@ export default function Journal({ user }) {
           Entries
         </div>
 
+        <div style={{ padding: '0 12px 12px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '7px',
+            background: 'var(--surface2)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '6px 10px',
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-dim)', flexShrink: 0 }}>
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search entries..."
+              style={{
+                flex: 1,
+                fontSize: '12px',
+                color: 'var(--text)',
+                background: 'none',
+                border: 'none',
+                outline: 'none',
+                minWidth: 0,
+              }}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} style={{ color: 'var(--text-dim)', fontSize: '14px', lineHeight: 1 }}>×</button>
+            )}
+          </div>
+        </div>
+
         <button
           onClick={() => { setSelected(null); setMobileView('editor') }}
           className="sidebar-btn"
@@ -314,7 +353,13 @@ export default function Journal({ user }) {
           </p>
         )}
 
-        {entries.map(e => (
+        {entries.length > 0 && filteredEntries.length === 0 && (
+          <p style={{ padding: '16px 18px', fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+            No entries match.
+          </p>
+        )}
+
+        {filteredEntries.map(e => (
           <button
             key={e.id}
             onClick={() => { setSelected(e.id); setMobileView('editor') }}
