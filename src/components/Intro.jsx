@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const LETTERS = 'PLATZ'.split('')
 
@@ -134,14 +134,23 @@ const VINE_UNDERLINE_LEAVES = [
 
 export default function Intro({ onComplete }) {
   const [phase, setPhase] = useState('hidden')
+  const timers = useRef([])
 
   useEffect(() => {
-    const t0 = setTimeout(() => setPhase('letters'),  80)
-    const t1 = setTimeout(() => setPhase('leafing'),  1900)
-    const t2 = setTimeout(() => setPhase('exit'),     5000)
-    const t3 = setTimeout(() => onComplete(),         6000)
-    return () => [t0, t1, t2, t3].forEach(clearTimeout)
+    timers.current = [
+      setTimeout(() => setPhase('letters'),  80),
+      setTimeout(() => setPhase('leafing'),  1900),
+      setTimeout(() => setPhase('exit'),     5000),
+      setTimeout(() => onComplete(),         6000),
+    ]
+    return () => timers.current.forEach(clearTimeout)
   }, [onComplete])
+
+  function skip() {
+    timers.current.forEach(clearTimeout)
+    setPhase('exit')
+    setTimeout(() => onComplete(), 1000)
+  }
 
   const lettersVisible = phase !== 'hidden'
   const leafing        = phase === 'leafing' || phase === 'exit'
@@ -171,6 +180,7 @@ export default function Intro({ onComplete }) {
       `}</style>
 
       <div
+        onClick={skip}
         style={{
           position: 'fixed',
           inset: 0,
@@ -185,6 +195,7 @@ export default function Intro({ onComplete }) {
           pointerEvents: isExit ? 'none' : 'all',
           userSelect: 'none',
           overflow: 'hidden',
+          cursor: 'pointer',
         }}
       >
 
