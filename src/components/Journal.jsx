@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
+import ContextMenu from './ContextMenu'
 
 const BASE_SYSTEM_PROMPT = `You are Platz - a sharp, perceptive thinking partner who genuinely cares about the person's growth. You're like a trusted friend who tells the truth and has your back.
 
@@ -86,6 +87,7 @@ export default function Journal({ user }) {
   const [expanded, setExpanded] = useState({})
   const [mobileView, setMobileView] = useState('list')
   const [search, setSearch] = useState('')
+  const [ctxMenu, setCtxMenu] = useState(null)
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -268,6 +270,15 @@ export default function Journal({ user }) {
 
   return (
     <>
+    {ctxMenu && (
+      <ContextMenu
+        x={ctxMenu.x} y={ctxMenu.y}
+        onClose={() => setCtxMenu(null)}
+        items={[
+          { label: 'Delete entry', danger: true, onClick: () => deleteEntry(ctxMenu.entryId) },
+        ]}
+      />
+    )}
     <style>{`
       @media (max-width: 639px) {
         .journal-sidebar { width: 100% !important; flex-shrink: unset !important; }
@@ -368,6 +379,7 @@ export default function Journal({ user }) {
           <button
             key={e.id}
             onClick={() => { setSelected(e.id); setMobileView('editor') }}
+            onContextMenu={ev => { ev.preventDefault(); setCtxMenu({ x: ev.clientX, y: ev.clientY, entryId: e.id }) }}
             className="sidebar-btn"
             style={{
               width: '100%',

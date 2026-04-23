@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { useUndo } from '../hooks/useUndo'
 import UndoToast from './UndoToast'
+import ContextMenu from './ContextMenu'
 
 // Marker body / cap color pairs - real whiteboard marker colors
 const MARKERS = [
@@ -98,6 +99,16 @@ export default function Whiteboard({ user }) {
     })
   }
 
+  async function saveItem(boardId, itemId) {
+    const text = editItemText.trim()
+    setEditingItemId(null)
+    if (!text) return
+    const board = boards.find(b => b.id === boardId)
+    const updatedItems = board.items.map(i => i.id === itemId ? { ...i, text } : i)
+    setBoards(prev => prev.map(b => b.id === boardId ? { ...b, items: updatedItems } : b))
+    await supabase.from('boards').update({ lines: updatedItems }).eq('id', boardId)
+  }
+
   async function updateTitle(id, title) {
     if (!title) { setEditingTitle(null); return }
     setBoards(prev => prev.map(b => b.id === id ? { ...b, title } : b))
@@ -134,6 +145,9 @@ export default function Whiteboard({ user }) {
     })
   }
 
+  const [ctxMenu, setCtxMenu] = useState(null)
+  const [editingItemId, setEditingItemId] = useState(null)
+  const [editItemText, setEditItemText] = useState('')
   const [mobileView, setMobileView] = useState('list')
   const { undoToast, showUndo } = useUndo()
 
@@ -144,6 +158,17 @@ export default function Whiteboard({ user }) {
   return (
     <>
     <UndoToast toast={undoToast} />
+    {ctxMenu && (
+      <ContextMenu
+        x={ctxMenu.x} y={ctxMenu.y}
+        onClose={() => setCtxMenu(null)}
+        items={[
+          { label: 'Edit item', onClick: () => { const board = boards.find(b => b.id === ctxMenu.boardId); const item = board?.items.find(i => i.id === ctxMenu.itemId); setEditItemText(item?.text ?? ''); setEditingItemId(ctxMenu.itemId) } },
+          'separator',
+          { label: 'Delete', danger: true, onClick: () => removeItem(ctxMenu.boardId, ctxMenu.itemId) },
+        ]}
+      />
+    )}
     <style>{`
       @media (max-width: 639px) {
         .wb-sidebar { width: 100% !important; flex-shrink: unset !important; }
@@ -430,6 +455,7 @@ export default function Whiteboard({ user }) {
                       <div
                         key={item.id}
                         className="board-item"
+                        onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, boardId: active.id, itemId: item.id }) }}
                         style={{
                           display: 'flex', alignItems: 'flex-start', gap: '14px',
                           padding: '8px 4px',
@@ -457,16 +483,37 @@ export default function Whiteboard({ user }) {
                           {item.done ? '✓' : ''}
                         </button>
 
-                        <span style={{
-                          fontFamily: "'Permanent Marker', cursive",
-                          fontSize: 'clamp(16px, 2.2vw, 21px)',
-                          color: ink, lineHeight: 1.4, flex: 1,
-                          textDecoration: item.done ? 'line-through' : 'none',
-                          textDecorationColor: `${ink}66`,
-                          wordBreak: 'break-word',
-                        }}>
-                          {item.text}
-                        </span>
+                        {editingItemId === item.id ? (
+                          <input
+                            autoFocus
+                            value={editItemText}
+                            onChange={e => setEditItemText(e.target.value)}
+                            onBlur={() => saveItem(active.id, item.id)}
+                            onKeyDown={e => { if (e.key === 'Enter') saveItem(active.id, item.id); if (e.key === 'Escape') setEditingItemId(null) }}
+                            style={{
+                              flex: 1,
+                              fontFamily: "'Permanent Marker', cursive",
+                              fontSize: 'clamp(16px, 2.2vw, 21px)',
+                              color: ink,
+                              background: 'transparent',
+                              border: 'none',
+                              borderBottom: `2px solid ${ink}`,
+                              outline: 'none',
+                              padding: '2px 0',
+                            }}
+                          />
+                        ) : (
+                          <span style={{
+                            fontFamily: "'Permanent Marker', cursive",
+                            fontSize: 'clamp(16px, 2.2vw, 21px)',
+                            color: ink, lineHeight: 1.4, flex: 1,
+                            textDecoration: item.done ? 'line-through' : 'none',
+                            textDecorationColor: `${ink}66`,
+                            wordBreak: 'break-word',
+                          }}>
+                            {item.text}
+                          </span>
+                        )}
 
                         <button
                           onClick={() => removeItem(active.id, item.id)}

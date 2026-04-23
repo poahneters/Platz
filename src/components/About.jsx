@@ -67,7 +67,7 @@ export default function About({ onReplayTutorial }) {
             {[
               ['Journal', 'Write freely. Reflect with Platz when you want a second voice - or just save and move on. Your journal, your pace.'],
               ['To Do', 'Keep your daily tasks in one clean place.'],
-              ['Whiteboard', 'Long-term goals, organized by board. Your digital wipe board.'],
+              ['Whiteboard', 'Long-term goals, organized by board. Your digital whiteboard.'],
             ].map(([title, desc]) => (
               <div key={title} style={{
                 display: 'flex',

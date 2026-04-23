@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
 import { useUndo } from '../hooks/useUndo'
 import UndoToast from './UndoToast'
+import ContextMenu from './ContextMenu'
 
 function formatDue(dueDate, dueTime) {
   if (!dueDate) return null
@@ -74,6 +75,9 @@ export default function Todo({ user }) {
   const [renameValue, setRenameValue] = useState('')
   const [confirmDeleteList, setConfirmDeleteList] = useState(null)
   const [mobileView, setMobileView] = useState('lists')
+  const [ctxMenu, setCtxMenu] = useState(null)
+  const [editingText, setEditingText] = useState(null)
+  const [editTextVal, setEditTextVal] = useState('')
   const { undoToast, showUndo } = useUndo()
   const inputRef = useRef(null)
   const newListRef = useRef(null)
@@ -213,6 +217,14 @@ export default function Todo({ user }) {
     await supabase.from('todos').update({ due_date, due_time }).eq('id', id)
   }
 
+  async function saveText(id) {
+    const text = editTextVal.trim()
+    setEditingText(null)
+    if (!text) return
+    setTodos(prev => prev.map(t => t.id === id ? { ...t, text } : t))
+    await supabase.from('todos').update({ text }).eq('id', id)
+  }
+
   const filtered = todos.filter(t =>
     filter === 'all'    ? true :
     filter === 'active' ? !t.done :
@@ -226,6 +238,17 @@ export default function Todo({ user }) {
   return (
     <>
       <UndoToast toast={undoToast} />
+      {ctxMenu && (
+        <ContextMenu
+          x={ctxMenu.x} y={ctxMenu.y}
+          onClose={() => setCtxMenu(null)}
+          items={[
+            { label: 'Edit task', onClick: () => { const t = todos.find(t => t.id === ctxMenu.todoId); setEditTextVal(t.text); setEditingText(ctxMenu.todoId) } },
+            'separator',
+            { label: 'Delete', danger: true, onClick: () => remove(ctxMenu.todoId) },
+          ]}
+        />
+      )}
       <style>{`
         @media (max-width: 639px) {
           .todo-sidebar { width: 100% !important; flex-shrink: unset !important; }
@@ -516,6 +539,7 @@ export default function Todo({ user }) {
                   <div
                     key={todo.id}
                     className="todo-row fade-up"
+                    onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, todoId: todo.id }) }}
                     style={{
                       display: 'flex',
                       alignItems: 'flex-start',
@@ -545,14 +569,25 @@ export default function Todo({ user }) {
                     </button>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{
-                        display: 'block', fontSize: '14px', lineHeight: 1.5, color: 'var(--text)',
-                        textDecoration: todo.done ? 'line-through' : 'none',
-                        textDecorationColor: 'var(--text-dim)',
-                        transition: 'all 0.25s ease',
-                      }}>
-                        {todo.text}
-                      </span>
+                      {editingText === todo.id ? (
+                        <input
+                          autoFocus
+                          value={editTextVal}
+                          onChange={e => setEditTextVal(e.target.value)}
+                          onBlur={() => saveText(todo.id)}
+                          onKeyDown={e => { if (e.key === 'Enter') saveText(todo.id); if (e.key === 'Escape') setEditingText(null) }}
+                          style={{ fontSize: '14px', lineHeight: 1.5, color: 'var(--text)', width: '100%', background: 'var(--surface2)', border: '1px solid var(--gold)', borderRadius: '4px', padding: '2px 6px' }}
+                        />
+                      ) : (
+                        <span style={{
+                          display: 'block', fontSize: '14px', lineHeight: 1.5, color: 'var(--text)',
+                          textDecoration: todo.done ? 'line-through' : 'none',
+                          textDecorationColor: 'var(--text-dim)',
+                          transition: 'all 0.25s ease',
+                        }}>
+                          {todo.text}
+                        </span>
+                      )}
 
                       {editingDue === todo.id ? (
                         <InlineDuePicker
