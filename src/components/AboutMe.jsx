@@ -95,12 +95,9 @@ const MEMORY_SECTIONS = [
   { key: 'life',      label: 'Life' },
 ]
 
-export default function AboutMe({ user }) {
+export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter }) {
   const [data, setData] = useState({})
   const [tab, setTab] = useState('story')
-  const [reflectOnEnter, setReflectOnEnter] = useState(
-    localStorage.getItem('platz_reflect_on_enter') === 'true'
-  )
   const [saveStatus, setSaveStatus] = useState('idle') // 'idle' | 'saving' | 'saved'
   const autosaveTimer = useRef(null)
   const initializedRef = useRef(false)
@@ -441,11 +438,7 @@ export default function AboutMe({ user }) {
               Journal input
             </label>
             <button
-              onClick={() => {
-                const next = !reflectOnEnter
-                setReflectOnEnter(next)
-                localStorage.setItem('platz_reflect_on_enter', next)
-              }}
+              onClick={() => onToggleReflectOnEnter(!reflectOnEnter)}
               style={{
                 width: '100%',
                 textAlign: 'left',

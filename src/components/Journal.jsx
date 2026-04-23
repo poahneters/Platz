@@ -76,7 +76,7 @@ function excerpt(text, max = 180) {
   return text.slice(0, cut > 0 ? cut : max) + '…'
 }
 
-export default function Journal({ user }) {
+export default function Journal({ user, reflectOnEnter }) {
   const [entries, setEntries] = useState([])
   const [aboutMe, setAboutMe] = useState({})
   const [text, setText] = useState('')
@@ -656,7 +656,7 @@ export default function Journal({ user }) {
               onChange={e => setText(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
-                  if (localStorage.getItem('platz_reflect_on_enter') === 'true' && !e.shiftKey) {
+                  if (reflectOnEnter && !e.shiftKey) {
                     e.preventDefault()
                     sendMessage(false)
                   } else {

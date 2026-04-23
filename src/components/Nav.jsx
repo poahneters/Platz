@@ -2,15 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../supabase'
 
 const VIEWS = [
-  { id: 'journal',    label: 'Journal',     short: 'Journal' },
-  { id: 'todo',       label: 'To Do',       short: 'To Do' },
-  { id: 'whiteboard', label: 'Whiteboard',  short: 'Board' },
-  { id: 'about',      label: 'About Platz', short: 'About' },
-  { id: 'about-me',   label: 'About Me',    short: 'Me' },
+  { id: 'journal',    label: 'Journal',    short: 'Journal' },
+  { id: 'todo',       label: 'To Do',      short: 'To Do' },
+  { id: 'whiteboard', label: 'Whiteboard', short: 'Board' },
+  { id: 'about-me',   label: 'About Me',   short: 'Me' },
 ]
 
 
-export default function Nav({ view, setView, highlight, tutorialStep }) {
+export default function Nav({ view, setView, highlight, tutorialStep, onAbout }) {
   const navRef = useRef(null)
   const [indicator, setIndicator] = useState({ left: 0, width: 0 })
   const [rustling, setRustling] = useState(false)
@@ -194,25 +193,40 @@ export default function Nav({ view, setView, highlight, tutorialStep }) {
           ))}
         </nav>
 
-        {/* Sign out */}
-        <button
-          onClick={signOut}
-          style={{
-            fontSize: '11.5px',
-            fontWeight: 500,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: 'var(--text-dim)',
-            padding: '5px 12px',
-            border: '1px solid var(--border)',
-            borderRadius: '6px',
-            transition: 'color 0.2s, border-color 0.2s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)' }}
-        >
-          Sign out
-        </button>
+        {/* About + Sign out */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            onClick={onAbout}
+            style={{
+              fontSize: '11px',
+              color: view === 'about' ? 'var(--gold)' : 'var(--text-dim)',
+              letterSpacing: '0.06em',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--text-mid)'}
+            onMouseLeave={e => e.currentTarget.style.color = view === 'about' ? 'var(--gold)' : 'var(--text-dim)'}
+          >
+            About
+          </button>
+          <button
+            onClick={signOut}
+            style={{
+              fontSize: '11.5px',
+              fontWeight: 500,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'var(--text-dim)',
+              padding: '5px 12px',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              transition: 'color 0.2s, border-color 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
       {/* Mobile bottom nav */}

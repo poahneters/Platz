@@ -22,6 +22,9 @@ export default function App() {
   const [tutorialStep, setTutorialStep] = useState(null)
   const [tutorialForced, setTutorialForced] = useState(false)
   const [emailConfirmed, setEmailConfirmed] = useState(false)
+  const [reflectOnEnter, setReflectOnEnter] = useState(
+    localStorage.getItem('platz_reflect_on_enter') === 'true'
+  )
 
   // Check session on mount, then listen for auth changes
   useEffect(() => {
@@ -106,7 +109,7 @@ export default function App() {
             transition: 'opacity 0.6s ease',
           }}
         >
-          <Nav view={view} setView={setView} highlight={tutorialHighlight} tutorialStep={tutorialStep} />
+          <Nav view={view} setView={setView} highlight={tutorialHighlight} tutorialStep={tutorialStep} onAbout={() => setView('about')} />
 
           <div
             className="mobile-nav-offset"
@@ -129,7 +132,12 @@ export default function App() {
                   overflow: 'hidden',
                 }}
               >
-                <Comp user={user} onReplayTutorial={() => setTutorialForced(true)} />
+                <Comp
+                  user={user}
+                  onReplayTutorial={() => setTutorialForced(true)}
+                  reflectOnEnter={reflectOnEnter}
+                  onToggleReflectOnEnter={v => { setReflectOnEnter(v); localStorage.setItem('platz_reflect_on_enter', v) }}
+                />
               </div>
             ))}
           </div>
