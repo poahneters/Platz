@@ -242,7 +242,10 @@ export default function Todo({ user }) {
         <ContextMenu
           x={ctxMenu.x} y={ctxMenu.y}
           onClose={() => setCtxMenu(null)}
-          items={[
+          items={ctxMenu.listId ? [
+            { label: 'Rename list', onClick: () => { setRenamingList(ctxMenu.listId); setRenameValue(lists.find(l => l.id === ctxMenu.listId)?.name ?? '') } },
+            ...(lists.length > 1 ? ['separator', { label: 'Delete list', danger: true, onClick: () => deleteList(ctxMenu.listId) }] : []),
+          ] : [
             { label: 'Edit task', onClick: () => { const t = todos.find(t => t.id === ctxMenu.todoId); setEditTextVal(t.text); setEditingText(ctxMenu.todoId) } },
             'separator',
             { label: 'Delete', danger: true, onClick: () => remove(ctxMenu.todoId) },
@@ -285,6 +288,7 @@ export default function Todo({ user }) {
             <div
               key={list.id}
               className="todo-list-btn"
+              onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, listId: list.id }) }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -390,15 +394,43 @@ export default function Todo({ user }) {
 
             {/* Header */}
             <div style={{ marginBottom: '36px' }}>
-              <h1 style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: '32px',
-                fontWeight: 700,
-                color: 'var(--text)',
-                marginBottom: '6px',
-              }}>
-                {currentList?.name ?? ''}
-              </h1>
+              {renamingList === selectedList ? (
+                <input
+                  ref={renameRef}
+                  value={renameValue}
+                  onChange={e => setRenameValue(e.target.value)}
+                  onBlur={() => renameList(selectedList)}
+                  onKeyDown={e => { if (e.key === 'Enter') renameList(selectedList); if (e.key === 'Escape') setRenamingList(null) }}
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: '32px',
+                    fontWeight: 700,
+                    color: 'var(--text)',
+                    marginBottom: '6px',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: '2px solid var(--gold)',
+                    outline: 'none',
+                    width: '100%',
+                    padding: '0 0 2px',
+                  }}
+                />
+              ) : (
+                <h1
+                  onClick={() => { setRenamingList(selectedList); setRenameValue(currentList?.name ?? '') }}
+                  title="Click to rename"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: '32px',
+                    fontWeight: 700,
+                    color: 'var(--text)',
+                    marginBottom: '6px',
+                    cursor: 'text',
+                  }}
+                >
+                  {currentList?.name ?? ''}
+                </h1>
+              )}
               <p style={{ fontSize: '13px', color: 'var(--text-dim)' }}>
                 {activeCount} remaining{doneCount > 0 ? ` · ${doneCount} done` : ''}
               </p>
