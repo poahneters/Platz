@@ -656,7 +656,12 @@ export default function Journal({ user }) {
               onChange={e => setText(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
-                  e.stopPropagation()
+                  if (localStorage.getItem('platz_reflect_on_enter') === 'true' && !e.shiftKey) {
+                    e.preventDefault()
+                    sendMessage(false)
+                  } else {
+                    e.stopPropagation()
+                  }
                 }
               }}
               placeholder="What's on your mind..."

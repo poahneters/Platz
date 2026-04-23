@@ -98,6 +98,9 @@ const MEMORY_SECTIONS = [
 export default function AboutMe({ user }) {
   const [data, setData] = useState({})
   const [tab, setTab] = useState('story')
+  const [reflectOnEnter, setReflectOnEnter] = useState(
+    localStorage.getItem('platz_reflect_on_enter') === 'true'
+  )
   const [saveStatus, setSaveStatus] = useState('idle') // 'idle' | 'saving' | 'saved'
   const autosaveTimer = useRef(null)
   const initializedRef = useRef(false)
@@ -433,6 +436,41 @@ export default function AboutMe({ user }) {
                 )
               })}
             </div>
+
+            <label style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-dim)', display: 'block', marginBottom: '16px' }}>
+              Journal input
+            </label>
+            <button
+              onClick={() => {
+                const next = !reflectOnEnter
+                setReflectOnEnter(next)
+                localStorage.setItem('platz_reflect_on_enter', next)
+              }}
+              style={{
+                width: '100%',
+                textAlign: 'left',
+                padding: '16px 18px',
+                borderRadius: '10px',
+                background: reflectOnEnter ? 'var(--gold-dim)' : 'var(--surface)',
+                border: `1px solid ${reflectOnEnter ? 'rgba(45,138,85,0.3)' : 'var(--border2)'}`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+                marginBottom: '36px',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <div style={{
+                width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
+                border: `2px solid ${reflectOnEnter ? 'var(--gold)' : 'var(--text-dim)'}`,
+                background: reflectOnEnter ? 'var(--gold)' : 'transparent',
+                transition: 'all 0.2s',
+              }} />
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-mid)', marginBottom: '3px' }}>Press Enter to reflect</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-dim)', lineHeight: 1.5 }}>Submit with Enter. Use Shift+Enter for a new line.</div>
+              </div>
+            </button>
 
             <label style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-dim)', display: 'block', marginBottom: '12px' }}>
               Anything else Platz should know?
