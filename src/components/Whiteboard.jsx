@@ -162,10 +162,14 @@ export default function Whiteboard({ user }) {
       <ContextMenu
         x={ctxMenu.x} y={ctxMenu.y}
         onClose={() => setCtxMenu(null)}
-        items={[
+        items={ctxMenu.itemId ? [
           { label: 'Edit item', onClick: () => { const board = boards.find(b => b.id === ctxMenu.boardId); const item = board?.items.find(i => i.id === ctxMenu.itemId); setEditItemText(item?.text ?? ''); setEditingItemId(ctxMenu.itemId) } },
           'separator',
           { label: 'Delete', danger: true, onClick: () => removeItem(ctxMenu.boardId, ctxMenu.itemId) },
+        ] : [
+          { label: 'Rename board', onClick: () => setEditingTitle(ctxMenu.boardId) },
+          'separator',
+          { label: 'Erase board', danger: true, onClick: () => deleteBoard(ctxMenu.boardId) },
         ]}
       />
     )}
@@ -191,6 +195,7 @@ export default function Whiteboard({ user }) {
           <button
             key={board.id}
             onClick={() => { setActiveId(board.id); setMobileView('board') }}
+            onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, boardId: board.id }) }}
             className="sidebar-btn"
             style={{
               width: '100%', textAlign: 'left', padding: '10px 18px',
