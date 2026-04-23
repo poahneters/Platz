@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../supabase'
 
-const VIEWS = [
+const BASE_VIEWS = [
   { id: 'journal',    label: 'Journal',    short: 'Journal' },
   { id: 'todo',       label: 'To Do',      short: 'To Do' },
   { id: 'whiteboard', label: 'Whiteboard', short: 'Board' },
-  { id: 'about-me',   label: 'About Me',   short: 'Me' },
+  { id: 'about-me',   label: null,         short: 'Me' },
 ]
 
 
-export default function Nav({ view, setView, highlight, tutorialStep, onAbout }) {
+export default function Nav({ view, setView, highlight, tutorialStep, onAbout, userName }) {
   const navRef = useRef(null)
   const [indicator, setIndicator] = useState({ left: 0, width: 0 })
   const [rustling, setRustling] = useState(false)
@@ -159,7 +159,9 @@ export default function Nav({ view, setView, highlight, tutorialStep, onAbout })
             }}
           />
 
-          {VIEWS.map(({ id, label }) => (
+          {BASE_VIEWS.map(({ id, label: baseLabel, short }) => {
+            const label = id === 'about-me' ? (userName ? `About ${userName}` : 'About Me') : baseLabel
+            return (
             <button
               key={id}
               data-active={view === id ? 'true' : 'false'}
@@ -190,7 +192,8 @@ export default function Nav({ view, setView, highlight, tutorialStep, onAbout })
                 }} />
               )}
             </button>
-          ))}
+            )
+          })}
         </nav>
 
         {/* About + Sign out */}
@@ -231,7 +234,7 @@ export default function Nav({ view, setView, highlight, tutorialStep, onAbout })
 
       {/* Mobile bottom nav */}
       <div className={`nav-mobile-bottom${tutorialActive && highlight ? ' nav-mobile-over-tutorial' : ''}`} style={{ opacity: navVisible ? 1 : 0, transition: 'opacity 0.5s ease', pointerEvents: tutorialActive ? 'none' : 'auto' }}>
-        {VIEWS.map(({ id, short }) => (
+        {BASE_VIEWS.map(({ id, short }) => (
           <button
             key={id}
             data-active={view === id ? 'true' : 'false'}

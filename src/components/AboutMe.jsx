@@ -223,6 +223,27 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter }
         {tab === 'story' && (
           <div className="fade-up">
             <label style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-dim)', display: 'block', marginBottom: '12px' }}>
+              Your name
+            </label>
+            <input
+              value={userName || ''}
+              onChange={e => onNameSave(e.target.value.slice(0, 20))}
+              placeholder="First name"
+              style={{
+                fontSize: '15px',
+                padding: '10px 14px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                color: 'var(--text)',
+                width: '220px',
+                marginBottom: '32px',
+                display: 'block',
+              }}
+              onFocus={e => e.target.style.borderColor = 'rgba(45,138,85,0.35)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+            <label style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-dim)', display: 'block', marginBottom: '12px' }}>
               Your story
             </label>
             <p style={{ fontSize: '13px', color: 'var(--text-dim)', marginBottom: '16px', lineHeight: 1.6 }}>

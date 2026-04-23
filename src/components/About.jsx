@@ -1,4 +1,21 @@
-export default function About({ onReplayTutorial }) {
+import { useState } from 'react'
+import { supabase } from '../supabase'
+
+export default function About({ onReplayTutorial, user }) {
+  const [feedback, setFeedback] = useState('')
+  const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+
+  async function sendFeedback() {
+    if (!feedback.trim()) return
+    setSending(true)
+    await supabase.from('feedback').insert({ user_id: user?.id ?? null, message: feedback.trim() })
+    setSent(true)
+    setSending(false)
+    setFeedback('')
+    setTimeout(() => setSent(false), 4000)
+  }
+
   return (
     <div style={{ height: '100%', overflowY: 'auto' }}>
       <div className="fade-up" style={{ maxWidth: '680px', margin: '0 auto', padding: '56px 48px' }}>
@@ -96,8 +113,63 @@ export default function About({ onReplayTutorial }) {
           </div>
         </div>
 
+        {/* Feedback */}
+        <div style={{ marginTop: '64px', paddingTop: '40px', borderTop: '1px solid var(--border)' }}>
+          <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '12px' }}>
+            Share an idea
+          </div>
+          <p style={{ fontSize: '13px', color: 'var(--text-dim)', marginBottom: '16px', lineHeight: 1.6 }}>
+            Got a feature idea or something that could be better? I read everything.
+          </p>
+          {sent ? (
+            <p style={{ fontSize: '14px', color: 'var(--gold)', fontFamily: "'Playfair Display', serif", fontStyle: 'italic' }}>
+              Thanks — got it.
+            </p>
+          ) : (
+            <>
+              <textarea
+                value={feedback}
+                onChange={e => setFeedback(e.target.value)}
+                placeholder="What's on your mind..."
+                rows={4}
+                style={{
+                  width: '100%',
+                  fontSize: '14px',
+                  lineHeight: 1.75,
+                  color: 'var(--text)',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  marginBottom: '12px',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={e => e.target.style.borderColor = 'rgba(45,138,85,0.35)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+              <button
+                onClick={sendFeedback}
+                disabled={!feedback.trim() || sending}
+                className="btn-gold"
+                style={{
+                  padding: '9px 22px',
+                  background: feedback.trim() ? 'var(--gold)' : 'var(--surface)',
+                  color: feedback.trim() ? '#0f2d1a' : 'var(--text-dim)',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  opacity: feedback.trim() ? 1 : 0.4,
+                  transition: 'all 0.2s',
+                }}
+              >
+                {sending ? 'Sending…' : 'Send'}
+              </button>
+            </>
+          )}
+        </div>
+
         {/* Replay tutorial */}
-        <div style={{ paddingTop: '32px', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
+        <div style={{ paddingTop: '32px', borderTop: '1px solid var(--border)', marginTop: '40px' }}>
           <p style={{ fontSize: '13px', color: 'var(--text-dim)', marginBottom: '14px' }}>
             New here, or just want a refresher?
           </p>

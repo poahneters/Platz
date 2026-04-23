@@ -49,6 +49,9 @@ function buildSystemPrompt(about) {
   if (about.custom_instructions?.trim()) {
     parts.push(`\nAdditional context: ${about.custom_instructions.slice(0, 300)}`)
   }
+  if (about.userName) {
+    parts.push(`\nThe user's name is ${about.userName}. Use their name occasionally and naturally — only when it adds warmth or emphasis in a meaningful moment. Never in every response, never formulaically.`)
+  }
   if (about.memory) {
     const LABELS = { people: 'People', goals: 'Goals', struggles: 'Struggles', patterns: 'Patterns', life: 'Life context' }
     const lines = Object.entries(LABELS)
@@ -76,7 +79,7 @@ function excerpt(text, max = 180) {
   return text.slice(0, cut > 0 ? cut : max) + '…'
 }
 
-export default function Journal({ user, reflectOnEnter }) {
+export default function Journal({ user, reflectOnEnter, userName, onNameSave }) {
   const [entries, setEntries] = useState([])
   const [aboutMe, setAboutMe] = useState({})
   const [text, setText] = useState('')
@@ -88,6 +91,7 @@ export default function Journal({ user, reflectOnEnter }) {
   const [mobileView, setMobileView] = useState('list')
   const [search, setSearch] = useState('')
   const [ctxMenu, setCtxMenu] = useState(null)
+  const [nameInput, setNameInput] = useState('')
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -203,7 +207,7 @@ export default function Journal({ user, reflectOnEnter }) {
           'Authorization': `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({
-          system: buildSystemPrompt(aboutMe),
+          system: buildSystemPrompt({ ...aboutMe, userName }),
           messages,
           max_tokens: LENGTH_INSTRUCTIONS[aboutMe.response_length || 'short']?.maxTokens ?? 180,
           response_length: aboutMe.response_length || 'short',
@@ -630,6 +634,54 @@ export default function Journal({ user, reflectOnEnter }) {
                 </div>
               </div>
             )}
+          </div>
+
+        ) : !userName ? (
+          /* ── Name prompt (first time) ── */
+          <div className="fade-up journal-new-pad" style={{ padding: '40px 48px', maxWidth: '740px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
+            <div style={{ borderLeft: '2px solid rgba(45,138,85,0.4)', paddingLeft: '20px', maxWidth: '480px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.14em', color: 'var(--gold)', textTransform: 'uppercase', marginBottom: '14px', opacity: 0.8 }}>
+                Platz
+              </div>
+              <p style={{ fontSize: '16px', lineHeight: 1.85, color: 'var(--text-mid)', marginBottom: '24px' }}>
+                Before we start — what should I call you?
+              </p>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input
+                  autoFocus
+                  value={nameInput}
+                  onChange={e => setNameInput(e.target.value.slice(0, 20))}
+                  onKeyDown={e => { if (e.key === 'Enter' && nameInput.trim()) onNameSave(nameInput.trim()) }}
+                  placeholder="Your first name"
+                  style={{
+                    fontSize: '16px',
+                    padding: '10px 14px',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    color: 'var(--text)',
+                    width: '220px',
+                  }}
+                />
+                <button
+                  onClick={() => { if (nameInput.trim()) onNameSave(nameInput.trim()) }}
+                  disabled={!nameInput.trim()}
+                  className="btn-gold"
+                  style={{
+                    padding: '10px 20px',
+                    background: nameInput.trim() ? 'var(--gold)' : 'var(--surface)',
+                    color: nameInput.trim() ? '#0f2d1a' : 'var(--text-dim)',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                    opacity: nameInput.trim() ? 1 : 0.4,
+                  }}
+                >
+                  Let's go
+                </button>
+              </div>
+            </div>
           </div>
 
         ) : (

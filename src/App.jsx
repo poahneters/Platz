@@ -25,6 +25,18 @@ export default function App() {
   const [reflectOnEnter, setReflectOnEnter] = useState(
     localStorage.getItem('platz_reflect_on_enter') === 'true'
   )
+  const [userName, setUserName] = useState('')
+
+  useEffect(() => {
+    if (!user) { setUserName(''); return }
+    supabase.from('about_me').select('name').eq('user_id', user.id).single()
+      .then(({ data }) => { if (data?.name) setUserName(data.name) })
+  }, [user])
+
+  function handleNameSave(name) {
+    setUserName(name)
+    supabase.from('about_me').upsert({ user_id: user.id, name }, { onConflict: 'user_id' }).then()
+  }
 
   // Check session on mount, then listen for auth changes
   useEffect(() => {
@@ -109,7 +121,7 @@ export default function App() {
             transition: 'opacity 0.6s ease',
           }}
         >
-          <Nav view={view} setView={setView} highlight={tutorialHighlight} tutorialStep={tutorialStep} onAbout={() => setView('about')} />
+          <Nav view={view} setView={setView} highlight={tutorialHighlight} tutorialStep={tutorialStep} onAbout={() => setView('about')} userName={userName} />
 
           <div
             className="mobile-nav-offset"
@@ -137,6 +149,8 @@ export default function App() {
                   onReplayTutorial={() => setTutorialForced(true)}
                   reflectOnEnter={reflectOnEnter}
                   onToggleReflectOnEnter={v => { setReflectOnEnter(v); localStorage.setItem('platz_reflect_on_enter', v) }}
+                  userName={userName}
+                  onNameSave={handleNameSave}
                 />
               </div>
             ))}
