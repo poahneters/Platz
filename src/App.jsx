@@ -9,6 +9,7 @@ import About from './components/About'
 import AboutMe from './components/AboutMe'
 import AuthModal from './components/AuthModal'
 import Tutorial from './components/Tutorial'
+import ErrorBoundary from './components/ErrorBoundary'
 
 const VIEWS = { journal: Journal, todo: Todo, whiteboard: Whiteboard, about: About, 'about-me': AboutMe }
 
@@ -95,6 +96,7 @@ export default function App() {
       {introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
 
       {introComplete && user && (
+        <ErrorBoundary>
         <div
           style={{
             height: '100vh',
@@ -137,6 +139,7 @@ export default function App() {
             ))}
           </div>
         </div>
+        </ErrorBoundary>
       )}
     </>
   )
