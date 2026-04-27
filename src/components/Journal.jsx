@@ -568,6 +568,12 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
                 <textarea
                   value={reply}
                   onChange={e => setReply(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && reflectOnEnter && !e.shiftKey) {
+                      e.preventDefault()
+                      sendMessage(true)
+                    }
+                  }}
                   placeholder="Continue the thought..."
                   rows={2}
                   style={{

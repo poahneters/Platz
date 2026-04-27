@@ -22,7 +22,7 @@ export default function App() {
   const [tutorialForced, setTutorialForced] = useState(false)
   const [emailConfirmed, setEmailConfirmed] = useState(false)
   const [reflectOnEnter, setReflectOnEnter] = useState(
-    localStorage.getItem('platz_reflect_on_enter') === 'true'
+    localStorage.getItem('platz_reflect_on_enter') !== 'false'
   )
   const [userName, setUserName] = useState('')
   const [nameInput, setNameInput] = useState('')
