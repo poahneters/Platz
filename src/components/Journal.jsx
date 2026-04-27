@@ -64,6 +64,30 @@ function buildSystemPrompt(about) {
   return parts.join('\n')
 }
 
+function MicButton({ active, onClick }) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  if (!SR) return null
+  return (
+    <button
+      onClick={onClick}
+      title={active ? 'Stop recording' : 'Speak your thought'}
+      style={{
+        width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
+        background: active ? 'rgba(180,40,40,0.1)' : 'var(--surface)',
+        border: `1px solid ${active ? 'rgba(180,40,40,0.35)' : 'var(--border)'}`,
+        color: active ? '#c44040' : 'var(--text-dim)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s',
+        animation: active ? 'pulse 1.2s ease-in-out infinite' : 'none',
+      }}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </button>
+  )
+}
+
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
@@ -91,7 +115,37 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
   const [mobileView, setMobileView] = useState('list')
   const [search, setSearch] = useState('')
   const [ctxMenu, setCtxMenu] = useState(null)
+  const [listening, setListening] = useState(false)
+  const [voiceTarget, setVoiceTarget] = useState(null)
+  const recognitionRef = useRef(null)
   const bottomRef = useRef(null)
+
+  function toggleVoice(target) {
+    if (listening) {
+      recognitionRef.current?.stop()
+      return
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+    const rec = new SR()
+    rec.continuous = true
+    rec.interimResults = false
+    rec.lang = 'en-US'
+    rec.onstart = () => { setListening(true); setVoiceTarget(target) }
+    rec.onend = () => { setListening(false); setVoiceTarget(null) }
+    rec.onerror = () => { setListening(false); setVoiceTarget(null) }
+    rec.onresult = (event) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          const t = event.results[i][0].transcript
+          if (target === 'new') setText(prev => prev ? prev + ' ' + t : t)
+          else setReply(prev => prev ? prev + ' ' + t : t)
+        }
+      }
+    }
+    recognitionRef.current = rec
+    rec.start()
+  }
 
   useEffect(() => {
     async function load() {
@@ -587,7 +641,8 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
                     width: '100%',
                   }}
                 />
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                  <MicButton active={listening && voiceTarget === 'reply'} onClick={() => toggleVoice('reply')} />
                   <button
                     onClick={async () => {
                       if (!reply.trim()) return
@@ -698,7 +753,9 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
               marginTop: '28px',
               paddingTop: '20px',
               borderTop: '1px solid var(--border)',
+              alignItems: 'center',
             }}>
+              <MicButton active={listening && voiceTarget === 'new'} onClick={() => toggleVoice('new')} />
               <button
                 onClick={() => sendMessage(false)}
                 disabled={reflecting || !text.trim()}
