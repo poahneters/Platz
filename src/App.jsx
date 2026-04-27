@@ -71,15 +71,12 @@ export default function App() {
     }
   }, [introComplete])
 
-  // Don't render anything until we know auth state
-  if (!authChecked) return null
-
   return (
     <>
       {(!introComplete || !visible) && <Intro onComplete={() => setIntroComplete(true)} />}
 
-      {/* Auth gate - shown after intro if not signed in */}
-      {introComplete && !user && (
+      {/* Auth gate - shown after intro once we know user is signed out */}
+      {introComplete && authChecked && !user && (
         <AuthModal onAuth={() => {}} />
       )}
 
@@ -109,9 +106,9 @@ export default function App() {
         </div>
       )}
 
-{introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
+{introComplete && authChecked && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
 
-      {user && introComplete && (
+      {user && authChecked && introComplete && (
         <div
           style={{
             height: '100vh',
