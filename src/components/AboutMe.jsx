@@ -95,7 +95,7 @@ const MEMORY_SECTIONS = [
   { key: 'life',      label: 'Life' },
 ]
 
-export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter }) {
+export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, userName, onNameSave }) {
   const [data, setData] = useState({})
   const [tab, setTab] = useState('story')
   const [saveStatus, setSaveStatus] = useState('idle') // 'idle' | 'saving' | 'saved'
