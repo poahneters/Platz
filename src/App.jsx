@@ -13,10 +13,8 @@ import Tutorial from './components/Tutorial'
 const VIEWS = { journal: Journal, todo: Todo, whiteboard: Whiteboard, about: About, 'about-me': AboutMe }
 
 export default function App() {
-  const [authChecked, setAuthChecked] = useState(false)
   const [user, setUser] = useState(null)
   const [introComplete, setIntroComplete] = useState(false)
-  const [visible, setVisible] = useState(false)
   const [view, setView] = useState('journal')
   const [tutorialHighlight, setTutorialHighlight] = useState(null)
   const [tutorialStep, setTutorialStep] = useState(null)
@@ -38,20 +36,17 @@ export default function App() {
     supabase.from('about_me').upsert({ user_id: user.id, name }, { onConflict: 'user_id' }).then()
   }
 
-  // Check session on mount, then listen for auth changes
   useEffect(() => {
     const isEmailConfirmation = window.location.hash.includes('type=signup') || window.location.search.includes('type=signup')
 
-    supabase.auth.getSession().then((result) => {
-      const session = result?.data?.session ?? null
-      setUser(session?.user ?? null)
-      setAuthChecked(true)
-      if (session && isEmailConfirmation) {
+    supabase.auth.getSession().then(result => {
+      setUser(result?.data?.session?.user ?? null)
+      if (result?.data?.session && isEmailConfirmation) {
         setEmailConfirmed(true)
         window.history.replaceState(null, '', window.location.pathname)
         setTimeout(() => setEmailConfirmed(false), 7000)
       }
-    }).catch(() => setAuthChecked(true))
+    }).catch(() => {})
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
@@ -65,21 +60,11 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  useEffect(() => {
-    if (introComplete) {
-      const t = setTimeout(() => setVisible(true), 50)
-      return () => clearTimeout(t)
-    }
-  }, [introComplete])
-
   return (
     <>
-      {(!introComplete || !visible) && <Intro onComplete={() => setIntroComplete(true)} />}
+      {!introComplete && <Intro onComplete={() => setIntroComplete(true)} />}
 
-      {/* Auth gate - shown after intro once we know user is signed out */}
-      {introComplete && authChecked && !user && (
-        <AuthModal onAuth={() => {}} />
-      )}
+      {introComplete && !user && <AuthModal onAuth={() => {}} />}
 
       {emailConfirmed && (
         <div style={{
@@ -107,16 +92,14 @@ export default function App() {
         </div>
       )}
 
-{introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
+      {introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
 
-      {user && introComplete && (
+      {introComplete && user && (
         <div
           style={{
             height: '100vh',
             display: 'flex',
             flexDirection: 'column',
-            opacity: visible ? 1 : 0,
-            transition: 'opacity 0.6s ease',
           }}
         >
           <Nav view={view} setView={setView} highlight={tutorialHighlight} tutorialStep={tutorialStep} onAbout={() => setView('about')} userName={userName} />
