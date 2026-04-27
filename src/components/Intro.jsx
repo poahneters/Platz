@@ -144,7 +144,7 @@ export default function Intro({ onComplete }) {
       setTimeout(() => onComplete(),         6000),
     ]
     return () => timers.current.forEach(clearTimeout)
-  }, [onComplete])
+  }, [])
 
   function skip() {
     timers.current.forEach(clearTimeout)
