@@ -648,7 +648,6 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
               </p>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <input
-                  autoFocus
                   value={nameInput}
                   onChange={e => setNameInput(e.target.value.slice(0, 20))}
                   onKeyDown={e => { if (e.key === 'Enter' && nameInput.trim()) onNameSave(nameInput.trim()) }}

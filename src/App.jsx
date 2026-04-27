@@ -66,7 +66,7 @@ export default function App() {
 
   useEffect(() => {
     if (introComplete) {
-      const t = setTimeout(() => setVisible(true), 30)
+      const t = setTimeout(() => setVisible(true), 50)
       return () => clearTimeout(t)
     }
   }, [introComplete])
@@ -76,7 +76,7 @@ export default function App() {
 
   return (
     <>
-      {!introComplete && <Intro onComplete={() => setIntroComplete(true)} />}
+      {(!introComplete || !visible) && <Intro onComplete={() => setIntroComplete(true)} />}
 
       {/* Auth gate - shown after intro if not signed in */}
       {introComplete && !user && (
@@ -111,7 +111,7 @@ export default function App() {
 
 {introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
 
-      {user && (
+      {user && introComplete && (
         <div
           style={{
             height: '100vh',
