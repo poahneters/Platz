@@ -25,6 +25,7 @@ export default function App() {
     localStorage.getItem('platz_reflect_on_enter') === 'true'
   )
   const [userName, setUserName] = useState('')
+  const [nameInput, setNameInput] = useState('')
 
   useEffect(() => {
     if (!user) { setUserName(''); return }
@@ -90,6 +91,66 @@ export default function App() {
         }}>
           <span style={{ fontSize: '18px' }}>✓</span>
           Email confirmed! You can now sign in.
+        </div>
+      )}
+
+      {introComplete && user && !userName && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 200,
+          background: 'rgba(15, 35, 20, 0.55)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '24px',
+        }}>
+          <div style={{
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: '16px',
+            padding: 'clamp(28px, 6vw, 52px)',
+            maxWidth: '440px', width: '100%',
+          }}>
+            <div style={{ width: '28px', height: '2px', background: 'var(--gold)', borderRadius: '1px', marginBottom: '24px', opacity: 0.8 }} />
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 700, color: 'var(--text)', lineHeight: 1.2, marginBottom: '10px' }}>
+              Before we start
+            </p>
+            <p style={{ fontSize: '15px', color: 'var(--text-mid)', lineHeight: 1.7, marginBottom: '28px' }}>
+              What should Platz call you?
+            </p>
+            <input
+              autoFocus
+              value={nameInput}
+              onChange={e => setNameInput(e.target.value.slice(0, 20))}
+              onKeyDown={e => { if (e.key === 'Enter' && nameInput.trim()) handleNameSave(nameInput.trim()) }}
+              placeholder="Your first name"
+              style={{
+                display: 'block', width: '100%',
+                fontSize: '16px', padding: '12px 16px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '10px',
+                color: 'var(--text)',
+                marginBottom: '14px',
+                outline: 'none',
+              }}
+              onFocus={e => e.target.style.borderColor = 'rgba(45,138,85,0.4)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+            <button
+              onClick={() => { if (nameInput.trim()) handleNameSave(nameInput.trim()) }}
+              disabled={!nameInput.trim()}
+              style={{
+                width: '100%', padding: '12px',
+                background: nameInput.trim() ? 'var(--gold)' : 'var(--surface)',
+                color: nameInput.trim() ? '#0f2d1a' : 'var(--text-dim)',
+                borderRadius: '10px', fontSize: '14px', fontWeight: 600,
+                opacity: nameInput.trim() ? 1 : 0.4,
+                transition: 'all 0.2s',
+              }}
+            >
+              Let's go
+            </button>
+          </div>
         </div>
       )}
 
