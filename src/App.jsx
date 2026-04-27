@@ -42,7 +42,8 @@ export default function App() {
   useEffect(() => {
     const isEmailConfirmation = window.location.hash.includes('type=signup') || window.location.search.includes('type=signup')
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then((result) => {
+      const session = result?.data?.session ?? null
       setUser(session?.user ?? null)
       setAuthChecked(true)
       if (session && isEmailConfirmation) {
@@ -50,7 +51,7 @@ export default function App() {
         window.history.replaceState(null, '', window.location.pathname)
         setTimeout(() => setEmailConfirmed(false), 7000)
       }
-    })
+    }).catch(() => setAuthChecked(true))
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
@@ -106,9 +107,9 @@ export default function App() {
         </div>
       )}
 
-{introComplete && authChecked && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
+{introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
 
-      {user && authChecked && introComplete && (
+      {user && introComplete && (
         <div
           style={{
             height: '100vh',
