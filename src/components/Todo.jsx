@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
 import { useUndo } from '../hooks/useUndo'
 import UndoToast from './UndoToast'
-import ContextMenu from './ContextMenu'
 
 function formatDue(dueDate, dueTime) {
   if (!dueDate) return null
@@ -75,7 +74,6 @@ export default function Todo({ user }) {
   const [renameValue, setRenameValue] = useState('')
   const [confirmDeleteList, setConfirmDeleteList] = useState(null)
   const [mobileView, setMobileView] = useState('lists')
-  const [ctxMenu, setCtxMenu] = useState(null)
   const [editingText, setEditingText] = useState(null)
   const [editTextVal, setEditTextVal] = useState('')
   const { undoToast, showUndo } = useUndo()
@@ -238,27 +236,7 @@ export default function Todo({ user }) {
   return (
     <>
       <UndoToast toast={undoToast} />
-      {ctxMenu && (() => {
-        const listId = ctxMenu.listId
-        const todoId = ctxMenu.todoId
-        const ctxTodo = todos.find(t => t.id === todoId)
-        const ctxList = lists.find(l => l.id === listId)
-        return (
-          <ContextMenu
-            x={ctxMenu.x} y={ctxMenu.y}
-            onClose={() => setCtxMenu(null)}
-            items={listId ? [
-              { label: 'Rename list', onClick: () => { setRenamingList(listId); setRenameValue(ctxList?.name ?? '') } },
-              ...(lists.length > 1 ? ['separator', { label: 'Delete list', danger: true, onClick: () => deleteList(listId) }] : []),
-            ] : [
-              { label: 'Edit task', onClick: () => { setEditTextVal(ctxTodo?.text ?? ''); setEditingText(todoId) } },
-              'separator',
-              { label: 'Delete', danger: true, onClick: () => remove(todoId) },
-            ]}
-          />
-        )
-      })()}
-      <style>{`
+<style>{`
         @media (max-width: 639px) {
           .todo-sidebar { width: 100% !important; flex-shrink: unset !important; }
           .todo-sidebar.mobile-hidden { display: none !important; }
@@ -294,7 +272,7 @@ export default function Todo({ user }) {
             <div
               key={list.id}
               className="todo-list-btn"
-              onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, listId: list.id }) }}
+
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -577,7 +555,7 @@ export default function Todo({ user }) {
                   <div
                     key={todo.id}
                     className="todo-row fade-up"
-                    onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, todoId: todo.id }) }}
+
                     style={{
                       display: 'flex',
                       alignItems: 'flex-start',
