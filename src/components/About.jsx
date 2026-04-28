@@ -205,13 +205,13 @@ export default function About({ onReplayTutorial, user }) {
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <button
               onClick={() => setShowTerms(true)}
-              style={{ fontSize: '13px', color: 'var(--text-mid)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              style={{ fontSize: '13px', color: 'var(--gold)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
               Terms and Conditions
             </button>
             <button
               onClick={() => setShowPrivacy(true)}
-              style={{ fontSize: '13px', color: 'var(--text-mid)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              style={{ fontSize: '13px', color: 'var(--gold)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
               Privacy Policy
             </button>
