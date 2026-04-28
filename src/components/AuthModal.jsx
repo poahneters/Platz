@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
+import PrivacyPolicy from './PrivacyPolicy'
 
 const inputRowStyle = {
   display: 'flex',
@@ -38,6 +39,8 @@ export default function AuthModal({ onAuth }) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [agreed, setAgreed] = useState(false)
+  const [showPrivacy, setShowPrivacy] = useState(false)
   const [visible] = useState(true)
 
   function switchMode(next) {
@@ -46,6 +49,7 @@ export default function AuthModal({ onAuth }) {
     setMessage('')
     setPassword('')
     setConfirm('')
+    setAgreed(false)
   }
 
   async function handleSubmit(e) {
@@ -55,6 +59,11 @@ export default function AuthModal({ onAuth }) {
 
     if (mode === 'signup' && password !== confirm) {
       setError('Passwords do not match.')
+      return
+    }
+
+    if (mode === 'signup' && !agreed) {
+      setError('Please agree to the Privacy Policy to continue.')
       return
     }
 
@@ -232,6 +241,8 @@ export default function AuthModal({ onAuth }) {
   }
 
   return (
+    <>
+    {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
     <div
       style={{
         position: 'fixed',
@@ -331,6 +342,28 @@ export default function AuthModal({ onAuth }) {
             </div>
           )}
 
+          {mode === 'signup' && (
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={e => setAgreed(e.target.checked)}
+                style={{ marginTop: '2px', accentColor: 'var(--gold)', flexShrink: 0 }}
+              />
+              <span style={{ fontSize: '13px', color: 'var(--text-mid)', lineHeight: 1.5 }}>
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacy(true)}
+                  style={{ color: 'var(--gold)', fontWeight: 600, fontSize: '13px', textDecoration: 'underline' }}
+                >
+                  Privacy Policy
+                </button>
+                . I understand that my journal entries are processed by Anthropic's Claude AI to generate responses.
+              </span>
+            </label>
+          )}
+
           {error && (
             <p style={{ fontSize: '13px', color: '#c0392b', lineHeight: 1.5 }}>{error}</p>
           )}
@@ -404,5 +437,6 @@ export default function AuthModal({ onAuth }) {
         </div>
       </div>
     </div>
+    </>
   )
 }
