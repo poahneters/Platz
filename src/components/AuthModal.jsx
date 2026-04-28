@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
 import PrivacyPolicy from './PrivacyPolicy'
+import TermsOfService from './TermsOfService'
 
 const inputRowStyle = {
   display: 'flex',
@@ -41,6 +42,7 @@ export default function AuthModal({ onAuth }) {
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState(false)
   const [showPrivacy, setShowPrivacy] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
   const [visible] = useState(true)
 
   function switchMode(next) {
@@ -243,6 +245,7 @@ export default function AuthModal({ onAuth }) {
   return (
     <>
     {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
+    {showTerms && <TermsOfService onClose={() => setShowTerms(false)} />}
     <div
       style={{
         position: 'fixed',
@@ -352,11 +355,11 @@ export default function AuthModal({ onAuth }) {
               />
               <span style={{ fontSize: '13px', color: 'var(--text-mid)', lineHeight: 1.5 }}>
                 I agree to the{' '}
-                <button
-                  type="button"
-                  onClick={() => setShowPrivacy(true)}
-                  style={{ color: 'var(--gold)', fontWeight: 600, fontSize: '13px', textDecoration: 'underline' }}
-                >
+                <button type="button" onClick={() => setShowTerms(true)} style={{ color: 'var(--gold)', fontWeight: 600, fontSize: '13px', textDecoration: 'underline' }}>
+                  Terms and Conditions
+                </button>
+                {' '}and{' '}
+                <button type="button" onClick={() => setShowPrivacy(true)} style={{ color: 'var(--gold)', fontWeight: 600, fontSize: '13px', textDecoration: 'underline' }}>
                   Privacy Policy
                 </button>
                 . I understand that my journal entries are processed by Anthropic's Claude AI to generate responses.
