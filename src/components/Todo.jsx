@@ -611,12 +611,16 @@ export default function Todo({ user }) {
                           style={{ fontSize: '14px', lineHeight: 1.5, color: 'var(--text)', width: '100%', background: 'var(--surface2)', border: '1px solid var(--gold)', borderRadius: '4px', padding: '2px 6px' }}
                         />
                       ) : (
-                        <span style={{
-                          display: 'block', fontSize: '14px', lineHeight: 1.5, color: 'var(--text)',
-                          textDecoration: todo.done ? 'line-through' : 'none',
-                          textDecorationColor: 'var(--text-dim)',
-                          transition: 'all 0.25s ease',
-                        }}>
+                        <span
+                          onClick={() => { if (!todo.done) { setEditTextVal(todo.text); setEditingText(todo.id) } }}
+                          style={{
+                            display: 'block', fontSize: '14px', lineHeight: 1.5, color: 'var(--text)',
+                            textDecoration: todo.done ? 'line-through' : 'none',
+                            textDecorationColor: 'var(--text-dim)',
+                            transition: 'all 0.25s ease',
+                            cursor: todo.done ? 'default' : 'text',
+                          }}
+                        >
                           {todo.text}
                         </span>
                       )}
