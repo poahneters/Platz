@@ -24,13 +24,14 @@ export default function App() {
   const [reflectOnEnter, setReflectOnEnter] = useState(
     localStorage.getItem('platz_reflect_on_enter') !== 'false'
   )
-  const [userName, setUserName] = useState('')
+  const [userName, setUserName] = useState(null) // null = loading, '' = loaded/no name, 'X' = has name
   const [nameInput, setNameInput] = useState('')
 
   useEffect(() => {
-    if (!user) { setUserName(''); return }
+    if (!user) { setUserName(null); return }
     supabase.from('about_me').select('name').eq('user_id', user.id).single()
-      .then(({ data }) => { if (data?.name) setUserName(data.name) })
+      .then(({ data }) => { setUserName(data?.name || '') })
+      .catch(() => { setUserName('') })
   }, [user])
 
   function handleNameSave(name) {
@@ -94,7 +95,7 @@ export default function App() {
         </div>
       )}
 
-      {introComplete && user && !userName && (
+      {introComplete && user && userName === '' && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 200,
           background: 'rgba(15, 35, 20, 0.55)',
