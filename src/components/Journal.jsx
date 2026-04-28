@@ -117,6 +117,7 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
   const [ctxMenu, setCtxMenu] = useState(null)
   const [listening, setListening] = useState(false)
   const [voiceTarget, setVoiceTarget] = useState(null)
+  const [showDisclaimer, setShowDisclaimer] = useState(() => !localStorage.getItem('platz_disclaimer_seen'))
   const recognitionRef = useRef(null)
   const bottomRef = useRef(null)
 
@@ -335,6 +336,29 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
           { label: 'Delete entry', danger: true, onClick: () => deleteEntry(ctxMenu.entryId) },
         ]}
       />
+    )}
+    {showDisclaimer && (
+      <div style={{
+        position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+        zIndex: 400, maxWidth: '520px', width: 'calc(100% - 48px)',
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderRadius: '12px', padding: '14px 18px',
+        display: 'flex', alignItems: 'flex-start', gap: '12px',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+      }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text)', marginBottom: '3px' }}>
+            A note before you start
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-mid)', lineHeight: 1.6 }}>
+            Platz is a journaling tool, not a therapist. AI responses are for reflection only — not professional advice. If you're in crisis, please contact <strong style={{ color: 'var(--text)' }}>988</strong> or a qualified professional.
+          </div>
+        </div>
+        <button
+          onClick={() => { setShowDisclaimer(false); localStorage.setItem('platz_disclaimer_seen', '1') }}
+          style={{ fontSize: '18px', color: 'var(--text-dim)', lineHeight: 1, flexShrink: 0, padding: '0 4px' }}
+        >×</button>
+      </div>
     )}
     <style>{`
       @media (max-width: 639px) {

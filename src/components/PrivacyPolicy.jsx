@@ -83,6 +83,18 @@ export default function PrivacyPolicy({ onClose }) {
             <p>You can access, correct, or delete your personal data at any time by visiting your account settings or contacting us. We will honor deletion requests within a reasonable time.</p>
           </Section>
 
+          <Section title="Disclaimer and Limitations">
+            <p><strong style={{ color: 'var(--text)' }}>Platz is not a mental health service.</strong> It is a personal journaling and productivity tool. Nothing in Platz — including AI-generated responses — constitutes professional mental health, medical, legal, or financial advice.</p>
+            <p>You should not use Platz as a substitute for therapy, counseling, or any professional support. AI responses are generated automatically and are not reviewed by a professional. They may be incomplete, inaccurate, or inappropriate for your situation.</p>
+            <p>If you are experiencing a mental health crisis or are in danger, please contact a qualified professional or a crisis resource immediately. In the US, you can call or text <strong style={{ color: 'var(--text)' }}>988</strong> (Suicide and Crisis Lifeline) at any time.</p>
+            <p>By using Platz, you agree not to:</p>
+            <ul>
+              <li>Use the Service as a replacement for professional mental health treatment or therapy</li>
+              <li>Rely on AI responses as professional recommendations of any kind</li>
+              <li>Share AI-generated responses with others as professional advice</li>
+            </ul>
+          </Section>
+
           <Section title="Children's Privacy">
             <p>Platz is not directed at anyone under 16. We do not knowingly collect data from children under 16. If you believe a child has provided us with personal data, please contact us.</p>
           </Section>
