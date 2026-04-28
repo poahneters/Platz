@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
 const PIN_KEY = 'platz_pin'
@@ -71,6 +71,15 @@ export default function PinLock({ onVerified }) {
   const [firstPin, setFirstPin] = useState('')
   const [error, setError] = useState('')
   const [shake, setShake] = useState(false)
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key >= '0' && e.key <= '9') handleDigit(e.key)
+      else if (e.key === 'Backspace') handleDelete()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
 
   function fail(msg) {
     setError(msg)
