@@ -10,12 +10,14 @@ import AboutMe from './components/AboutMe'
 import AuthModal from './components/AuthModal'
 import Tutorial from './components/Tutorial'
 import ErrorBoundary from './components/ErrorBoundary'
+import PinLock from './components/PinLock'
 
 const VIEWS = { journal: Journal, todo: Todo, whiteboard: Whiteboard, about: About, 'about-me': AboutMe }
 
 export default function App() {
   const [user, setUser] = useState(null)
   const [introComplete, setIntroComplete] = useState(false)
+  const [pinVerified, setPinVerified] = useState(false)
   const [view, setView] = useState('journal')
   const [tutorialHighlight, setTutorialHighlight] = useState(null)
   const [tutorialStep, setTutorialStep] = useState(null)
@@ -52,6 +54,7 @@ export default function App() {
     }).catch(() => {})
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session?.user) setPinVerified(false)
       setUser(session?.user ?? null)
       if (event === 'SIGNED_IN' && isEmailConfirmation) {
         setEmailConfirmed(true)
@@ -68,6 +71,8 @@ export default function App() {
       {!introComplete && <Intro onComplete={() => setIntroComplete(true)} />}
 
       {introComplete && !user && <AuthModal onAuth={() => {}} />}
+
+      {introComplete && user && !pinVerified && <PinLock onVerified={() => setPinVerified(true)} />}
 
       {emailConfirmed && (
         <div style={{
@@ -95,7 +100,7 @@ export default function App() {
         </div>
       )}
 
-      {introComplete && user && userName === '' && (
+      {introComplete && user && pinVerified && userName === '' && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 200,
           background: 'rgba(15, 35, 20, 0.55)',
@@ -155,9 +160,9 @@ export default function App() {
         </div>
       )}
 
-      {introComplete && user && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
+      {introComplete && user && pinVerified && <Tutorial onStep={(tabId, stepIdx) => { setTutorialHighlight(tabId); setTutorialStep(stepIdx ?? null) }} forced={tutorialForced} onClose={() => { setTutorialForced(false); setView('about-me'); setTutorialStep(null) }} />}
 
-      {introComplete && user && (
+      {introComplete && user && pinVerified && (
         <ErrorBoundary>
         <div
           style={{
