@@ -351,7 +351,7 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
             A note before you start
           </div>
           <div style={{ fontSize: '12px', color: 'var(--text-mid)', lineHeight: 1.6 }}>
-            Platz is a journaling tool, not a therapist. AI responses are for reflection only — not professional advice. If you're in crisis, please contact <strong style={{ color: 'var(--text)' }}>988</strong> or a qualified professional.
+            Platz is a journaling tool, not a therapist. AI responses are for reflection only, not professional advice. If you're in crisis, please contact <strong style={{ color: 'var(--text)' }}>988</strong> or a qualified professional.
           </div>
         </div>
         <button

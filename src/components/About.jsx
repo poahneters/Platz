@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
+import TermsOfService from './TermsOfService'
+import PrivacyPolicy from './PrivacyPolicy'
 
 export default function About({ onReplayTutorial, user }) {
   const [feedback, setFeedback] = useState('')
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
+  const [showPrivacy, setShowPrivacy] = useState(false)
 
   async function sendFeedback() {
     if (!feedback.trim()) return
@@ -18,6 +22,8 @@ export default function About({ onReplayTutorial, user }) {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto' }}>
+      {showTerms && <TermsOfService onClose={() => setShowTerms(false)} />}
+      {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
       <div className="fade-up" style={{ maxWidth: '680px', margin: '0 auto', padding: '56px 48px' }}>
 
         {/* Gold bar */}
@@ -189,6 +195,27 @@ export default function About({ onReplayTutorial, user }) {
           >
             Replay tutorial
           </button>
+        </div>
+
+        {/* Legal */}
+        <div style={{ paddingTop: '32px', borderTop: '1px solid var(--border)', marginTop: '40px', paddingBottom: '56px' }}>
+          <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '14px' }}>
+            Legal
+          </div>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setShowTerms(true)}
+              style={{ fontSize: '13px', color: 'var(--text-mid)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >
+              Terms and Conditions
+            </button>
+            <button
+              onClick={() => setShowPrivacy(true)}
+              style={{ fontSize: '13px', color: 'var(--text-mid)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >
+              Privacy Policy
+            </button>
+          </div>
         </div>
 
       </div>
