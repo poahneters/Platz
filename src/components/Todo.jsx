@@ -238,20 +238,26 @@ export default function Todo({ user }) {
   return (
     <>
       <UndoToast toast={undoToast} />
-      {ctxMenu && (
-        <ContextMenu
-          x={ctxMenu.x} y={ctxMenu.y}
-          onClose={() => setCtxMenu(null)}
-          items={ctxMenu.listId ? [
-            { label: 'Rename list', onClick: () => { setRenamingList(ctxMenu.listId); setRenameValue(lists.find(l => l.id === ctxMenu.listId)?.name ?? '') } },
-            ...(lists.length > 1 ? ['separator', { label: 'Delete list', danger: true, onClick: () => deleteList(ctxMenu.listId) }] : []),
-          ] : [
-            { label: 'Edit task', onClick: () => { const t = todos.find(t => t.id === ctxMenu.todoId); setEditTextVal(t.text); setEditingText(ctxMenu.todoId) } },
-            'separator',
-            { label: 'Delete', danger: true, onClick: () => remove(ctxMenu.todoId) },
-          ]}
-        />
-      )}
+      {ctxMenu && (() => {
+        const listId = ctxMenu.listId
+        const todoId = ctxMenu.todoId
+        const ctxTodo = todos.find(t => t.id === todoId)
+        const ctxList = lists.find(l => l.id === listId)
+        return (
+          <ContextMenu
+            x={ctxMenu.x} y={ctxMenu.y}
+            onClose={() => setCtxMenu(null)}
+            items={listId ? [
+              { label: 'Rename list', onClick: () => { setRenamingList(listId); setRenameValue(ctxList?.name ?? '') } },
+              ...(lists.length > 1 ? ['separator', { label: 'Delete list', danger: true, onClick: () => deleteList(listId) }] : []),
+            ] : [
+              { label: 'Edit task', onClick: () => { setEditTextVal(ctxTodo?.text ?? ''); setEditingText(todoId) } },
+              'separator',
+              { label: 'Delete', danger: true, onClick: () => remove(todoId) },
+            ]}
+          />
+        )
+      })()}
       <style>{`
         @media (max-width: 639px) {
           .todo-sidebar { width: 100% !important; flex-shrink: unset !important; }
