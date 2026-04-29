@@ -95,7 +95,7 @@ const MEMORY_SECTIONS = [
   { key: 'life',      label: 'Life' },
 ]
 
-export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, userName, onNameSave }) {
+export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, userName, onNameSave, aboutMe: sharedAboutMe, onAboutMeChange }) {
   const [data, setData] = useState({})
   const [tab, setTab] = useState('story')
   const [saveStatus, setSaveStatus] = useState('idle') // 'idle' | 'saving' | 'saved'
@@ -122,24 +122,11 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
             platzStyle: row.communication_style || '',
             responseLength: row.response_length || 'short',
             customInstructions: row.custom_instructions || '',
-            memory: row.memory || {},
           })
         }
         requestAnimationFrame(() => { initializedRef.current = true })
       })
   }, [user.id])
-
-  useEffect(() => {
-    if (tab !== 'memory') return
-    supabase
-      .from('about_me')
-      .select('memory')
-      .eq('user_id', user.id)
-      .single()
-      .then(({ data: row }) => {
-        if (row?.memory) setData(prev => ({ ...prev, memory: row.memory }))
-      })
-  }, [tab, user.id])
 
   useEffect(() => {
     if (!initializedRef.current) return
@@ -519,11 +506,11 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
               Platz builds this automatically as you journal. It uses this to know you better over time. You don't need to manage it.
             </p>
 
-            {!MEMORY_SECTIONS.some(s => data.memory?.[s.key]?.trim()) ? (
-              <MemoryEmpty user={user} onBuilt={memory => setData(prev => ({ ...prev, memory }))} />
+            {!MEMORY_SECTIONS.some(s => sharedAboutMe?.memory?.[s.key]?.trim()) ? (
+              <MemoryEmpty user={user} onAboutMeChange={onAboutMeChange} />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {MEMORY_SECTIONS.filter(s => data.memory?.[s.key]?.trim()).map(section => (
+                {MEMORY_SECTIONS.filter(s => sharedAboutMe?.memory?.[s.key]?.trim()).map(section => (
                   <div
                     key={section.key}
                     style={{
@@ -545,7 +532,7 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
                       {section.label}
                     </div>
                     <p style={{ fontSize: '14px', color: 'var(--text-mid)', lineHeight: 1.75 }}>
-                      {data.memory[section.key]}
+                      {sharedAboutMe?.memory?.[section.key]}
                     </p>
                   </div>
                 ))}
@@ -559,7 +546,7 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
   )
 }
 
-function MemoryEmpty({ user, onBuilt }) {
+function MemoryEmpty({ user, onAboutMeChange }) {
   const [building, setBuilding] = useState(false)
   const [error, setError] = useState(null)
 
@@ -600,7 +587,7 @@ function MemoryEmpty({ user, onBuilt }) {
         { user_id: user.id, memory: result.memory },
         { onConflict: 'user_id' }
       )
-      onBuilt(result.memory)
+      onAboutMeChange(prev => ({ ...prev, memory: result.memory }))
     } catch (e) {
       setError(e.message)
     }

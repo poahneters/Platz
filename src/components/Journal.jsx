@@ -103,9 +103,8 @@ function excerpt(text, max = 180) {
   return text.slice(0, cut > 0 ? cut : max) + '…'
 }
 
-export default function Journal({ user, reflectOnEnter, userName, onNameSave }) {
+export default function Journal({ user, reflectOnEnter, userName, onNameSave, aboutMe, onAboutMeChange }) {
   const [entries, setEntries] = useState([])
-  const [aboutMe, setAboutMe] = useState({})
   const [text, setText] = useState('')
   const [reply, setReply] = useState('')
   const [selected, setSelected] = useState(null)
@@ -149,29 +148,18 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
   }
 
   useEffect(() => {
-    async function load() {
-      const [entriesRes, aboutRes] = await Promise.all([
-        supabase
-          .from('journal_entries')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('about_me')
-          .select('*')
-          .eq('user_id', user.id)
-          .single(),
-      ])
-      if (entriesRes.data) {
-        setEntries(entriesRes.data.map(row => ({
+    supabase
+      .from('journal_entries')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (data) setEntries(data.map(row => ({
           id: row.id,
           createdAt: row.created_at,
           thread: row.messages || [],
         })))
-      }
-      if (aboutRes.data) setAboutMe(aboutRes.data)
-    }
-    load()
+      })
   }, [user.id])
 
   // Scroll to bottom when thread updates
@@ -296,7 +284,7 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave }) 
           console.log('[memory]', memData)
           if (!memRes.ok) { console.error('[memory] API error:', memData); return }
           if (memData.memory) {
-            setAboutMe(prev => ({ ...prev, memory: memData.memory }))
+            onAboutMeChange(prev => ({ ...prev, memory: memData.memory }))
             const { error: dbErr } = await supabase.from('about_me').upsert({ user_id: user.id, memory: memData.memory }, { onConflict: 'user_id' })
             if (dbErr) console.error('[memory] DB error:', dbErr)
           }

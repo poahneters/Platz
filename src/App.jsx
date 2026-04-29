@@ -36,13 +36,17 @@ export default function App() {
   )
   const [userName, setUserName] = useState(null) // null = loading, '' = loaded/no name, 'X' = has name
   const [nameInput, setNameInput] = useState('')
+  const [aboutMe, setAboutMe] = useState({})
 
   useEffect(() => {
-    if (!user) { setUserName(null); return }
-    supabase.from('about_me').select('name').eq('user_id', user.id).single()
-      .then(({ data }) => { setUserName(data?.name || '') })
+    if (!user) { setUserName(null); setAboutMe({}); return }
+    supabase.from('about_me').select('*').eq('user_id', user.id).single()
+      .then(({ data }) => {
+        setUserName(data?.name || '')
+        if (data) setAboutMe(data)
+      })
       .catch(() => { setUserName('') })
-  }, [user])
+  }, [user?.id])
 
   function handleNameSave(name) {
     setUserName(name)
@@ -274,6 +278,8 @@ export default function App() {
                   onToggleReflectOnEnter={v => { setReflectOnEnter(v); localStorage.setItem('platz_reflect_on_enter', v) }}
                   userName={userName}
                   onNameSave={handleNameSave}
+                  aboutMe={aboutMe}
+                  onAboutMeChange={setAboutMe}
                 />
               </div>
             ))}
