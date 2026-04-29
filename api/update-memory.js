@@ -6,6 +6,8 @@ const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SU
 
 const MEMORY_SYSTEM = `You maintain a structured memory profile for a personal journaling app. You will be given the user's current memory profile and a new journal conversation.
 
+IMPORTANT: Never use em dashes (--) anywhere in your output. Use commas, periods, or rewrite the sentence instead.
+
 Update only the sections where new, meaningful information appears. Prioritize information that:
 - Carries clear emotional weight or significance to the user
 - Would actually change how a thoughtful advisor would respond to them
@@ -18,9 +20,9 @@ The five sections are:
 - life: Current circumstances — work, school, living situation, key relationships, and any major life context.
 - goals: What they are actively working toward, stated or clearly implied.
 - struggles: Recurring fears, blockers, anxieties, or challenges that hold them back.
-- patterns: How they tend to think and behave — their defaults, blind spots, and recurring tendencies. Only include what is clearly observable, not guessed.
+- patterns: How they tend to think and behave. Their defaults, blind spots, and recurring tendencies. Only include what is clearly observable, not guessed.
 
-Return ONLY a valid JSON object with exactly these five keys: values, life, goals, struggles, patterns. No explanation, no markdown, just the JSON.`
+Return ONLY a valid JSON object with exactly these five keys: values, life, goals, struggles, patterns. No explanation, no markdown, just the JSON. Do not use em dashes anywhere in the values.`
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })

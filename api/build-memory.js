@@ -6,6 +6,8 @@ const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SU
 
 const SYSTEM = `You are building a memory profile for a user based on their journal conversations with an AI called Platz. Read everything carefully, then extract what matters most.
 
+IMPORTANT: Never use em dashes (--) anywhere in your output. Use commas, periods, or rewrite the sentence instead.
+
 Prioritize information that:
 - Recurs across multiple entries — repetition signals importance
 - Carries emotional weight or vulnerability
@@ -19,11 +21,11 @@ The five sections are:
 - life: Current circumstances — work, school, living situation, and key relationships. Reflect the most recent state if things have changed.
 - goals: What they are actively working toward. Focus on goals they return to or have taken concrete steps toward.
 - struggles: Recurring fears, blockers, or anxieties. Weight toward things that come up more than once.
-- patterns: How they tend to think and behave — defaults, blind spots, recurring tendencies. Only include what is clearly observable across entries, not inferred from a single moment.
+- patterns: How they tend to think and behave. Defaults, blind spots, recurring tendencies. Only include what is clearly observable across entries, not inferred from a single moment.
 
-If you have nothing confident to say about a section, return an empty string. Never use em dashes.
+If you have nothing confident to say about a section, return an empty string.
 
-Return ONLY a valid JSON object with exactly these five keys: values, life, goals, struggles, patterns. No explanation, no markdown, just the JSON.`
+Return ONLY a valid JSON object with exactly these five keys: values, life, goals, struggles, patterns. No explanation, no markdown, just the JSON. Do not use em dashes anywhere in the values.`
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
