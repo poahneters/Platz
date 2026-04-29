@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY)
 
-const MEMORY_SYSTEM = `You maintain a structured memory profile for a personal journaling app. You will be given the user's current memory profile and a new journal entry with the AI's response.
+const MEMORY_SYSTEM = `You maintain a structured memory profile for a personal journaling app. You will be given the user's current memory profile and a new journal conversation (which may be a single exchange or a multi-turn dialogue).
 
-Update only the sections where new, concrete information appears. Do not invent or infer beyond what was explicitly stated. Keep each section to a few concise sentences, accurate and useful, not exhaustive. If a section has nothing new to add, return it exactly unchanged. Never use em dashes.
+Update only the sections where new, concrete information appears. Do not invent or infer beyond what was explicitly stated. Keep each section to a few concise sentences, accurate and useful, not exhaustive. If something in the current profile is contradicted or no longer accurate, update or remove it. If a section has nothing new to add, return it exactly unchanged. Never use em dashes.
 
 The five sections are:
 - people: Key relationships mentioned and relevant context about them
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(token)
   if (authError || !user) return res.status(401).json({ error: 'Unauthorized' })
 
-  const { currentMemory, entry, platzResponse } = req.body
+  const { currentMemory, thread } = req.body
 
   const memory = {
     people: '',
@@ -37,19 +37,20 @@ export default async function handler(req, res) {
     ...currentMemory,
   }
 
+  const conversation = thread
+    .map(m => `${m.role === 'user' ? 'User' : 'Platz'}: ${m.content.slice(0, 500)}`)
+    .join('\n\n')
+
   const userMessage = `Current memory profile:
 ${JSON.stringify(memory, null, 2)}
 
-New journal entry:
-${entry}
-
-Platz's response:
-${platzResponse}`
+Journal conversation:
+${conversation}`
 
   try {
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 800,
+      max_tokens: 1000,
       system: MEMORY_SYSTEM,
       messages: [{ role: 'user', content: userMessage }],
     })

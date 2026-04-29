@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY)
 
-const SYSTEM = `You are building a memory profile for a user based on their past journal entries and AI responses. Read everything carefully and extract what you can confidently say is true about this person.
+const SYSTEM = `You are building a memory profile for a user based on their past journal conversations with an AI called Platz. Read everything carefully and extract what you can confidently say is true about this person.
 
 The five sections are:
 - people: Key relationships mentioned and relevant context about them
@@ -16,6 +16,8 @@ The five sections are:
 Rules:
 - Only include what is clearly stated or strongly implied. Do not invent or assume.
 - Keep each section to a few concise sentences. Be specific, not vague.
+- Look for patterns that repeat across multiple entries — these are especially important.
+- If something appears to have changed or been resolved across entries, reflect the most recent state.
 - If you have nothing confident to say about a section, return an empty string for it.
 - Never use em dashes.
 
@@ -34,15 +36,16 @@ export default async function handler(req, res) {
   if (!entries?.length) return res.status(400).json({ error: 'No entries provided' })
 
   const formatted = entries.map((e, i) => {
-    const parts = [`Entry ${i + 1}:\n${e.userText}`]
-    if (e.platzResponse) parts.push(`Platz response:\n${e.platzResponse}`)
-    return parts.join('\n')
+    const conversation = e.conversation
+      .map(m => `${m.role === 'user' ? 'User' : 'Platz'}: ${m.content.slice(0, 500)}`)
+      .join('\n\n')
+    return `Entry ${i + 1}:\n${conversation}`
   }).join('\n\n---\n\n')
 
   try {
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1000,
+      max_tokens: 1200,
       system: SYSTEM,
       messages: [{ role: 'user', content: formatted }],
     })

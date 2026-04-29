@@ -559,7 +559,7 @@ function MemoryEmpty({ user, onAboutMeChange }) {
         .select('messages')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(15)
+        .limit(10)
 
       if (!entries?.length) {
         setError('No journal entries found. Write your first reflection first.')
@@ -569,10 +569,8 @@ function MemoryEmpty({ user, onAboutMeChange }) {
 
       const formatted = entries.map(row => {
         const msgs = row.messages || []
-        const userText = msgs.find(m => m.role === 'user')?.content || ''
-        const platzResponse = msgs.find(m => m.role === 'platz')?.content || ''
-        return { userText, platzResponse }
-      }).filter(e => e.userText)
+        return { conversation: msgs.map(m => ({ role: m.role, content: m.content })) }
+      }).filter(e => e.conversation.length > 0)
 
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/build-memory', {

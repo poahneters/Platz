@@ -273,17 +273,34 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave, ab
 
       // Background memory update — fire and forget, never blocks the UI
       const currentMemory = aboutMe.memory || {}
+      const rebuildKey = `platz_memory_rebuilt_${user.id}`
+      const lastRebuild = parseInt(localStorage.getItem(rebuildKey) || '0')
+      const doFullRebuild = !isReply && (Date.now() - lastRebuild > 7 * 24 * 60 * 60 * 1000)
       ;(async () => {
         try {
-          const memRes = await fetch('/api/update-memory', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-            body: JSON.stringify({ currentMemory, entry: content, platzResponse: platzMsg.content }),
-          })
+          let memRes
+          if (doFullRebuild) {
+            const recentEntries = [{ ...targetEntry, thread: finalThread }, ...entries].slice(0, 10)
+            const formattedEntries = recentEntries.map(e => ({
+              conversation: e.thread.map(m => ({ role: m.role, content: m.content })),
+            }))
+            memRes = await fetch('/api/build-memory', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+              body: JSON.stringify({ entries: formattedEntries }),
+            })
+          } else {
+            const thread = finalThread.map(m => ({ role: m.role, content: m.content }))
+            memRes = await fetch('/api/update-memory', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+              body: JSON.stringify({ currentMemory, thread }),
+            })
+          }
           const memData = await memRes.json()
-          console.log('[memory]', memData)
           if (!memRes.ok) { console.error('[memory] API error:', memData); return }
           if (memData.memory) {
+            if (doFullRebuild) localStorage.setItem(rebuildKey, Date.now().toString())
             onAboutMeChange(prev => ({ ...prev, memory: memData.memory }))
             const { error: dbErr } = await supabase.from('about_me').upsert({ user_id: user.id, memory: memData.memory }, { onConflict: 'user_id' })
             if (dbErr) console.error('[memory] DB error:', dbErr)
