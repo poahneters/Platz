@@ -99,6 +99,8 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
   const [data, setData] = useState({})
   const [tab, setTab] = useState('story')
   const [saveStatus, setSaveStatus] = useState('idle') // 'idle' | 'saving' | 'saved'
+  const [building, setBuilding] = useState(false)
+  const [buildError, setBuildError] = useState(null)
   const autosaveTimer = useRef(null)
   const initializedRef = useRef(false)
   const dataRef = useRef({})
@@ -152,6 +154,44 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
 
   function update(patch) {
     setData(prev => ({ ...prev, ...patch }))
+  }
+
+  async function buildMemory() {
+    setBuilding(true)
+    setBuildError(null)
+    try {
+      const { data: entries } = await supabase
+        .from('journal_entries')
+        .select('messages')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (!entries?.length) {
+        setBuildError('No journal entries found. Write your first reflection first.')
+        setBuilding(false)
+        return
+      }
+
+      const formatted = entries.map(row => ({
+        conversation: (row.messages || []).map(m => ({ role: m.role, content: m.content })),
+      })).filter(e => e.conversation.length > 0)
+
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/build-memory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ entries: formatted }),
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Failed to build memory')
+
+      await supabase.from('about_me').upsert({ user_id: user.id, memory: result.memory }, { onConflict: 'user_id' })
+      onAboutMeChange(prev => ({ ...prev, memory: result.memory }))
+    } catch (e) {
+      setBuildError(e.message)
+    }
+    setBuilding(false)
   }
 
   function runQuiz() {
@@ -507,9 +547,11 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
             </p>
 
             {!MEMORY_SECTIONS.some(s => sharedAboutMe?.memory?.[s.key]?.trim()) ? (
-              <MemoryEmpty user={user} onAboutMeChange={onAboutMeChange} />
+              <p style={{ fontSize: '14px', color: 'var(--text-dim)', lineHeight: 1.7, marginBottom: '24px' }}>
+                Nothing here yet. Journal a few times and Platz will start building your profile, or rebuild it manually below.
+              </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
                 {MEMORY_SECTIONS.filter(s => sharedAboutMe?.memory?.[s.key]?.trim()).map(section => (
                   <div
                     key={section.key}
@@ -538,6 +580,27 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
                 ))}
               </div>
             )}
+
+            {buildError && (
+              <p style={{ fontSize: '13px', color: '#c47a7a', marginBottom: '12px' }}>{buildError}</p>
+            )}
+            <button
+              onClick={buildMemory}
+              disabled={building}
+              className="btn-gold"
+              style={{
+                padding: '10px 22px',
+                background: 'var(--gold)',
+                color: '#0f2d1a',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                opacity: building ? 0.6 : 1,
+                transition: 'opacity 0.2s, filter 0.2s',
+              }}
+            >
+              {building ? 'Building...' : 'Rebuild from history'}
+            </button>
           </div>
         )}
 
@@ -546,80 +609,3 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
   )
 }
 
-function MemoryEmpty({ user, onAboutMeChange }) {
-  const [building, setBuilding] = useState(false)
-  const [error, setError] = useState(null)
-
-  async function build() {
-    setBuilding(true)
-    setError(null)
-    try {
-      const { data: entries } = await supabase
-        .from('journal_entries')
-        .select('messages')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (!entries?.length) {
-        setError('No journal entries found. Write your first reflection first.')
-        setBuilding(false)
-        return
-      }
-
-      const formatted = entries.map(row => {
-        const msgs = row.messages || []
-        return { conversation: msgs.map(m => ({ role: m.role, content: m.content })) }
-      }).filter(e => e.conversation.length > 0)
-
-      const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch('/api/build-memory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ entries: formatted }),
-      })
-      const result = await res.json()
-      if (!res.ok) throw new Error(result.error || 'Failed to build memory')
-
-      await supabase.from('about_me').upsert(
-        { user_id: user.id, memory: result.memory },
-        { onConflict: 'user_id' }
-      )
-      onAboutMeChange(prev => ({ ...prev, memory: result.memory }))
-    } catch (e) {
-      setError(e.message)
-    }
-    setBuilding(false)
-  }
-
-  return (
-    <div style={{ padding: '40px 32px', textAlign: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px' }}>
-      <p style={{ fontSize: '14px', color: 'var(--text-dim)', lineHeight: 1.7, marginBottom: '20px' }}>
-        Nothing here yet. Platz will build this automatically after your next reflection.
-      </p>
-      <p style={{ fontSize: '13px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: '24px' }}>
-        Already have journal entries? Build your profile from your history.
-      </p>
-      {error && (
-        <p style={{ fontSize: '13px', color: '#c47a7a', marginBottom: '16px' }}>{error}</p>
-      )}
-      <button
-        onClick={build}
-        disabled={building}
-        className="btn-gold"
-        style={{
-          padding: '10px 22px',
-          background: 'var(--gold)',
-          color: '#0f2d1a',
-          borderRadius: '8px',
-          fontSize: '13px',
-          fontWeight: 600,
-          opacity: building ? 0.6 : 1,
-          transition: 'opacity 0.2s, filter 0.2s',
-        }}
-      >
-        {building ? 'Building...' : 'Build from history'}
-      </button>
-    </div>
-  )
-}
