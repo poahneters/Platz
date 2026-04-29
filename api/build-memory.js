@@ -4,24 +4,26 @@ import { createClient } from '@supabase/supabase-js'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY)
 
-const SYSTEM = `You are building a memory profile for a user based on their past journal conversations with an AI called Platz. Read everything carefully and extract what you can confidently say is true about this person.
+const SYSTEM = `You are building a memory profile for a user based on their journal conversations with an AI called Platz. Read everything carefully, then extract what matters most.
+
+Prioritize information that:
+- Recurs across multiple entries — repetition signals importance
+- Carries emotional weight or vulnerability
+- Would genuinely change how a thoughtful advisor would respond to this person
+- Reveals something about who they are, not just what happened to them
+
+Do not include incidental details, one-off mentions, or surface-level context that would not change how someone would advise them. Be specific and concrete, not vague. If you are not confident about something, leave it out.
 
 The five sections are:
-- people: Key relationships mentioned and relevant context about them
-- goals: What the user is working toward, stated or clearly implied
-- struggles: Recurring fears, blockers, anxieties, or challenges
-- patterns: Thinking or behavioral tendencies observed across their writing
-- life: Current circumstances, job, school, living situation, major life context
+- values: What the user fundamentally cares about. Their beliefs, priorities, and what drives them at a deeper level. What they seem unwilling to compromise on. This is the most important section — fill it when you see clear signals, even implicit ones.
+- life: Current circumstances — work, school, living situation, and key relationships. Reflect the most recent state if things have changed.
+- goals: What they are actively working toward. Focus on goals they return to or have taken concrete steps toward.
+- struggles: Recurring fears, blockers, or anxieties. Weight toward things that come up more than once.
+- patterns: How they tend to think and behave — defaults, blind spots, recurring tendencies. Only include what is clearly observable across entries, not inferred from a single moment.
 
-Rules:
-- Only include what is clearly stated or strongly implied. Do not invent or assume.
-- Keep each section to a few concise sentences. Be specific, not vague.
-- Look for patterns that repeat across multiple entries — these are especially important.
-- If something appears to have changed or been resolved across entries, reflect the most recent state.
-- If you have nothing confident to say about a section, return an empty string for it.
-- Never use em dashes.
+If you have nothing confident to say about a section, return an empty string. Never use em dashes.
 
-Return ONLY a valid JSON object with exactly these five keys: people, goals, struggles, patterns, life. No explanation, no markdown, just the JSON.`
+Return ONLY a valid JSON object with exactly these five keys: values, life, goals, struggles, patterns. No explanation, no markdown, just the JSON.`
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })

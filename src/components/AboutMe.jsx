@@ -88,11 +88,11 @@ const TABS = [
 ]
 
 const MEMORY_SECTIONS = [
-  { key: 'people',    label: 'People' },
+  { key: 'values',    label: 'Values' },
+  { key: 'life',      label: 'Life' },
   { key: 'goals',     label: 'Goals' },
   { key: 'struggles', label: 'Struggles' },
   { key: 'patterns',  label: 'Patterns' },
-  { key: 'life',      label: 'Life' },
 ]
 
 export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, userName, onNameSave, aboutMe: sharedAboutMe, onAboutMeChange }) {

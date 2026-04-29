@@ -4,18 +4,23 @@ import { createClient } from '@supabase/supabase-js'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY)
 
-const MEMORY_SYSTEM = `You maintain a structured memory profile for a personal journaling app. You will be given the user's current memory profile and a new journal conversation (which may be a single exchange or a multi-turn dialogue).
+const MEMORY_SYSTEM = `You maintain a structured memory profile for a personal journaling app. You will be given the user's current memory profile and a new journal conversation.
 
-Update only the sections where new, concrete information appears. Do not invent or infer beyond what was explicitly stated. Keep each section to a few concise sentences, accurate and useful, not exhaustive. If something in the current profile is contradicted or no longer accurate, update or remove it. If a section has nothing new to add, return it exactly unchanged. Never use em dashes.
+Update only the sections where new, meaningful information appears. Prioritize information that:
+- Carries clear emotional weight or significance to the user
+- Would actually change how a thoughtful advisor would respond to them
+- Contradicts or refines something already in the profile
+
+Skip incidental details, one-off mentions, or anything that is just surface context. If something in the profile is contradicted or outdated, correct it. Keep each section to a few concise, specific sentences. Never use em dashes.
 
 The five sections are:
-- people: Key relationships mentioned and relevant context about them
-- goals: What the user is working toward, stated or clearly implied
-- struggles: Recurring fears, blockers, anxieties, or challenges
-- patterns: Thinking or behavioral tendencies observed across their writing
-- life: Current circumstances, job, school, living situation, major life context
+- values: What the user fundamentally cares about. Their beliefs, priorities, and what drives them at a deeper level. What they seem unwilling to compromise on.
+- life: Current circumstances — work, school, living situation, key relationships, and any major life context.
+- goals: What they are actively working toward, stated or clearly implied.
+- struggles: Recurring fears, blockers, anxieties, or challenges that hold them back.
+- patterns: How they tend to think and behave — their defaults, blind spots, and recurring tendencies. Only include what is clearly observable, not guessed.
 
-Return ONLY a valid JSON object with exactly these five keys. No explanation, no markdown, just the JSON.`
+Return ONLY a valid JSON object with exactly these five keys: values, life, goals, struggles, patterns. No explanation, no markdown, just the JSON.`
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -29,11 +34,11 @@ export default async function handler(req, res) {
   const { currentMemory, thread } = req.body
 
   const memory = {
-    people: '',
+    values: '',
+    life: '',
     goals: '',
     struggles: '',
     patterns: '',
-    life: '',
     ...currentMemory,
   }
 

@@ -53,7 +53,7 @@ function buildSystemPrompt(about) {
     parts.push(`\nThe user's name is ${about.userName}. Use their name occasionally and naturally — only when it adds warmth or emphasis in a meaningful moment. Never in every response, never formulaically.`)
   }
   if (about.memory) {
-    const LABELS = { people: 'People', goals: 'Goals', struggles: 'Struggles', patterns: 'Patterns', life: 'Life context' }
+    const LABELS = { values: 'Values', life: 'Life context', goals: 'Goals', struggles: 'Struggles', patterns: 'Patterns' }
     const lines = Object.entries(LABELS)
       .filter(([k]) => about.memory[k]?.trim())
       .map(([k, label]) => `${label}: ${about.memory[k]}`)
