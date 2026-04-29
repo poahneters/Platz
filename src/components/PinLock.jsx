@@ -3,6 +3,11 @@ import { supabase } from '../supabase'
 
 const PIN_KEY = 'platz_pin'
 
+async function hashPin(pin) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin))
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
 const padBtnStyle = {
   width: '76px',
   height: '76px',
@@ -65,6 +70,9 @@ function Dots({ count, shake }) {
 }
 
 export default function PinLock({ onVerified }) {
+  const stored = localStorage.getItem(PIN_KEY)
+  // Migrate plaintext PINs (4 digits) — force re-set
+  if (stored && stored.length !== 64) localStorage.removeItem(PIN_KEY)
   const pinExists = !!localStorage.getItem(PIN_KEY)
   const [mode, setMode] = useState(pinExists ? 'enter' : 'set')
   const [pin, setPin] = useState('')
@@ -105,9 +113,10 @@ export default function PinLock({ onVerified }) {
     if (!shake) setPin(p => p.slice(0, -1))
   }
 
-  function submit(p) {
+  async function submit(p) {
     if (mode === 'enter') {
-      if (p === localStorage.getItem(PIN_KEY)) {
+      const hashed = await hashPin(p)
+      if (hashed === localStorage.getItem(PIN_KEY)) {
         onVerified()
       } else {
         fail('Incorrect PIN')
@@ -118,12 +127,12 @@ export default function PinLock({ onVerified }) {
       setPin('')
     } else if (mode === 'confirm') {
       if (p === firstPin) {
-        localStorage.setItem(PIN_KEY, p)
+        localStorage.setItem(PIN_KEY, await hashPin(p))
         onVerified()
       } else {
         setFirstPin('')
         setMode('set')
-        fail("PINs don't match — try again")
+        fail("PINs don't match, try again")
       }
     }
   }
