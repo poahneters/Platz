@@ -101,6 +101,7 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
   const [saveStatus, setSaveStatus] = useState('idle') // 'idle' | 'saving' | 'saved'
   const [building, setBuilding] = useState(false)
   const [buildError, setBuildError] = useState(null)
+  const [builtOnce, setBuiltOnce] = useState(() => !!localStorage.getItem(`platz_memory_built_${user.id}`))
   const autosaveTimer = useRef(null)
   const initializedRef = useRef(false)
   const dataRef = useRef({})
@@ -188,6 +189,8 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
 
       await supabase.from('about_me').upsert({ user_id: user.id, memory: result.memory }, { onConflict: 'user_id' })
       onAboutMeChange(prev => ({ ...prev, memory: result.memory }))
+      localStorage.setItem(`platz_memory_built_${user.id}`, '1')
+      setBuiltOnce(true)
     } catch (e) {
       setBuildError(e.message)
     }
@@ -584,23 +587,25 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
             {buildError && (
               <p style={{ fontSize: '13px', color: '#c47a7a', marginBottom: '12px' }}>{buildError}</p>
             )}
-            <button
-              onClick={buildMemory}
-              disabled={building}
-              className="btn-gold"
-              style={{
-                padding: '10px 22px',
-                background: 'var(--gold)',
-                color: '#0f2d1a',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 600,
-                opacity: building ? 0.6 : 1,
-                transition: 'opacity 0.2s, filter 0.2s',
-              }}
-            >
-              {building ? 'Building...' : 'Rebuild from history'}
-            </button>
+            {!builtOnce && (
+              <button
+                onClick={buildMemory}
+                disabled={building}
+                className="btn-gold"
+                style={{
+                  padding: '10px 22px',
+                  background: 'var(--gold)',
+                  color: '#0f2d1a',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  opacity: building ? 0.6 : 1,
+                  transition: 'opacity 0.2s, filter 0.2s',
+                }}
+              >
+                {building ? 'Building...' : 'Rebuild from history'}
+              </button>
+            )}
           </div>
         )}
 
