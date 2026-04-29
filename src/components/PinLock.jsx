@@ -24,29 +24,33 @@ const padBtnStyle = {
   fontFamily: 'Inter, sans-serif',
   transition: 'background 0.12s',
   userSelect: 'none',
+  touchAction: 'manipulation',
+}
+
+function PadButton({ onClick, style, children }) {
+  return (
+    <button
+      onClick={onClick}
+      style={style}
+      onPointerDown={e => e.currentTarget.style.background = 'var(--surface2)'}
+      onPointerUp={e => e.currentTarget.style.background = 'var(--surface)'}
+      onPointerLeave={e => e.currentTarget.style.background = 'var(--surface)'}
+      onPointerCancel={e => e.currentTarget.style.background = 'var(--surface)'}
+    >
+      {children}
+    </button>
+  )
 }
 
 function Pad({ onDigit, onDelete }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 76px)', gap: '14px' }}>
       {[1,2,3,4,5,6,7,8,9].map(n => (
-        <button key={n} onClick={() => onDigit(String(n))} style={padBtnStyle}
-          onMouseDown={e => e.currentTarget.style.background = 'var(--surface2)'}
-          onMouseUp={e => e.currentTarget.style.background = 'var(--surface)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'var(--surface)'}
-        >{n}</button>
+        <PadButton key={n} onClick={() => onDigit(String(n))} style={padBtnStyle}>{n}</PadButton>
       ))}
       <div />
-      <button onClick={() => onDigit('0')} style={padBtnStyle}
-        onMouseDown={e => e.currentTarget.style.background = 'var(--surface2)'}
-        onMouseUp={e => e.currentTarget.style.background = 'var(--surface)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'var(--surface)'}
-      >0</button>
-      <button onClick={onDelete} style={{ ...padBtnStyle, fontSize: '20px', color: 'var(--text-mid)' }}
-        onMouseDown={e => e.currentTarget.style.background = 'var(--surface2)'}
-        onMouseUp={e => e.currentTarget.style.background = 'var(--surface)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'var(--surface)'}
-      >⌫</button>
+      <PadButton onClick={() => onDigit('0')} style={padBtnStyle}>0</PadButton>
+      <PadButton onClick={onDelete} style={{ ...padBtnStyle, fontSize: '20px', color: 'var(--text-mid)' }}>⌫</PadButton>
     </div>
   )
 }
@@ -87,7 +91,7 @@ export default function PinLock({ onVerified }) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  })
+  }, [pin, shake, mode, firstPin])
 
   function fail(msg) {
     setError(msg)
