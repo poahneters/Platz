@@ -47,7 +47,7 @@ export default function ContextMenu({ x, y, items, onClose }) {
           ) : (
             <button
               key={i}
-              onMouseDown={e => { e.stopPropagation(); item.onClick(); onClose() }}
+              onMouseDown={e => { e.preventDefault(); e.stopPropagation(); item.onClick(); onClose() }}
               style={{
                 display: 'block',
                 width: '100%',

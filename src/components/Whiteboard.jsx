@@ -464,7 +464,7 @@ export default function Whiteboard({ user }) {
           x={ctxMenu.x} y={ctxMenu.y}
           onClose={() => setCtxMenu(null)}
           items={ctxMenu.itemId ? [
-            { label: 'Edit item', onClick: () => { const board = boards.find(b => b.id === ctxMenu.boardId); const item = board?.items.find(i => i.id === ctxMenu.itemId); setEditItemText(item?.text ?? ''); setEditingItemId(ctxMenu.itemId) } },
+            { label: 'Edit item', onClick: () => { setEditItemText(ctxMenu.itemText ?? ''); setEditingItemId(ctxMenu.itemId) } },
             'separator',
             { label: 'Delete', danger: true, onClick: () => removeItem(ctxMenu.boardId, ctxMenu.itemId) },
           ] : [
@@ -658,7 +658,7 @@ export default function Whiteboard({ user }) {
                               onToggle={(itemId) => toggleItem(active.id, itemId)}
                               onRemove={(itemId) => removeItem(active.id, itemId)}
                               onEditStart={(id, text) => { setEditingItemId(id); setEditItemText(text ?? '') }}
-                              onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, boardId: active.id, itemId: item.id }) }}
+                              onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, boardId: active.id, itemId: item.id, itemText: item.text }) }}
                             />
                           ))}
                         </div>
