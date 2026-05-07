@@ -563,9 +563,6 @@ export default function Whiteboard({ user }) {
               ].join(', '),
               position: 'relative',
             }}>
-              {[{ top: '5px', left: '5px' }, { top: '5px', right: '5px' }].map((pos, i) => (
-                <div key={i} style={{ position: 'absolute', ...pos, width: '7px', height: '7px', borderRadius: '50%', background: 'radial-gradient(circle at 38% 38%, #e4e8ec, #8a9098)', boxShadow: '0 1px 3px rgba(0,0,0,0.35)', zIndex: 4 }} />
-              ))}
               <div style={{ position: 'absolute', inset: '12px', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.12)', pointerEvents: 'none', zIndex: 6, borderRadius: '1px' }} />
 
               {/* Board surface */}

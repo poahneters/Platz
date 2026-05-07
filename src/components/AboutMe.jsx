@@ -609,6 +609,38 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
           </div>
         )}
 
+        {/* ── Tab navigation ── */}
+        {(() => {
+          const tabIds = TABS.map(t => t.id)
+          const currentIdx = tabIds.indexOf(tab)
+          const prevTab = currentIdx > 0 ? TABS[currentIdx - 1] : null
+          const nextTab = currentIdx < TABS.length - 1 ? TABS[currentIdx + 1] : null
+          return (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '48px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
+              {prevTab ? (
+                <button
+                  onClick={() => setTab(prevTab.id)}
+                  style={{ fontSize: '13px', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '6px', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
+                >
+                  ← {prevTab.label}
+                </button>
+              ) : <div />}
+              {nextTab ? (
+                <button
+                  onClick={() => setTab(nextTab.id)}
+                  style={{ fontSize: '13px', color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500, transition: 'opacity 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                >
+                  {nextTab.label} →
+                </button>
+              ) : <div />}
+            </div>
+          )
+        })()}
+
       </div>
     </div>
   )
