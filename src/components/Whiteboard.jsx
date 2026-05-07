@@ -450,11 +450,6 @@ export default function Whiteboard({ user }) {
 
                   {/* Items */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '28px' }}>
-                    {active.items.length === 0 && (
-                      <p style={{ fontFamily: "'Permanent Marker', cursive", fontSize: '20px', color: `${ink}38`, padding: '12px 0' }}>
-                        write your first goal below...
-                      </p>
-                    )}
 
                     {active.items.map(item => (
                       <div
