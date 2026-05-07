@@ -503,18 +503,36 @@ export default function Whiteboard({ user }) {
                             }}
                           />
                         ) : (
-                          <span style={{
-                            fontFamily: "'Permanent Marker', cursive",
-                            fontSize: 'clamp(16px, 2.2vw, 21px)',
-                            color: ink, lineHeight: 1.4, flex: 1,
-                            textDecoration: item.done ? 'line-through' : 'none',
-                            textDecorationColor: `${ink}66`,
-                            wordBreak: 'break-word',
-                          }}>
+                          <span
+                            onDoubleClick={() => { setEditItemText(item.text); setEditingItemId(item.id) }}
+                            title="Double-click to edit"
+                            style={{
+                              fontFamily: "'Permanent Marker', cursive",
+                              fontSize: 'clamp(16px, 2.2vw, 21px)',
+                              color: ink, lineHeight: 1.4, flex: 1,
+                              textDecoration: item.done ? 'line-through' : 'none',
+                              textDecorationColor: `${ink}66`,
+                              wordBreak: 'break-word',
+                              cursor: 'text',
+                            }}>
                             {item.text}
                           </span>
                         )}
 
+                        <button
+                          onClick={() => { setEditItemText(item.text); setEditingItemId(item.id) }}
+                          className="board-item-edit"
+                          style={{
+                            fontFamily: 'Inter, sans-serif', fontSize: '13px',
+                            color: `${ink}55`, opacity: 0,
+                            transition: 'opacity 0.15s', padding: '0 4px',
+                            flexShrink: 0, marginTop: '4px',
+                            background: 'transparent', border: 'none',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ✎
+                        </button>
                         <button
                           onClick={() => removeItem(active.id, item.id)}
                           className="board-item-delete"

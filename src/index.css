@@ -87,6 +87,7 @@ textarea::placeholder,
 input::placeholder { color: var(--text-dim); }
 
 .board-item:hover .board-item-delete { opacity: 1 !important; }
+.board-item:hover .board-item-edit { opacity: 1 !important; }
 
 @keyframes pulse {
   0%, 80%, 100% { opacity: 0.15; transform: scale(0.8); }
