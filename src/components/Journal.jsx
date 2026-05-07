@@ -368,9 +368,41 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave, ab
   }
 
   async function deleteEntry(id) {
-    setEntries(prev => prev.filter(e => e.id !== id))
+    const remaining = entries.filter(e => e.id !== id)
+    setEntries(remaining)
     if (selected === id) setSelected(null)
     await supabase.from('journal_entries').delete().eq('id', id)
+
+    // Recalibrate memory after deletion — fire and forget
+    const memoryBuilt = !!localStorage.getItem(`platz_memory_built_${user.id}`)
+    if (!memoryBuilt) return
+
+    if (remaining.length === 0) {
+      // No entries left — wipe the memory
+      const emptyMemory = { values: '', life: '', goals: '', struggles: '', patterns: '' }
+      await supabase.from('about_me').upsert({ user_id: user.id, memory: emptyMemory }, { onConflict: 'user_id' })
+      onAboutMeChange(prev => ({ ...prev, memory: emptyMemory }))
+      return
+    }
+
+    ;(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const formattedEntries = remaining.slice(0, 10).map(e => ({
+          conversation: e.thread.map(m => ({ role: m.role, content: m.content })),
+        })).filter(e => e.conversation.length > 0)
+
+        const res = await fetch('/api/build-memory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+          body: JSON.stringify({ entries: formattedEntries }),
+        })
+        const data = await res.json()
+        if (!res.ok || !data.memory) return
+        await supabase.from('about_me').upsert({ user_id: user.id, memory: data.memory }, { onConflict: 'user_id' })
+        onAboutMeChange(prev => ({ ...prev, memory: data.memory }))
+      } catch (e) { console.error('[memory] delete rebuild error:', e) }
+    })()
   }
 
   function toggleExpanded(msgId) {
