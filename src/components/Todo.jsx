@@ -193,18 +193,21 @@ function SortableTodoRow({
   return (
     <div
       ref={setNodeRef}
-      className="todo-row fade-up"
+      className="todo-row"
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.3 : todo.done ? 0.45 : 1,
+        opacity: isDragging ? 0.25 : todo.done ? 0.45 : 1,
         display: 'flex',
         alignItems: 'flex-start',
         gap: '8px',
         padding: '12px 14px',
         borderRadius: '8px',
-        background: 'var(--surface)',
-        border: `1px solid ${due?.overdue && !todo.done ? 'rgba(180,60,60,0.25)' : 'var(--border2)'}`,
+        background: isDragging ? 'transparent' : 'var(--surface)',
+        border: isDragging
+          ? '1.5px dashed rgba(45,138,85,0.22)'
+          : `1px solid ${due?.overdue && !todo.done ? 'rgba(180,60,60,0.25)' : 'var(--border2)'}`,
+        boxShadow: isDragging ? 'none' : undefined,
       }}
     >
       <DragHandle listeners={listeners} attributes={attributes} />
@@ -783,10 +786,11 @@ export default function Todo({ user }) {
           {activeDrag?.type === 'todo' && activeDrag.item && (
             <div style={{
               padding: '12px 14px', borderRadius: '8px',
-              background: 'var(--surface)', border: '1px solid var(--border)',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
               fontSize: '14px', color: 'var(--text)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-              opacity: 0.95, cursor: 'grabbing',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.12)',
+              cursor: 'grabbing',
             }}>
               {activeDrag.item.text}
             </div>
