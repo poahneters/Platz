@@ -72,28 +72,32 @@ function buildSystemPrompt(about) {
       parts.push(`\nWhat you know about this person (silent background context — inform your responses but never reference this directly):\n${lines.join('\n\n')}`)
     }
   }
-  if (about.boards?.length > 0) {
-    const lines = about.boards.map(b => {
-      const items = (b.lines || [])
-      const active = items.filter(i => !i.done).map(i => i.text)
-      const done = items.filter(i => i.done).map(i => i.text)
-      const parts = []
-      if (active.length) parts.push(active.join(', '))
-      if (done.length) parts.push(`completed: ${done.join(', ')}`)
-      return `• ${b.name}: ${parts.join(' | ') || 'empty'}`
-    })
-    parts.push(`\nUser's whiteboard boards and goals (use this when they ask about what to work on, priorities, or their week):\n${lines.join('\n')}`)
+  if (about.boards !== undefined) {
+    const boardLines = (about.boards || []).length === 0
+      ? 'No boards created yet.'
+      : (about.boards).map(b => {
+          const items = (b.lines || [])
+          const active = items.filter(i => !i.done).map(i => i.text)
+          const done = items.filter(i => i.done).map(i => i.text)
+          const segments = []
+          if (active.length) segments.push(active.join(', '))
+          if (done.length) segments.push(`completed: ${done.join(', ')}`)
+          return `• ${b.name}: ${segments.join(' | ') || 'no goals yet'}`
+        }).join('\n')
+    parts.push(`\nUser's whiteboard boards and goals:\n${boardLines}`)
   }
-  if (about.lists?.length > 0) {
-    const lines = about.lists.map(l => {
-      const active = (l.todos || []).filter(t => !t.done).map(t => t.text)
-      const done = (l.todos || []).filter(t => t.done).map(t => t.text)
-      const parts = []
-      if (active.length) parts.push(active.join(', '))
-      if (done.length) parts.push(`done: ${done.join(', ')}`)
-      return `• ${l.name}: ${parts.join(' | ') || 'empty'}`
-    })
-    parts.push(`\nUser's to-do lists (use this when they ask about what to work on, priorities, or their week):\n${lines.join('\n')}`)
+  if (about.lists !== undefined) {
+    const listLines = (about.lists || []).length === 0
+      ? 'No to-do lists yet.'
+      : (about.lists).map(l => {
+          const active = (l.todos || []).filter(t => !t.done).map(t => t.text)
+          const done = (l.todos || []).filter(t => t.done).map(t => t.text)
+          const segments = []
+          if (active.length) segments.push(active.join(', '))
+          if (done.length) segments.push(`done: ${done.join(', ')}`)
+          return `• ${l.name}: ${segments.join(' | ') || 'no items yet'}`
+        }).join('\n')
+    parts.push(`\nUser's to-do lists:\n${listLines}`)
   }
   return parts.join('\n')
 }
@@ -202,15 +206,13 @@ export default function Journal({ user, reflectOnEnter, userName, onNameSave, ab
       .then(({ data }) => { if (data) setBoardsContext(data) })
 
     Promise.all([
-      supabase.from('lists').select('id, name').eq('user_id', user.id).order('created_at', { ascending: true }),
+      supabase.from('todo_lists').select('id, name').eq('user_id', user.id).order('created_at', { ascending: true }),
       supabase.from('todos').select('list_id, text, done').eq('user_id', user.id),
     ]).then(([{ data: listRows }, { data: todoRows }]) => {
-      if (listRows) {
-        setListsContext(listRows.map(l => ({
-          ...l,
-          todos: (todoRows || []).filter(t => t.list_id === l.id),
-        })))
-      }
+      setListsContext((listRows || []).map(l => ({
+        ...l,
+        todos: (todoRows || []).filter(t => t.list_id === l.id),
+      })))
     })
   }, [user.id])
 
