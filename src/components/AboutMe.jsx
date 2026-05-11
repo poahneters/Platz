@@ -147,6 +147,15 @@ export default function AboutMe({ user, reflectOnEnter, onToggleReflectOnEnter, 
         custom_instructions: d.customInstructions || '',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' })
+      // Sync shared state so Journal picks up the new settings immediately
+      onAboutMeChange(prev => ({
+        ...prev,
+        life_story: d.lifeStory || '',
+        personality_type: d.mbtiType || '',
+        communication_style: d.platzStyle || '',
+        response_length: d.responseLength || 'short',
+        custom_instructions: d.customInstructions || '',
+      }))
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 2000)
     }, 800)
